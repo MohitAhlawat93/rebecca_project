@@ -13,8 +13,7 @@ The review build currently uses `rebeccaproject.vercel.app`. Rebecca’s existin
   - `/touring-rates` → `/travel`
   - `/wishlist` → `/date-ideas`
   - `/links-grouped` → `/contact`
-  - `/professional` → `/gallery`
-  - `/selfies-of-risquerebecca` → `/gallery`
+- Legacy gallery URLs `/professional` and `/selfies-of-risquerebecca` are preserved as real pages rather than redirected.
 - Security headers and concierge request handling hardened.
 - Sitemap, robots and homepage structured data are present.
 
@@ -23,9 +22,11 @@ The review build currently uses `rebeccaproject.vercel.app`. Rebecca’s existin
 1. Rebecca gives final visual approval on desktop and mobile.
 2. Replace any photography Rebecca wants changed for the production version.
 3. Reconfirm current rates, travel calendar/minimums, screening, deposits and cancellation policies against the live source.
-4. Decide whether the existing Blog and Media Appearances content will be migrated. Do not redirect those URLs to unrelated pages.
-5. Test WhatsApp, Telegram, email, enquiry copy/open actions and the concierge in real iPhone/Android/desktop browsers.
-6. Connect `www.risquerebecca.com` to the canonical Vercel project.
+4. Recover the original public video asset used on Rebecca’s current Selfies page and place it in the reserved moving-image position. The current crawler exposes the video’s existence but not the underlying media URL.
+5. Recover/migrate the existing Blog (`/musings`) and Media Appearances (`/media-appearances`) source content before domain cutover. Do not redirect those URLs to unrelated pages.
+6. Add `XAI_API_KEY` to the canonical Vercel project and optionally set `XAI_MODEL` (default: `grok-4.3`).
+7. Test WhatsApp, Telegram, email, enquiry copy/open actions and the concierge in real iPhone/Android/desktop browsers.
+8. Connect `www.risquerebecca.com` to the canonical Vercel project.
 
 ## At domain cutover
 
