@@ -10,6 +10,8 @@ const { profile, singapore, travel, policies, contact }=REBECCA_DATA;
 assert(profile.displayName && profile.establishedSince,'profile core fields are required');
 assert(profile.languages.length>=1,'at least one language is required');
 assert(profile.homeFacts.length>=5 && profile.aboutFacts.length>=5,'profile fact sets are incomplete');
+assert(profile.interview?.length>=5,'profile interview is incomplete');
+assert(profile.philosophy?.title && profile.philosophy?.body,'profile philosophy is incomplete');
 
 assert(singapore.rates.length>=1,'Singapore rates are required');
 const rateLabels=new Set();
@@ -39,6 +41,10 @@ assert(policies.boundaries.length>=1,'boundary rules are missing');
 assert(contact.email.includes('@'),'contact email is invalid');
 assert(contact.whatsappUrl.startsWith('https://wa.me/'),'WhatsApp URL is invalid');
 assert(contact.telegramUrl.startsWith('https://t.me/'),'Telegram URL is invalid');
+assert(REBECCA_DATA.reputation.proofPoints?.length>=4,'reputation proof points are incomplete');
+assert(REBECCA_DATA.reputation.reviews?.length>=6,'review history is incomplete');
+assert(REBECCA_DATA.dateIdeas.categories?.length>=5,'date idea categories are incomplete');
+assert(REBECCA_DATA.wishlist.categories?.length>=5,'wishlist categories are incomplete');
 
 const knowledgeText=REBECCA_KNOWLEDGE.map((chunk)=>chunk.text).join('\n');
 assert(knowledgeText.includes(formatSingaporeRatesCompact()),'RAG Singapore rates are not derived from canonical data');
@@ -46,7 +52,9 @@ assert(knowledgeText.includes(formatFmtySummary()),'RAG FMTY rules are not deriv
 
 const requiredBindings={
   'index.html':['data-profile-hero-meta','data-profile-home-facts'],
-  'about.html':['data-profile-about-facts'],
+  'about.html':['data-profile-about-facts','data-profile-philosophy','data-profile-interview'],
+  'reviews.html':['data-reputation-proof','data-reputation-reviews'],
+  'date-ideas.html':['data-date-categories','data-wishlist-categories'],
   'rates.html':['data-singapore-rates','data-singapore-terms','data-asia-promo'],
   'travel.html':['data-travel-calendar','data-fmty-grid','data-touring-rates','data-travel-practicalities'],
   'etiquette.html':['data-screening-policy','data-deposit-grid','data-cancellation-policy','data-boundaries-policy'],
