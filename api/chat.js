@@ -175,8 +175,7 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.XAI_API_KEY}`,
-        'Content-Type': 'application/json',
-        'x-grok-conv-id': 'rebecca-concierge-v1'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         model: process.env.XAI_MODEL || 'grok-4.3',
