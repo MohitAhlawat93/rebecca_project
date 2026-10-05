@@ -18,6 +18,18 @@ Rules:
 APPROVED PUBLIC KNOWLEDGE:
 ${REBECCA_KNOWLEDGE}`;
 
+function suggestionFor(message = '') {
+  const q = message.toLowerCase();
+  if (/rate|price|cost|how much|sgd/.test(q)) return { path: '/rates', label: 'View Singapore rates' };
+  if (/travel|tour|fly|city|india|hong kong|dubai|tokyo|london/.test(q)) return { path: '/travel', label: 'View travel guidance' };
+  if (/screen|verify|id|privacy|etiquette|deposit|cancel|rule|boundary/.test(q)) return { path: '/etiquette', label: 'Read etiquette & privacy' };
+  if (/review|testimonial|reputation/.test(q)) return { path: '/reviews', label: 'Read reviews' };
+  if (/date idea|dinner|gift|wishlist|restaurant|wine|spa/.test(q)) return { path: '/date-ideas', label: 'Explore date ideas' };
+  if (/about|who|profile|height|language|education/.test(q)) return { path: '/about', label: 'Meet Rebecca' };
+  if (/contact|book|enquir|available|availability|meet/.test(q)) return { path: '/contact', label: 'Start an enquiry' };
+  return null;
+}
+
 function fallbackFor(message = '') {
   const q = message.toLowerCase();
   if (/rate|price|cost|how much|sgd/.test(q)) {
@@ -68,8 +80,8 @@ export default async function handler(req, res) {
 
     const answer = result.text?.trim();
     if (!answer) throw new Error('Empty AI response');
-    return res.status(200).json({ answer, mode: 'ai' });
+    return res.status(200).json({ answer, mode: 'ai', suggestion: suggestionFor(message) });
   } catch {
-    return res.status(200).json({ answer: fallbackFor(message), mode: 'grounded-fallback' });
+    return res.status(200).json({ answer: fallbackFor(message), mode: 'grounded-fallback', suggestion: suggestionFor(message) });
   }
 }
