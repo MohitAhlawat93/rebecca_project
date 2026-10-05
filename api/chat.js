@@ -21,9 +21,9 @@ ${REBECCA_KNOWLEDGE}`;
 
 function suggestionFor(message = '') {
   const q = message.toLowerCase();
+  if (/screen|verify|id|privacy|etiquette|deposit|cancel|rule|boundary/.test(q)) return { path: '/etiquette', label: 'Read etiquette & privacy' };
   if (/rate|price|cost|how much|sgd|couple|phone call/.test(q)) return { path: '/rates', label: 'View rates' };
   if (/travel|tour|fly|city|india|hong kong|dubai|tokyo|london/.test(q)) return { path: '/travel', label: 'View travel guidance' };
-  if (/screen|verify|id|privacy|etiquette|deposit|cancel|rule|boundary/.test(q)) return { path: '/etiquette', label: 'Read etiquette & privacy' };
   if (/review|testimonial|reputation/.test(q)) return { path: '/reviews', label: 'Read reviews' };
   if (/date idea|dinner|gift|wishlist|restaurant|wine|spa/.test(q)) return { path: '/date-ideas', label: 'Explore date ideas' };
   if (/about|who|profile|height|language|education/.test(q)) return { path: '/about', label: 'Meet Rebecca' };
@@ -74,7 +74,7 @@ function directAnswerFor(message = '') {
     return 'For couples, Rebecca’s published Singapore terms have a 2-hour minimum and add SGD 500 to the standard rate.';
   }
   if (/phone call|call before|20.?minute call/.test(q)) {
-    return 'A 20-minute phone call is SGD 250 and screening is required. Her public page does not promise any additional credit or discount.';
+    return 'A 20-minute phone call is SGD 250 and screening is required. That is the full published information I have for calls.';
   }
   if (/deposit/.test(q)) {
     return 'Deposits are required for confirmed dates: Singapore 20–25%, touring 40%, and fly-me-to-you 50% plus travel. Rebecca asks for the deposit within 24 hours after the details are agreed.';
