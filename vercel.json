@@ -57,16 +57,6 @@
       "source": "/links-grouped",
       "destination": "/contact",
       "permanent": true
-    },
-    {
-      "source": "/professional",
-      "destination": "/gallery",
-      "permanent": true
-    },
-    {
-      "source": "/selfies-of-risquerebecca",
-      "destination": "/gallery",
-      "permanent": true
     }
   ]
 }
