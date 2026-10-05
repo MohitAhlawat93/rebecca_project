@@ -1,29 +1,38 @@
-# Risqué Rebecca — Phase 1 Homepage
+# Risqué Rebecca — Premium Website & AI Concierge
 
-A premium, editorial, mobile-first homepage concept for Rebecca.
+Phase 2 is a complete, responsive editorial website for Rebecca, built from her approved public content and photography.
 
-## Phase 1 direction
-- Warm ivory / ink / muted sage / deep wine palette
-- Editorial typography and large photography
-- Spacious layout rather than a dashboard-like AI aesthetic
-- Concierge presence is intentionally restrained and preview-only
-- Uses Rebecca's currently approved public photography from her existing Squarespace CDN
-- No video
+## Public routes
 
-## Files
-- `index.html` — homepage structure and copy
-- `styles.css` — full design system and responsive styling
-- `script.js` — header, concierge dialog, review carousel
-- `vercel.json` — deployment headers and routing defaults
+- `/` — premium homepage
+- `/about` — profile and personality
+- `/rates` — current Singapore consideration
+- `/travel` — touring and fly-me-to-you guidance
+- `/date-ideas` — date ideas and wishlist direction
+- `/gallery` — editorial portfolio
+- `/etiquette` — screening, deposits, privacy and policies
+- `/reviews` — selected public testimonials
+- `/contact` — privacy-first enquiry builder
 
-## Local preview
-Run any static server from the repo root, for example:
+## AI concierge
 
-```bash
-python -m http.server 4173
-```
+`/api/chat` uses the Vercel AI SDK and AI Gateway with `openai/gpt-5.6-luna`. The prompt is grounded in `lib/rebecca-knowledge.js` and refuses to invent private availability, exact tour dates or unpublished information.
 
-Then visit `http://localhost:4173`.
+If the AI provider is unavailable, the endpoint automatically falls back to grounded deterministic answers for the core topics, so the concierge does not become a dead end.
 
-## Content editing
-Most homepage copy is intentionally in `index.html` so it remains visible to search engines and easy to change without touching application logic. Brand colors and spacing are CSS variables at the top of `styles.css`.
+### Privacy rules
+
+The concierge and enquiry builder explicitly tell visitors not to send ID documents, employer details, financial data or other sensitive screening information. The enquiry form does not submit data to a database; it formats the visitor's input locally for email/copying into Rebecca's verified channels.
+
+## Main edit locations
+
+- Content and page layout: each `.html` page
+- Shared design system: `styles.css`
+- Navigation, enquiry builder and concierge UI: `script.js`
+- Concierge knowledge: `lib/rebecca-knowledge.js`
+- Concierge server endpoint: `api/chat.js`
+- Vercel settings: `vercel.json`
+
+## Deployment
+
+GitHub main branch is connected to Vercel. Every push to `main` triggers a deployment.
