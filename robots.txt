@@ -1,4 +1,4 @@
-# Temporary Vercel review environment.
-# Search indexing will be enabled only when the new site replaces the existing risquerebecca.com.
 User-agent: *
-Disallow: /
+Allow: /
+Disallow: /api/
+Sitemap: https://rebeccaproject.vercel.app/sitemap.xml
