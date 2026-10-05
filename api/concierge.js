@@ -127,12 +127,13 @@ function directAnswerFor(message='',data){
   return null;
 }
 
-function fallbackFor(message=''){
+function fallbackFor(message='',data){
   const q=message.toLowerCase();
-  if(/rate|price|cost|how much|sgd/.test(q)) return formatSingaporeRatesCompact()+' See the Rates page for the full structure.';
-  if(/screen|verify|id|privacy/.test(q)) return `${REBECCA_DATA.policies.screening.paragraphs[0]} ${REBECCA_DATA.policies.screening.conciergeNotice}`;
-  if(/travel|tour|fly|city|india|hong kong|dubai|tokyo|london/.test(q)) return `Rebecca is based primarily in Asia and can travel by invitation. ${formatFmtySummary()} See the Travel page for details.`;
-  if(/contact|book|enquir|available|availability|meet/.test(q)) return 'For live availability or an enquiry, use the Contact page and Rebecca will confirm directly.';
+  const availability=data.availability||{};
+  if(/rate|price|cost|how much|sgd/.test(q)) return formatSingaporeRatesCompact(data)+' See the Rates page for the full structure.';
+  if(/screen|verify|id|privacy/.test(q)) return `${data.policies.screening.paragraphs[0]} ${data.policies.screening.conciergeNotice}`;
+  if(/travel|tour|fly|city|india|hong kong|dubai|tokyo|london/.test(q)) return `Rebecca is based primarily in Asia and can travel by invitation. ${formatFmtySummary(data)} See the Travel page for details.`;
+  if(/contact|book|enquir|available|availability|meet/.test(q)) return `${availability.label||'Availability'}: ${availability.message||'Final live availability is confirmed directly by Rebecca.'} Use the Contact page for a specific date.`;
   if(/etiquette|deposit|cancel|rule|boundary/.test(q)) return 'Rebecca requires screening and a deposit to confirm dates, values discretion and good manners, and does not negotiate rates. See the Etiquette page for her current policies.';
   return 'I can help with Rebecca’s public profile, rates, travel, etiquette, reviews and enquiry process. For anything private or live, please use her official contact channels.';
 }
