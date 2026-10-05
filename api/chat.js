@@ -54,6 +54,9 @@ function policyAnswerFor(message = '') {
   if (/discount|cheaper|negotiate|bargain|special price|lower (the )?(rate|price)|make .* cheaper/.test(q)) {
     return 'Rebecca’s published rates are fixed and I won’t invent a discount. If the listed structure works for you, the next step is a complete enquiry.';
   }
+  if (/private date|locked date|little black book|password.{0,20}date|private restaurant|private venue|secret restaurant|frequented date spot/.test(q)) {
+    return 'Rebecca’s curated Date Ideas list is intentionally private. Confirmed suitors can ask her for it when planning a date; I won’t reveal, guess or reconstruct the locked list here.';
+  }
   if (/private service|secret service|unlisted service|off[- ]menu|off menu|unpublished service|what .* privately|anything extra not listed/.test(q)) {
     return 'I only answer from Rebecca’s published information, so I won’t invent or describe unpublished services. I can help with her public rates, travel, etiquette and enquiry process.';
   }
