@@ -72,7 +72,7 @@ function directAnswerFor(message = '') {
   if (/couple|two of us|my partner/.test(q)) {
     return 'For couples, Rebecca’s published Singapore terms have a 2-hour minimum and add SGD 800 to the standard rate.';
   }
-  if (/phone call|call before|20.?minute call/.test(q)) {
+  if (/phone call|call before|20.?minute call|call her|speak.{0,12}phone|chat.{0,12}phone/.test(q)) {
     return 'A 20-minute phone call is SGD 250 and screening is required. Rebecca’s published page says the amount can be credited toward the total booking.';
   }
   if (/deposit/.test(q)) {
