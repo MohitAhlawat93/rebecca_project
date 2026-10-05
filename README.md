@@ -20,11 +20,11 @@ The current build is the Phase 6 editorial demo: Rebecca-first, responsive, priv
 
 The concierge uses a lightweight local RAG pipeline:
 
-1. `lib/rebecca-rag.js` stores approved public knowledge as small topic chunks.
-2. Each visitor question retrieves only the most relevant chunks.
-3. High-risk factual and privacy questions are handled by deterministic guardrails first.
-4. Broader questions send the retrieved context to Groq.
-5. If Groq is unavailable or has no usable API credit, grounded deterministic fallback answers remain available.
+1. `data/rebecca-data.js` is the single source of truth for mutable public facts: profile, rates, travel, policies, contact, date ideas, wishlist and gallery counts.
+2. `content.js` renders factual website sections from that source.
+3. `lib/rebecca-knowledge.js` derives retrieval chunks from the same source.
+4. `api/concierge.js` derives direct and fallback answers from the same source before using Groq for broader grounded responses.
+5. GitHub Actions runs `npm run validate:data` to catch missing bindings or accidental re-introduction of legacy duplicate data.
 
 The default dynamic model is `openai/gpt-oss-20b` with reasoning disabled for speed and cost control. Set `GROQ_MODEL` to override it.
 
@@ -37,7 +37,7 @@ Without `GROQ_API_KEY`, the concierge still works for core public topics through
 
 ### RAG privacy boundary
 
-The retrieval store contains Rebecca’s useful **public** knowledge: profile, interests, rates, travel, FMTY, screening, deposits, cancellations, etiquette, public date ideas, wishlist preferences, food/wine tastes, contact information, public FAQs and the photo-only gallery inventory.
+The retrieval store is derived from the same canonical data used by the website. Do not maintain a second manual copy of profile, rates, travel, policies or contact facts inside concierge code.
 
 The locked private Date Ideas venue list is deliberately excluded. The concierge must not reveal, guess or reconstruct it.
 
@@ -50,11 +50,14 @@ The locked private Date Ideas venue list is deliberately excluded. The concierge
 
 ## Main edit locations
 
-- Content and page layout: each `.html` page
+- **Rebecca factual data (edit here first): `data/rebecca-data.js`**
+- Page layout/editorial copy: each `.html` page
+- Canonical-data page renderer: `content.js`
 - Shared design system: `styles.css`
 - Navigation, enquiry builder and concierge UI: `script.js`
-- RAG knowledge + retrieval: `lib/rebecca-rag.js`
-- Concierge server endpoint: `api/chat.js`
+- Derived RAG knowledge + retrieval: `lib/rebecca-knowledge.js`
+- Concierge server endpoint: `api/concierge.js`
+- Data validation: `scripts/validate-data.mjs`
 - Vercel routing/security settings: `vercel.json`
 
 ## Production readiness
