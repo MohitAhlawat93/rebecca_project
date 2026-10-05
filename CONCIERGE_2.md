@@ -102,3 +102,7 @@ npm run validate
 ```
 
 before merging.
+
+## Validation scenarios
+
+CI covers Singapore and India rate matching, Dubai FMTY minimums, couple surcharge handling, multi-turn duration changes, incomplete draft requests, official-channel handoff safety, and the compact mobile panel contract.
