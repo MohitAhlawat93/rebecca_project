@@ -30,6 +30,28 @@ function suggestionFor(message = '') {
   return null;
 }
 
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX = 12;
+const rateBuckets = globalThis.__REBECCA_RATE_LIMIT__ || (globalThis.__REBECCA_RATE_LIMIT__ = new Map());
+
+function checkRateLimit(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  const key = (Array.isArray(forwarded) ? forwarded[0] : String(forwarded || req.headers['x-real-ip'] || 'anonymous').split(',')[0]).trim();
+  const now = Date.now();
+  let bucket = rateBuckets.get(key);
+  if (!bucket || now >= bucket.resetAt) bucket = { count: 0, resetAt: now + RATE_WINDOW_MS };
+  bucket.count += 1;
+  rateBuckets.set(key, bucket);
+  if (rateBuckets.size > 2000) {
+    for (const [k, value] of rateBuckets) if (now >= value.resetAt) rateBuckets.delete(k);
+  }
+  return { allowed: bucket.count <= RATE_MAX, retryAfter: Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)) };
+}
+
+function isPromptInjection(message = '') {
+  return /(ignore|override|forget).{0,30}(instruction|prompt|rule)|system prompt|developer message|hidden instruction|reveal.{0,20}(prompt|instruction)/i.test(message);
+}
+
 function fallbackFor(message = '') {
   const q = message.toLowerCase();
   if (/rate|price|cost|how much|sgd/.test(q)) {
@@ -57,9 +79,22 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST for concierge messages.' });
 
+  const limit = checkRateLimit(req);
+  if (!limit.allowed) {
+    res.setHeader('Retry-After', String(limit.retryAfter));
+    return res.status(429).json({ error: 'Too many concierge messages. Please wait a moment and try again.' });
+  }
+
   const body = req.body || {};
   const message = typeof body.message === 'string' ? body.message.trim().slice(0, 600) : '';
   if (!message) return res.status(400).json({ error: 'Please enter a message.' });
+  if (isPromptInjection(message)) {
+    return res.status(200).json({
+      answer: 'I can’t reveal or override private instructions. I can still help with Rebecca’s public profile, rates, travel, etiquette, reviews and enquiry process.',
+      mode: 'guardrail',
+      suggestion: null
+    });
+  }
 
   const history = Array.isArray(body.history)
     ? body.history
