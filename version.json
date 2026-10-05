@@ -1,21 +1,17 @@
 {
   "site": "Risqué Rebecca",
-  "phase": "3-production-polish",
-  "release": "2026-10-05-phase3.2",
-  "features": [
-    "full multi-page architecture",
-    "premium inner-page editorial visuals",
-    "grounded AI concierge",
-    "contextual concierge navigation",
-    "concierge prompt-injection guard",
-    "concierge rate limiting",
-    "privacy-first enquiry builder",
-    "one-click WhatsApp enquiry",
-    "keyboard and focus accessibility improvements",
-    "temporary-domain noindex protection",
-    "fresh-deploy cache revalidation",
-    "image decoding performance hints"
-  ],
+  "phase": "4A-voice-accuracy-reset",
+  "release": "2026-10-05-phase4a",
   "canonicalVercelProject": "rebecca_project",
-  "canonicalDomain": "rebeccaproject.vercel.app"
+  "canonicalDomain": "rebeccaproject.vercel.app",
+  "features": [
+    "Rebecca-first first-person copy",
+    "simplified editorial homepage",
+    "single discreet AI concierge presence",
+    "current Singapore rates",
+    "current touring calendar and regional rates",
+    "correct couples and phone-call terms",
+    "privacy-first enquiry flow",
+    "updated concierge source-of-truth"
+  ]
 }
