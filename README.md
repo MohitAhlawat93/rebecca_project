@@ -23,17 +23,17 @@ The concierge uses a lightweight local RAG pipeline:
 1. `lib/rebecca-rag.js` stores approved public knowledge as small topic chunks.
 2. Each visitor question retrieves only the most relevant chunks.
 3. High-risk factual and privacy questions are handled by deterministic guardrails first.
-4. Broader questions send the retrieved context to xAI Grok.
-5. If xAI is unavailable or has no usable API credit, grounded deterministic fallback answers remain available.
+4. Broader questions send the retrieved context to Groq.
+5. If Groq is unavailable or has no usable API credit, grounded deterministic fallback answers remain available.
 
-The default dynamic model is `grok-4.3` with reasoning disabled for speed and cost control. Set `XAI_MODEL` to override it.
+The default dynamic model is `openai/gpt-oss-20b` with reasoning disabled for speed and cost control. Set `GROQ_MODEL` to override it.
 
 ### Required Vercel environment variable
 
-- `XAI_API_KEY` — xAI API key used by `/api/chat`
-- `XAI_MODEL` — optional model override; defaults to `grok-4.3`
+- `GROQ_API_KEY` — Groq API key used by `/api/chat`
+- `GROQ_MODEL` — optional model override; defaults to `openai/gpt-oss-20b`
 
-Without `XAI_API_KEY`, the concierge still works for core public topics through the grounded fallback, but broader RAG-generated answers will not call Grok.
+Without `GROQ_API_KEY`, the concierge still works for core public topics through the grounded fallback, but broader RAG-generated answers will not call Grok.
 
 ### RAG privacy boundary
 
@@ -45,7 +45,7 @@ The locked private Date Ideas venue list is deliberately excluded. The concierge
 
 - Do not send ID documents, employer documents, financial information, passwords or other sensitive screening material to the concierge.
 - Concierge history remains in the browser and is not replayed as trusted server context.
-- xAI Responses requests use `store: false`.
+- Groq Responses requests use `store: false`.
 - The enquiry builder does not submit visitor data to a database; it formats the enquiry locally for Rebecca’s verified channels.
 
 ## Main edit locations
