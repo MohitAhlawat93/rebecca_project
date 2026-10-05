@@ -1,14 +1,20 @@
 {
   "site": "Risqué Rebecca",
-  "phase": "3",
-  "release": "2026-10-05-phase3.1",
+  "phase": "3-production-polish",
+  "release": "2026-10-05-phase3.2",
   "features": [
     "full multi-page architecture",
+    "premium inner-page editorial visuals",
     "grounded AI concierge",
     "contextual concierge navigation",
+    "concierge prompt-injection guard",
+    "concierge rate limiting",
     "privacy-first enquiry builder",
     "one-click WhatsApp enquiry",
-    "fresh-deploy cache revalidation"
+    "keyboard and focus accessibility improvements",
+    "temporary-domain noindex protection",
+    "fresh-deploy cache revalidation",
+    "image decoding performance hints"
   ],
   "canonicalVercelProject": "rebecca_project",
   "canonicalDomain": "rebeccaproject.vercel.app"
