@@ -90,10 +90,10 @@ function directAnswerFor(message = '') {
   }
 
   if (/couple|two of us|my partner/.test(q)) {
-    return 'For couples, Rebecca’s published Singapore terms have a 2-hour minimum and add SGD 800 to the standard rate.';
+    return 'For couples, Rebecca’s published Singapore terms have a 2-hour minimum and add SGD 500 to the standard rate.';
   }
   if (/phone call|call before|20.?minute call|call her|speak.{0,12}phone|chat.{0,12}phone/.test(q)) {
-    return 'A 20-minute phone call is SGD 250 and screening is required. Rebecca’s published page says the amount can be credited toward the total booking.';
+    return 'A 20-minute phone call is SGD 250 and screening is required.';
   }
   if (/deposit/.test(q)) {
     return 'Deposits are required for confirmed dates: Singapore 20–25%, touring 40%, and fly-me-to-you 50% plus travel. Rebecca asks for the deposit within 24 hours after the details are agreed.';
@@ -120,7 +120,7 @@ function directAnswerFor(message = '') {
     return 'Upcoming public windows: India 10–30 November 2026 (Bangalore, Chennai, Delhi, Hyderabad, Kolkata and Mumbai), then London & Europe 1–7 December 2026. North America is currently accepting expressions of interest. Public dates are estimates; exact details are shared after screening and deposit.';
   }
   if (/\bfmty\b|fly me to you|travel to me|come to my city|invite .*?(city|country)/.test(q)) {
-    return 'General fly-me-to-you minimums: selected Asia destinations 14h + travel; rest of Asia + India 24h + flights; Australia, New Zealand, Oceania, Europe and the Middle East 48h + flights; North America 72h + flights.';
+    return 'General fly-me-to-you minimums: selected Asia destinations 18h + travel; rest of Asia + India 24h + flights; Australia, New Zealand, Oceania, Europe and the Middle East 48h + flights; North America 72h + flights; Africa, South America and Central America 1 week + flights.';
   }
   return null;
 }
