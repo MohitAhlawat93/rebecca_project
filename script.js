@@ -39,7 +39,8 @@
   const chatHistory=[];
   const formatChatText=(text='')=>{
     const normalized=String(text)
-      .replace(/\\\r?\\n/g,'\n')
+      .replace(/\\n/g,'\n')
+      .replace(/\\\s*\n/g,'\n')
       .replace(/\\([*_-])/g,'$1')
       .replace(/\r\n/g,'\n')
       .trim();
