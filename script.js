@@ -70,6 +70,66 @@
   form?.addEventListener('submit',e=>{e.preventDefault();if(input)askConcierge(input.value)});
   document.querySelectorAll('[data-chat-prompt]').forEach(b=>b.addEventListener('click',()=>askConcierge(b.getAttribute('data-chat-prompt')||'')));
 
+
+  const galleryImages=[...document.querySelectorAll('.archive-gallery-grid img,.selfie-archive-grid img')];
+  if(galleryImages.length){
+    document.body.insertAdjacentHTML('beforeend',`
+      <div class="gallery-lightbox" data-gallery-lightbox hidden role="dialog" aria-modal="true" aria-label="Photo viewer">
+        <button class="gallery-lightbox-close" type="button" data-gallery-close aria-label="Close photo viewer">×</button>
+        <button class="gallery-lightbox-prev" type="button" data-gallery-prev aria-label="Previous photo">←</button>
+        <img class="gallery-lightbox-image" data-gallery-image alt="">
+        <button class="gallery-lightbox-next" type="button" data-gallery-next aria-label="Next photo">→</button>
+        <div class="gallery-lightbox-count" data-gallery-count></div>
+      </div>`);
+    const lightbox=document.querySelector('[data-gallery-lightbox]');
+    const lightboxImage=lightbox?.querySelector('[data-gallery-image]');
+    const lightboxCount=lightbox?.querySelector('[data-gallery-count]');
+    const lightboxClose=lightbox?.querySelector('[data-gallery-close]');
+    let galleryIndex=0;
+    let galleryReturnFocus=null;
+    const renderGallery=()=>{
+      const source=galleryImages[galleryIndex];
+      if(!source||!lightboxImage)return;
+      lightboxImage.src=source.currentSrc||source.src;
+      lightboxImage.alt=source.alt||'Rebecca photograph';
+      if(lightboxCount)lightboxCount.textContent=`${String(galleryIndex+1).padStart(2,'0')} / ${String(galleryImages.length).padStart(2,'0')}`;
+    };
+    const openGallery=(index)=>{
+      galleryIndex=(index+galleryImages.length)%galleryImages.length;
+      galleryReturnFocus=document.activeElement;
+      renderGallery();
+      lightbox.hidden=false;
+      document.body.classList.add('gallery-lightbox-open');
+      lightboxClose?.focus();
+    };
+    const closeGallery=()=>{
+      if(!lightbox||lightbox.hidden)return;
+      lightbox.hidden=true;
+      document.body.classList.remove('gallery-lightbox-open');
+      if(galleryReturnFocus instanceof HTMLElement)galleryReturnFocus.focus();
+    };
+    const stepGallery=(delta)=>{galleryIndex=(galleryIndex+delta+galleryImages.length)%galleryImages.length;renderGallery();};
+    galleryImages.forEach((img,index)=>{
+      const figure=img.closest('figure');
+      if(!figure)return;
+      figure.tabIndex=0;
+      figure.setAttribute('role','button');
+      figure.setAttribute('aria-label',`Open ${img.alt||'Rebecca photograph'} full screen`);
+      figure.addEventListener('click',()=>openGallery(index));
+      figure.addEventListener('keydown',(event)=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openGallery(index)}});
+    });
+    lightbox?.querySelector('[data-gallery-prev]')?.addEventListener('click',()=>stepGallery(-1));
+    lightbox?.querySelector('[data-gallery-next]')?.addEventListener('click',()=>stepGallery(1));
+    lightboxClose?.addEventListener('click',closeGallery);
+    lightbox?.addEventListener('click',(event)=>{if(event.target===lightbox)closeGallery()});
+    document.addEventListener('keydown',(event)=>{
+      if(!lightbox||lightbox.hidden)return;
+      if(event.key==='Escape')closeGallery();
+      if(event.key==='ArrowLeft')stepGallery(-1);
+      if(event.key==='ArrowRight')stepGallery(1);
+    });
+  }
+
   const enquiry=document.querySelector('[data-enquiry-form]');
   if(enquiry){const status=enquiry.querySelector('[data-form-status]');const build=()=>{const d=new FormData(enquiry);return ['Hello Rebecca,','','I’d like to introduce myself and enquire about a date.','',`Name / alias: ${d.get('name')||''}`,`Current city: ${d.get('city')||''}`,`Preferred date / window: ${d.get('date')||''}`,`Preferred duration: ${d.get('duration')||''}`,`Location / travel request: ${d.get('location')||''}`,`New or returning: ${d.get('relationship')||''}`,`Screening route I can provide privately: ${d.get('screening')||''}`,'',`Note: ${d.get('note')||''}`,'','I understand screening details and ID documents should be sent privately through Rebecca’s official channel, not through this website form.'].join('\n')};
     enquiry.querySelector('[data-email-enquiry]')?.addEventListener('click',()=>{if(!enquiry.reportValidity())return;window.location.href=`mailto:risquerebeccaxo@protonmail.com?subject=${encodeURIComponent('Date enquiry for Risqué Rebecca')}&body=${encodeURIComponent(build())}`});
