@@ -21,6 +21,14 @@ const STATUS_LABELS = {
   unavailable: 'Not accepting enquiries'
 };
 
+const STATUS_MESSAGES = {
+  accepting: 'Currently accepting enquiries.',
+  limited: 'Availability is limited, so early enquiries are appreciated.',
+  travelling: 'Currently travelling. Please check the Travel page before enquiring.',
+  away: 'Temporarily away. Replies may be slower than usual.',
+  unavailable: 'Not currently accepting new enquiries.'
+};
+
 const esc = (value = '') => String(value)
   .replaceAll('&', '&amp;')
   .replaceAll('<', '&lt;')
@@ -90,9 +98,7 @@ function renderAvailability() {
     button.classList.toggle('is-selected', button.dataset.status === current.status);
   });
   const message = document.querySelector('[data-availability-message]');
-  const until = document.querySelector('[data-availability-until]');
   if (message) message.value = current.message || '';
-  if (until) until.value = current.until || '';
   setText('[data-availability-summary]', current.label || STATUS_LABELS[current.status] || '—');
 }
 
@@ -112,7 +118,6 @@ function travelCard(item, index) {
       <div class="rc-form-grid">
         <label class="rc-field"><span>Headline</span><input data-trip="title" value="${esc(item.title || '')}" maxlength="180"></label>
         <label class="rc-field"><span>Date range</span><input data-trip="dateRange" value="${esc(item.dateRange || '')}" maxlength="140"></label>
-        <label class="rc-field"><span>Small heading</span><input data-trip="kicker" value="${esc(item.kicker || '')}" maxlength="140"></label>
         <label class="rc-field"><span>Cities <small>comma separated</small></span><input data-trip="cities" value="${esc((item.cities || []).join(', '))}"></label>
         <label class="rc-field rc-field-wide"><span>Public description</span><textarea data-trip="body" maxlength="800" rows="4">${esc(item.body || '')}</textarea></label>
         <label class="rc-field rc-field-wide"><span>Notes <small>comma separated</small></span><input data-trip="meta" value="${esc((item.meta || []).join(', '))}"></label>
@@ -193,7 +198,7 @@ function collectTravel() {
       ...previous,
       title: get('title').trim(),
       dateRange: get('dateRange').trim(),
-      kicker: get('kicker').trim(),
+      kicker: previous.kicker || '',
       cities: csv(get('cities')),
       body: get('body').trim(),
       meta: csv(get('meta')),
@@ -235,8 +240,8 @@ function collectState() {
       ...quickState.availability,
       status: availabilityStatus,
       label: STATUS_LABELS[availabilityStatus] || quickState.availability.label,
-      message: document.querySelector('[data-availability-message]')?.value?.trim() || '',
-      until: document.querySelector('[data-availability-until]')?.value || null
+      message: document.querySelector('[data-availability-message]')?.value?.trim() || STATUS_MESSAGES[availabilityStatus],
+      until: quickState.availability.until || null
     },
     travel: collectTravel(),
     rates: collectRates(),
@@ -369,6 +374,9 @@ document.addEventListener('click', (event) => {
     status.classList.add('is-selected');
     quickState.availability.status = status.dataset.status;
     quickState.availability.label = STATUS_LABELS[status.dataset.status] || status.textContent.trim();
+    quickState.availability.message = STATUS_MESSAGES[status.dataset.status] || quickState.availability.message;
+    const messageInput = document.querySelector('[data-availability-message]');
+    if (messageInput) messageInput.value = quickState.availability.message;
     setText('[data-availability-summary]', quickState.availability.label);
     setDirty(true);
     return;
@@ -396,7 +404,7 @@ document.addEventListener('click', (event) => {
   if (remove && quickState) {
     const card = remove.closest('[data-trip-index]');
     const index = Number(card?.dataset.tripIndex);
-    if (Number.isInteger(index)) {
+    if (Number.isInteger(index) && window.confirm('Remove this public trip from Quick Control?')) {
       quickState.travel.splice(index, 1);
       renderTravel();
       setDirty(true);
@@ -406,7 +414,7 @@ document.addEventListener('click', (event) => {
 
 document.addEventListener('input', (event) => {
   if (
-    event.target.matches('[data-availability-message], [data-availability-until], [data-trip], [data-rate], [data-contact], [data-profile]')
+    event.target.matches('[data-availability-message], [data-trip], [data-rate], [data-contact], [data-profile]')
   ) {
     setDirty(true);
   }
