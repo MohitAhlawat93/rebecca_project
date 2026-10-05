@@ -56,7 +56,7 @@ assert.match(
 );
 
 const compactRates = formatSingaporeRatesCompact(effective);
-assert.match(compactRates, /9999/);
+assert.match(compactRates, /9,999/);
 assert.ok(!compactRates.includes(effective.singapore.rates[1].short + ' '));
 
 const rateKnowledge = retrieveRebeccaKnowledge('Singapore rates', 2, effective);
