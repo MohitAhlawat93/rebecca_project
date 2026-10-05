@@ -4,7 +4,7 @@
 
 export const REBECCA_DATA = {
   meta: {
-    dataVersion: '2026-10-05.7A',
+    dataVersion: '2026-10-05.7B',
     lastVerified: '2026-10-05',
     originalPublicSite: 'https://www.risquerebecca.com/',
     reviewDomain: 'https://rebeccaproject.vercel.app'
@@ -59,6 +59,41 @@ export const REBECCA_DATA = {
       { label: 'Style', value: 'Elegant · feminine · quiet luxury' },
       { label: 'Weaknesses', value: 'Heels · tasting menus · good wine' },
       { label: 'Values', value: 'Freedom · balance · openness · curiosity' }
+    ],
+    philosophy: {
+      label: 'Pragmatic romantic',
+      title: 'Luxury is ease, not theatre.',
+      body: 'Beautiful places are lovely, but the real luxury is enough time and ease to stop performing. Rebecca prefers dates that can wander naturally through good food, flirty banter, terrible jokes, unexpected tangents and the feeling that neither person is watching the clock.'
+    },
+    interview: [
+      {
+        question: 'How do I make a good first impression?',
+        answer: 'Be efficient, reliable and capable of reading the practical details. Thoughtful gestures are lovely; making plans easy is genuinely attractive.'
+      },
+      {
+        question: 'What should a date with you feel like?',
+        answer: 'Natural, present and unhurried. Good food helps, but so do private jokes, a little spontaneity and enough time for the conversation to go somewhere neither of us planned.'
+      },
+      {
+        question: 'What makes you happy?',
+        answer: 'Balance: enough security to make choices freely, and enough freedom to follow curiosity without making decisions from fear.'
+      },
+      {
+        question: 'Strengths and weaknesses?',
+        answer: 'I am extremely present when I am with someone, adaptable and comfortable in my own skin. I am also very honest, occasionally to my own detriment, and spectacularly indecisive when a menu gives me too many good options.'
+      },
+      {
+        question: 'What are your pet peeves?',
+        answer: 'Bad manners, bad wine and wilful intellectual laziness. Rate negotiation deserves an honourable mention.'
+      },
+      {
+        question: 'What can we talk about?',
+        answer: 'Books, food, wine, travel, people and places, history, psychology, economics, fitness, theatre, F1, cars and whatever niche obsession has claimed the week.'
+      },
+      {
+        question: 'Are you really this opinionated in person?',
+        answer: 'Probably worse.'
+      }
     ]
   },
 
@@ -230,6 +265,38 @@ export const REBECCA_DATA = {
 
   dateIdeas: {
     public: ['bar hopping', 'movies', 'couples spas', 'cultural performances', 'beach clubs', 'karaoke', 'go-karting', 'hawker-food adventures', 'museums', 'mini-golf', 'cooking/craft/wine workshops', 'escape rooms', 'Pilates/yoga/Barry’s-style fitness', 'sightseeing', 'shopping', 'arcades', 'theatre'],
+    categories: [
+      {
+        label: 'Eat',
+        title: 'Make dinner the beginning.',
+        body: 'Tasting menus, sushi, steak, fresh seafood, thoughtful pairings, hidden bars and the sort of lunch that accidentally becomes dinner.',
+        notes: ['Tasting menus', 'Wine flights', 'Hidden bars', 'Cooking classes']
+      },
+      {
+        label: 'Play',
+        title: 'A little competition helps.',
+        body: 'Go-karts, arcades, karaoke, mini-golf, escape rooms and anything that gives us something to laugh about afterwards.',
+        notes: ['Go-karts', 'Arcades', 'Karaoke', 'Escape rooms']
+      },
+      {
+        label: 'Disappear',
+        title: 'Turn the volume down.',
+        body: 'Couples spas, beach clubs, a beautiful hotel, a quiet drink or an afternoon with absolutely nowhere else to be.',
+        notes: ['Couples spas', 'Beach clubs', 'Slow afternoons', 'Beautiful hotels']
+      },
+      {
+        label: 'Look',
+        title: 'Give curiosity somewhere to go.',
+        body: 'Museums, theatre, opera, cultural performances, city wandering and exhibitions worth discussing over a drink afterwards.',
+        notes: ['Museums', 'Theatre', 'Opera', 'Exhibitions']
+      },
+      {
+        label: 'Move',
+        title: 'Not every date needs a tablecloth.',
+        body: 'Pilates, yoga, boxing, padel, golf, sightseeing or a class where enthusiasm matters more than being particularly good at it.',
+        notes: ['Pilates', 'Yoga', 'Padel', 'Classes']
+      }
+    ],
     privateListIsLocked: true
   },
 
@@ -242,12 +309,33 @@ export const REBECCA_DATA = {
     food: ['caviar', 'sea urchin', 'French unsalted butter', 'locally sourced premium ingredients'],
     jewellery: '18K white or rose gold jewellery',
     champagneHouses: ['Krug', 'Billecart-Salmon', 'Egly-Ouriet'],
-    wineInterests: ['Bordeaux', 'Montepulciano', 'Provence', 'Piedmont', 'Marlborough', 'Shandong/Ningxia', 'natural orange wines']
+    wineInterests: ['Bordeaux', 'Montepulciano', 'Provence', 'Piedmont', 'Marlborough', 'Shandong/Ningxia', 'natural orange wines'],
+    categories: [
+      { label: 'Flowers', title: 'Big bouquets, soft colours.', body: 'Light-coloured roses, peonies, hydrangeas and orchids.' },
+      { label: 'Bottles', title: 'Something worth opening together.', body: 'Krug, Billecart-Salmon, Egly-Ouriet, interesting wine, whisky, sake, gin, mezcal or tequila.' },
+      { label: 'Table', title: 'Edible souvenirs.', body: 'Caviar, sea urchin, excellent butter, premium seasonal fruit and thoughtfully sourced ingredients from somewhere specific.' },
+      { label: 'Wear', title: 'Beautiful details.', body: 'Bordelle, Anoeses, Salute by Wacoal, silk scarves and 18K white or rose gold jewellery.' },
+      { label: 'Experience', title: 'Memories beat clutter.', body: 'Spa time, a class together, a beautiful meal or something that gives us another story to tell.' }
+    ]
   },
 
   reputation: {
     establishedSince: 2015,
-    themes: ['reliable', 'professional', 'engaging', 'intellectual', 'energetic', 'genuine', 'magnetic', 'better in person than photographs suggest']
+    themes: ['reliable', 'professional', 'engaging', 'intellectual', 'energetic', 'genuine', 'magnetic', 'better in person than photographs suggest'],
+    proofPoints: [
+      { label: 'Established', value: '2015', note: 'A long public track record, not a newly assembled profile.' },
+      { label: 'Public review span', value: '2018–2026', note: 'Feedback visible across multiple years and independent platforms.' },
+      { label: 'Review sources', value: 'Ivy Societe · TER · Scarlet Blue', note: 'Named sources rather than anonymous website-only endorsements.' },
+      { label: 'Public photography', value: '111 photographs', note: 'A substantial professional and candid archive, intentionally photo-only.' }
+    ],
+    reviews: [
+      { excerpt: 'Stunning in person, great communicator, reliable service, fun attitude, effortlessly professional.', source: 'Ivy Societe', date: 'June 2026', year: 2026 },
+      { excerpt: 'Classy, intellectual, engaging, energetic.', source: 'TER', date: 'November 2025', year: 2025 },
+      { excerpt: 'The full package and more.', source: 'Ivy Societe', date: 'March 2025', year: 2025 },
+      { excerpt: 'Genuine and magnetic.', source: 'Scarlet Blue', date: 'December 2024', year: 2024 },
+      { excerpt: 'Sweet, quirky, funny and genuine.', source: 'Scarlet Blue', date: 'December 2021', year: 2021 },
+      { excerpt: 'Anything shorter than a dinner date is limiting her magic.', source: 'Scarlet Blue', date: 'December 2018', year: 2018 }
+    ]
   },
 
   gallery: {
