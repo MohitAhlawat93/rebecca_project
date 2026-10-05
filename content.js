@@ -90,7 +90,7 @@ function renderTravel(){
         </div>
         <div class="travel-meta">${item.meta.map((value)=>`<span>${esc(value)}</span>`).join('')}</div>
       </article>`).join('');
-    el.innerHTML=cards+`<div class="notice" style="margin-top:18px">${esc(travel.northAmericaNotice)}</div>`;
+    el.innerHTML=`<div class="travel-board">${cards}</div><div class="notice" style="margin-top:18px">${esc(travel.northAmericaNotice)}</div>`;
   });
 
   document.querySelectorAll('[data-fmty-grid]').forEach((el)=>{
