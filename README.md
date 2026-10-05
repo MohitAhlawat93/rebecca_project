@@ -1,6 +1,6 @@
 # Risqué Rebecca — Premium Website & AI Concierge
 
-The current build is the Phase 5 production-ready demo: a responsive editorial website for Rebecca, built from her approved public content and photography.
+The current build is the Phase 6 editorial demo: Rebecca-first, responsive, privacy-conscious and built from her approved public website content and media.
 
 ## Public routes
 
@@ -8,40 +8,62 @@ The current build is the Phase 5 production-ready demo: a responsive editorial w
 - `/about` — profile and personality
 - `/rates` — current Singapore consideration
 - `/travel` — touring and fly-me-to-you guidance
-- `/date-ideas` — date ideas and wishlist direction
-- `/gallery` — editorial portfolio
+- `/date-ideas` — public date inspiration, wishlist direction and the private-list handoff
+- `/gallery` — curated gallery hub
+- `/professional` — preserved professional portrait archive
+- `/selfies-of-risquerebecca` — preserved candid archive and moving-image slot
 - `/etiquette` — screening, deposits, privacy and policies
 - `/reviews` — selected public testimonials
 - `/contact` — privacy-first enquiry builder
 
-## AI concierge
+## Rebecca’s Concierge
 
-`/api/chat` uses the Vercel AI SDK and AI Gateway with `openai/gpt-5.6-luna`. High-risk factual topics use grounded deterministic answers first; broader questions use the model against `lib/rebecca-knowledge.js`. The endpoint refuses to invent private availability, exact private tour details or unpublished information.
+The concierge uses a lightweight local RAG pipeline:
 
-If the AI provider is unavailable, the endpoint automatically falls back to grounded deterministic answers for the core topics, so the concierge does not become a dead end.
+1. `lib/rebecca-rag.js` stores approved public knowledge as small topic chunks.
+2. Each visitor question retrieves only the most relevant chunks.
+3. High-risk factual and privacy questions are handled by deterministic guardrails first.
+4. Broader questions send the retrieved context to xAI Grok.
+5. If xAI is unavailable or has no usable API credit, grounded deterministic fallback answers remain available.
+
+The default dynamic model is `grok-4.3` with reasoning disabled for speed and cost control. Set `XAI_MODEL` to override it.
+
+### Required Vercel environment variable
+
+- `XAI_API_KEY` — xAI API key used by `/api/chat`
+- `XAI_MODEL` — optional model override; defaults to `grok-4.3`
+
+Without `XAI_API_KEY`, the concierge still works for core public topics through the grounded fallback, but broader RAG-generated answers will not call Grok.
+
+### RAG privacy boundary
+
+The retrieval store contains Rebecca’s useful **public** knowledge: profile, interests, rates, travel, FMTY, screening, deposits, cancellations, etiquette, public date ideas, wishlist preferences, food/wine tastes, contact information and public FAQs.
+
+The locked private Date Ideas venue list is deliberately excluded. The concierge must not reveal, guess or reconstruct it.
 
 ### Privacy rules
 
-The concierge and enquiry builder explicitly tell visitors not to send ID documents, employer details, financial data or other sensitive screening information. Concierge history remains in the browser and is not trusted or replayed to the server. The enquiry form does not submit data to a database; it formats the visitor's input locally for email/copying into Rebecca's verified channels.
+- Do not send ID documents, employer documents, financial information, passwords or other sensitive screening material to the concierge.
+- Concierge history remains in the browser and is not replayed as trusted server context.
+- xAI Responses requests use `store: false`.
+- The enquiry builder does not submit visitor data to a database; it formats the enquiry locally for Rebecca’s verified channels.
 
 ## Main edit locations
 
 - Content and page layout: each `.html` page
 - Shared design system: `styles.css`
 - Navigation, enquiry builder and concierge UI: `script.js`
-- Concierge knowledge: `lib/rebecca-knowledge.js`
+- RAG knowledge + retrieval: `lib/rebecca-rag.js`
 - Concierge server endpoint: `api/chat.js`
-- Vercel settings: `vercel.json`
-
-## Deployment
-
-GitHub main branch is connected to Vercel. Every push to `main` triggers a deployment.
-
+- Vercel routing/security settings: `vercel.json`
 
 ## Production readiness
 
-- Legacy public URLs with direct equivalents are permanently redirected in `vercel.json`.
+GitHub `main` is connected to Vercel. Production deployment is triggered by the eventual Phase 6 merge.
+
+- Legacy paths with direct equivalents are either preserved as real pages or permanently redirected.
+- `/professional` and `/selfies-of-risquerebecca` are preserved as real pages.
 - CSP and baseline security headers are configured in `vercel.json`.
-- `robots.txt`, `sitemap.xml`, canonical URLs and homepage structured data are ready for the review domain.
+- `robots.txt`, `sitemap.xml`, canonical URLs and homepage structured data are prepared for the review domain.
 - At custom-domain cutover, replace review-domain canonical/OG/sitemap/structured-data URLs with `https://www.risquerebecca.com`.
-- See `LAUNCH_CHECKLIST.md` for the cutover sequence.
+- See `LAUNCH_CHECKLIST.md` for the final cutover sequence.
