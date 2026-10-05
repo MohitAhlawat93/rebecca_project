@@ -10,8 +10,8 @@ The current build is the Phase 6 editorial demo: Rebecca-first, responsive, priv
 - `/travel` — touring and fly-me-to-you guidance
 - `/date-ideas` — public date inspiration, wishlist direction and the private-list handoff
 - `/gallery` — curated gallery hub
-- `/professional` — preserved professional portrait archive
-- `/selfies-of-risquerebecca` — preserved candid archive and moving-image slot
+- `/professional` — complete 67-photo professional portrait archive
+- `/selfies-of-risquerebecca` — complete 44-photo candid archive
 - `/etiquette` — screening, deposits, privacy and policies
 - `/reviews` — selected public testimonials
 - `/contact` — privacy-first enquiry builder
@@ -33,11 +33,11 @@ The default dynamic model is `openai/gpt-oss-20b` with reasoning disabled for sp
 - `GROQ_API_KEY` — Groq API key used by `/api/chat`
 - `GROQ_MODEL` — optional model override; defaults to `openai/gpt-oss-20b`
 
-Without `GROQ_API_KEY`, the concierge still works for core public topics through the grounded fallback, but broader RAG-generated answers will not call Grok.
+Without `GROQ_API_KEY`, the concierge still works for core public topics through the grounded fallback, but broader RAG-generated answers will not call Groq.
 
 ### RAG privacy boundary
 
-The retrieval store contains Rebecca’s useful **public** knowledge: profile, interests, rates, travel, FMTY, screening, deposits, cancellations, etiquette, public date ideas, wishlist preferences, food/wine tastes, contact information and public FAQs.
+The retrieval store contains Rebecca’s useful **public** knowledge: profile, interests, rates, travel, FMTY, screening, deposits, cancellations, etiquette, public date ideas, wishlist preferences, food/wine tastes, contact information, public FAQs and the photo-only gallery inventory.
 
 The locked private Date Ideas venue list is deliberately excluded. The concierge must not reveal, guess or reconstruct it.
 
