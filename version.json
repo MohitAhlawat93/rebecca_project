@@ -1,0 +1,13 @@
+{
+  "site": "Risqué Rebecca",
+  "phase": "3",
+  "release": "2026-10-05-phase3",
+  "features": [
+    "full multi-page architecture",
+    "grounded AI concierge",
+    "contextual concierge navigation",
+    "privacy-first enquiry builder",
+    "one-click WhatsApp enquiry",
+    "fresh-deploy cache revalidation"
+  ]
+}
