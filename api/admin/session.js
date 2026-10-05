@@ -1,5 +1,5 @@
 import { getAdminSession, adminAuthConfigured } from '../../lib/admin-auth.js';
-import { REBECCA_DATA } from '../../data/rebecca-data.js';
+import { ADMIN_STORE_MODE, getAdminDashboardSnapshot } from '../../lib/admin-store.js';
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -27,14 +27,9 @@ export default async function handler(req, res) {
     },
     control: {
       version: 'RC-01',
-      status: 'Foundation active'
+      status: 'Foundation active',
+      storeMode: ADMIN_STORE_MODE
     },
-    site: {
-      dataVersion: REBECCA_DATA.meta?.dataVersion || '—',
-      lastVerified: REBECCA_DATA.meta?.lastVerified || '—',
-      base: REBECCA_DATA.profile?.base || '—',
-      singaporeRateCount: Array.isArray(REBECCA_DATA.singapore?.rates) ? REBECCA_DATA.singapore.rates.length : 0,
-      travelWindowCount: Array.isArray(REBECCA_DATA.travel?.calendar) ? REBECCA_DATA.travel.calendar.length : 0
-    }
+    site: getAdminDashboardSnapshot()
   });
 }
