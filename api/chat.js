@@ -22,7 +22,8 @@ Rules:
 - Keep the tone human, lightly playful when natural, and never corporate or AI-sounding.`;
 
 function suggestionFor(message = '') {
-  const q = message.toLowerCase();
+  const q = message.toLowerCase().trim();
+  if (/^(hi|hello|hey|hiya|good morning|good afternoon|good evening|how are you|how are u|how r you|how r u|who are you|what are you|what is your name|what’s your name|whats your name)[!.?\s]*$/.test(q)) return null;
   if (/screen|verify|id|privacy|etiquette|deposit|cancel|rule|boundary/.test(q)) return { path: '/etiquette', label: 'Read etiquette & privacy' };
   if (/rate|price|cost|how much|sgd|couple|phone call/.test(q)) return { path: '/rates', label: 'View rates' };
   if (/travel|tour|fly|city|india|hong kong|dubai|tokyo|london/.test(q)) return { path: '/travel', label: 'View travel guidance' };
@@ -79,13 +80,13 @@ function directAnswerFor(message = '') {
   const q = message.toLowerCase().trim();
 
   if (/^(hi|hello|hey|hiya|good morning|good afternoon|good evening)[!.?\s]*$/.test(q)) {
-    return 'Hi ✦ Lovely to meet you. What would you like to know?';
+    return 'Hi ✦ Lovely to meet you. How are you?';
   }
   if (/^(how are you|how are u|how r you|how r u|how’s it going|hows it going)[!.?\s]*$/.test(q)) {
-    return 'I’m good, thank you ✦ What are you curious about?';
+    return 'I’m good, thank you ✦ How are you?';
   }
   if (/^(who are you|what are you|what is your name|what’s your name|whats your name)[!.?\s]*$/.test(q)) {
-    return 'I’m Rebecca’s concierge ✦ I can help with questions about her, or just have a normal chat with you.';
+    return 'I’m Rebecca’s concierge ✦ I’m here to help with anything you’d like to know.';
   }
 
   if (/couple|two of us|my partner/.test(q)) {
