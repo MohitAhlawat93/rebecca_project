@@ -160,21 +160,11 @@ export default async function handler(req, res) {
     return res.status(200).json({ answer: directAnswer, mode: 'grounded-direct', suggestion: suggestionFor(message) });
   }
 
-  const history = Array.isArray(body.history)
-    ? body.history
-        .slice(-6)
-        .filter((item) => item && ['user', 'assistant'].includes(item.role) && typeof item.content === 'string')
-        .map((item) => ({ role: item.role, content: item.content.slice(0, 900) }))
-    : [];
-
   try {
-    const messages = history.length ? history : [{ role: 'user', content: message }];
-    if (messages[messages.length - 1]?.content !== message) messages.push({ role: 'user', content: message });
-
     const result = await generateText({
       model: 'openai/gpt-5.6-luna',
       system: SYSTEM,
-      messages
+      messages: [{ role: 'user', content: message }]
     });
 
     const answer = result.text?.trim();
