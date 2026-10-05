@@ -75,7 +75,44 @@
   };
   const addMessage=(role,text,extra='')=>{if(!thread)return null;const el=document.createElement('div');el.className=`chat-message ${role} ${extra}`.trim();el.innerHTML=formatChatText(text);thread.appendChild(el);thread.scrollTop=thread.scrollHeight;return el};
   const remember=(role,content)=>{chatHistory.push({role,content:String(content).slice(0,800)});if(chatHistory.length>8)chatHistory.splice(0,chatHistory.length-8);};
-  async function askConcierge(message){const q=message.trim();if(!q)return;addMessage('user',q);remember('user',q);const pending=addMessage('assistant','Just a moment ✦','pending');if(input)input.disabled=true;if(send)send.disabled=true;try{const r=await fetch('/api/concierge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q,history:chatHistory.slice(0,-1)})});const data=await r.json();if(!r.ok)throw new Error(data?.error||'Concierge unavailable');pending?.remove();addMessage('assistant',data.answer);remember('assistant',data.answer);if(data.suggestion?.path){const link=document.createElement('a');link.className='chat-suggestion';link.href=data.suggestion.path;link.textContent=data.suggestion.label+' →';thread?.appendChild(link);if(thread)thread.scrollTop=thread.scrollHeight}}catch{pending?.remove();const message='I’m having a little trouble right now. Try again in a moment, or use Rebecca’s official contact page.';addMessage('assistant',message,'error');remember('assistant',message)}finally{if(send)send.disabled=false;if(input){input.disabled=false;input.value='';input.focus()}}}
+  const safeActionHref=(href='')=>/^\/(?!\/)|^https:\/\/(?:wa\.me|t\.me)\/|^mailto:/i.test(href)?href:'';
+  const renderChatActions=(actions=[])=>{
+    if(!thread||!Array.isArray(actions)||!actions.length)return;
+    const wrap=document.createElement('div');wrap.className='chat-actions';
+    actions.slice(0,4).forEach((action)=>{
+      if(action?.type==='prompt'&&action.prompt){
+        const button=document.createElement('button');button.type='button';button.className='chat-action';button.textContent=action.label||'Continue';button.addEventListener('click',()=>askConcierge(action.prompt));wrap.appendChild(button);return;
+      }
+      if(action?.type==='copy'&&action.text){
+        const button=document.createElement('button');button.type='button';button.className='chat-action';button.textContent=action.label||'Copy';button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(action.text);button.textContent='Copied ✓'}catch{button.textContent='Copy unavailable'}});wrap.appendChild(button);return;
+      }
+      if(action?.type==='link'&&action.href){
+        const href=safeActionHref(action.href);if(!href)return;
+        const link=document.createElement('a');link.className='chat-action';link.href=href;link.textContent=(action.label||'Open')+' →';
+        if(action.external&&/^https:/i.test(href)){link.target='_blank';link.rel='noopener noreferrer'}
+        wrap.appendChild(link);
+      }
+    });
+    if(wrap.childElementCount){thread.appendChild(wrap);thread.scrollTop=thread.scrollHeight}
+  };
+  async function askConcierge(message){
+    const q=message.trim();if(!q)return;
+    addMessage('user',q);remember('user',q);
+    const pending=addMessage('assistant','Just a moment ✦','pending');
+    if(input)input.disabled=true;if(send)send.disabled=true;
+    try{
+      const r=await fetch('/api/concierge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q,history:chatHistory.slice(0,-1),page:currentPath})});
+      const data=await r.json();if(!r.ok)throw new Error(data?.error||'Concierge unavailable');
+      pending?.remove();addMessage('assistant',data.answer);remember('assistant',data.answer);
+      renderChatActions(data.actions);
+      if(data.suggestion?.path){const link=document.createElement('a');link.className='chat-suggestion';link.href=data.suggestion.path;link.textContent=data.suggestion.label+' →';thread?.appendChild(link);if(thread)thread.scrollTop=thread.scrollHeight}
+    }catch{
+      pending?.remove();const message='I’m having a little trouble right now. Try again in a moment, or use Rebecca’s official contact page.';addMessage('assistant',message,'error');remember('assistant',message)
+    }finally{
+      if(send)send.disabled=false;
+      if(input){input.disabled=false;input.value='';if(!window.matchMedia('(max-width: 640px)').matches)input.focus()}
+    }
+  }
   form?.addEventListener('submit',e=>{e.preventDefault();if(input)askConcierge(input.value)});
   document.querySelectorAll('[data-chat-prompt]').forEach(b=>b.addEventListener('click',()=>askConcierge(b.getAttribute('data-chat-prompt')||'')));
 
