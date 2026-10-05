@@ -493,3 +493,20 @@ body.gallery-lightbox-open{overflow:hidden}
   .taste-card,.wishlist-card{min-height:240px}
   .home-trust-item{min-height:125px}
 }
+
+/* RC-02 runtime availability */
+.availability-chip{
+  display:inline-flex;align-items:center;gap:9px;width:max-content;max-width:100%;
+  margin-top:18px;padding:9px 13px;border:1px solid rgba(67,78,62,.18);
+  border-radius:999px;background:rgba(248,246,240,.74);color:#485144;
+  font-size:.78rem;font-weight:650;line-height:1.2
+}
+.availability-dot{
+  width:7px;height:7px;border-radius:50%;background:#687b64;
+  box-shadow:0 0 0 4px rgba(104,123,100,.10);flex:0 0 auto
+}
+.availability-chip[data-status="limited"] .availability-dot{background:#a17b48;box-shadow:0 0 0 4px rgba(161,123,72,.10)}
+.availability-chip[data-status="travelling"] .availability-dot{background:#6d748e;box-shadow:0 0 0 4px rgba(109,116,142,.10)}
+.availability-chip[data-status="away"] .availability-dot,
+.availability-chip[data-status="unavailable"] .availability-dot{background:#8a625c;box-shadow:0 0 0 4px rgba(138,98,92,.10)}
+.page-availability-chip{margin-top:16px}
