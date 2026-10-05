@@ -1,10 +1,10 @@
 import { retrieveRebeccaKnowledge, formatRebeccaContext } from '../lib/rebecca-knowledge.js';
 import {
-  REBECCA_DATA,
   formatSingaporeRatesCompact,
   formatTouringRates,
   formatFmtySummary
 } from '../data/rebecca-data.js';
+import { getEffectiveRebeccaData } from '../lib/admin-store.js';
 
 const SYSTEM=`You are Rebecca's website concierge: elegant, concise, warm, discreet and useful.
 
@@ -58,8 +58,8 @@ function suggestionFor(message=''){
   return null;
 }
 
-function cancellationBody(title){
-  return REBECCA_DATA.policies.cancellations.find((item)=>item.title===title)?.body||'';
+function cancellationBody(title,data){
+  return data.policies.cancellations.find((item)=>item.title===title)?.body||'';
 }
 
 function policyAnswerFor(message=''){
@@ -79,11 +79,15 @@ function policyAnswerFor(message=''){
   return null;
 }
 
-function directAnswerFor(message=''){
+function directAnswerFor(message='',data){
   const q=message.toLowerCase().trim();
-  const sg=REBECCA_DATA.singapore;
-  const policies=REBECCA_DATA.policies;
-  const profile=REBECCA_DATA.profile;
+  const sg=data.singapore;
+  const policies=data.policies;
+  const profile=data.profile;
+  const availability=data.availability||{
+    label:'Availability',
+    message:'Final live availability is confirmed directly by Rebecca.'
+  };
 
   if(/^(hi|hello|hey|hiya|good morning|good afternoon|good evening)[!.?\s]*$/.test(q)) return 'Hi ✦ Lovely to meet you. How are you?';
   if(/^(how are you|how are u|how r you|how r u|how’s it going|hows it going)[!.?\s]*$/.test(q)) return 'I’m good, thank you ✦ How are you?';
@@ -99,23 +103,23 @@ function directAnswerFor(message=''){
     return `Deposits are required for confirmed dates: ${policies.deposits.map((item)=>`${item.label} ${item.value}`).join(', ')}. Rebecca asks for the deposit ${policies.depositTiming}.`;
   }
   if(/cancel|cancellation|reschedul/.test(q)){
-    return [cancellationBody('48+ hours’ notice'),cancellationBody('Touring / hosting / gift-card deposits'),cancellationBody('Last-minute cancellation'),cancellationBody('If I have to cancel')].filter(Boolean).join(' ');
+    return [cancellationBody('48+ hours’ notice',data),cancellationBody('Touring / hosting / gift-card deposits',data),cancellationBody('Last-minute cancellation',data),cancellationBody('If I have to cancel',data)].filter(Boolean).join(' ');
   }
   if(/screen|verify|linkedin|employment verification|\bid\b/.test(q)){
     return `${policies.screening.paragraphs[0]} ${policies.screening.conciergeNotice}`;
   }
   if(/available|availability|free (today|tonight|tomorrow|this week)/.test(q)){
-    return 'I can’t see or confirm Rebecca’s live availability. Send your preferred date, duration and location through the Contact page and Rebecca will confirm directly.';
+    return `Rebecca’s current public status is “${availability.label}”. ${availability.message} I still can’t confirm a specific date or time; send your preferred date, duration and location through the Contact page and Rebecca will confirm directly.`;
   }
-  if(/india.*(rate|price|cost)|(?:rate|price|cost|how much).*india/.test(q)) return `India: ${formatTouringRates('India')}`;
-  if(/(hong kong|\bhk\b).*(rate|price|cost)|(?:rate|price|cost|how much).*(hong kong|\bhk\b)/.test(q)) return `Hong Kong: ${formatTouringRates('Hong Kong')}`;
-  if(/singapore.*(rate|price|cost)|(?:rate|price|cost|how much|sgd).*singapore|what are rebecca'?s singapore rates/.test(q)) return formatSingaporeRatesCompact();
+  if(/india.*(rate|price|cost)|(?:rate|price|cost|how much).*india/.test(q)) return `India: ${formatTouringRates('India',data)}`;
+  if(/(hong kong|\bhk\b).*(rate|price|cost)|(?:rate|price|cost|how much).*(hong kong|\bhk\b)/.test(q)) return `Hong Kong: ${formatTouringRates('Hong Kong',data)}`;
+  if(/singapore.*(rate|price|cost)|(?:rate|price|cost|how much|sgd).*singapore|what are rebecca'?s singapore rates/.test(q)) return formatSingaporeRatesCompact(data);
 
   if(/travel date|tour date|touring date|upcoming.*(travel|tour)|when .*?(india|london|europe|north america)/.test(q)){
-    const windows=REBECCA_DATA.travel.calendar.map((item)=>`${item.kicker}${item.cities?.length?` (${item.cities.join(', ')})`:''}`).join(', then ');
-    return `Upcoming public windows: ${windows}. ${REBECCA_DATA.travel.northAmericaNotice}`;
+    const windows=data.travel.calendar.filter((item)=>item.visible!==false).map((item)=>`${item.kicker}${item.cities?.length?` (${item.cities.join(', ')})`:''}`).join(', then ');
+    return `Upcoming public windows: ${windows}. ${data.travel.northAmericaNotice}`;
   }
-  if(/\bfmty\b|fly me to you|travel to me|come to my city|invite .*?(city|country)/.test(q)) return `General fly-me-to-you minimums: ${formatFmtySummary()}`;
+  if(/\bfmty\b|fly me to you|travel to me|come to my city|invite .*?(city|country)/.test(q)) return `General fly-me-to-you minimums: ${formatFmtySummary(data)}`;
 
   if(/about|who is rebecca|tell me about rebecca|profile/.test(q)){
     return `Rebecca is based in ${profile.base} and has been established since ${profile.establishedSince}. She is ${profile.age.toLowerCase()}, ${profile.height.metric} / ${profile.height.imperial}, speaks ${profile.languages.join(' and ')}, has visited ${profile.countriesVisited} countries, and is especially interested in ${profile.interests.join(', ')}.`;
@@ -123,12 +127,13 @@ function directAnswerFor(message=''){
   return null;
 }
 
-function fallbackFor(message=''){
+function fallbackFor(message='',data){
   const q=message.toLowerCase();
-  if(/rate|price|cost|how much|sgd/.test(q)) return formatSingaporeRatesCompact()+' See the Rates page for the full structure.';
-  if(/screen|verify|id|privacy/.test(q)) return `${REBECCA_DATA.policies.screening.paragraphs[0]} ${REBECCA_DATA.policies.screening.conciergeNotice}`;
-  if(/travel|tour|fly|city|india|hong kong|dubai|tokyo|london/.test(q)) return `Rebecca is based primarily in Asia and can travel by invitation. ${formatFmtySummary()} See the Travel page for details.`;
-  if(/contact|book|enquir|available|availability|meet/.test(q)) return 'For live availability or an enquiry, use the Contact page and Rebecca will confirm directly.';
+  const availability=data.availability||{};
+  if(/rate|price|cost|how much|sgd/.test(q)) return formatSingaporeRatesCompact(data)+' See the Rates page for the full structure.';
+  if(/screen|verify|id|privacy/.test(q)) return `${data.policies.screening.paragraphs[0]} ${data.policies.screening.conciergeNotice}`;
+  if(/travel|tour|fly|city|india|hong kong|dubai|tokyo|london/.test(q)) return `Rebecca is based primarily in Asia and can travel by invitation. ${formatFmtySummary(data)} See the Travel page for details.`;
+  if(/contact|book|enquir|available|availability|meet/.test(q)) return `${availability.label||'Availability'}: ${availability.message||'Final live availability is confirmed directly by Rebecca.'} Use the Contact page for a specific date.`;
   if(/etiquette|deposit|cancel|rule|boundary/.test(q)) return 'Rebecca requires screening and a deposit to confirm dates, values discretion and good manners, and does not negotiate rates. See the Etiquette page for her current policies.';
   return 'I can help with Rebecca’s public profile, rates, travel, etiquette, reviews and enquiry process. For anything private or live, please use her official contact channels.';
 }
@@ -153,17 +158,20 @@ export default async function handler(req,res){
   if(!message) return res.status(400).json({error:'Please enter a message.'});
   if(isPromptInjection(message)) return res.status(200).json({answer:'I can’t reveal or override private instructions. I can still help with Rebecca’s public information.',mode:'guardrail',suggestion:null});
 
+  const effective=await getEffectiveRebeccaData();
+  const currentData=effective.data;
+
   const policyAnswer=policyAnswerFor(message);
   if(policyAnswer) return res.status(200).json({answer:policyAnswer,mode:'guardrail',suggestion:suggestionFor(message)});
 
-  const directAnswer=directAnswerFor(message);
+  const directAnswer=directAnswerFor(message,currentData);
   if(directAnswer) return res.status(200).json({answer:directAnswer,mode:'grounded-direct',suggestion:suggestionFor(message)});
 
   const recentUserContext=history.filter((item)=>item.role==='user').slice(-2).map((item)=>item.content).join(' ');
   const retrievalQuery=recentUserContext?`${recentUserContext} ${message}`:message;
-  const context=formatRebeccaContext(retrieveRebeccaKnowledge(retrievalQuery,4));
+  const context=formatRebeccaContext(retrieveRebeccaKnowledge(retrievalQuery,4,currentData));
 
-  if(!process.env.GROQ_API_KEY) return res.status(200).json({answer:fallbackFor(message),mode:'grounded-fallback',suggestion:suggestionFor(message)});
+  if(!process.env.GROQ_API_KEY) return res.status(200).json({answer:fallbackFor(message,currentData),mode:'grounded-fallback',suggestion:suggestionFor(message)});
 
   try{
     const response=await fetch('https://api.groq.com/openai/v1/chat/completions',{

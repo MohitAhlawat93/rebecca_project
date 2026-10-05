@@ -1,5 +1,5 @@
 import { getAdminSession, adminAuthConfigured } from '../../lib/admin-auth.js';
-import { ADMIN_STORE_MODE, getAdminDashboardSnapshot } from '../../lib/admin-store.js';
+import { getAdminDashboardSnapshot } from '../../lib/admin-store.js';
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -18,6 +18,8 @@ export default async function handler(req, res) {
   const session = getAdminSession(req);
   if (!session) return res.status(401).json({ authenticated: false, configured: true });
 
+  const site = await getAdminDashboardSnapshot();
+
   return res.status(200).json({
     authenticated: true,
     configured: true,
@@ -26,10 +28,11 @@ export default async function handler(req, res) {
       role: 'Owner'
     },
     control: {
-      version: 'RC-01',
-      status: 'Foundation active',
-      storeMode: ADMIN_STORE_MODE
+      version: 'RC-02',
+      status: 'Quick Control',
+      storeMode: site.storeMode,
+      persistent: site.persistent
     },
-    site: getAdminDashboardSnapshot()
+    site
   });
 }
