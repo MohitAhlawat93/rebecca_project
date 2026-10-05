@@ -1,17 +1,5 @@
 {
   "site": "Risqué Rebecca",
-  "phase": "4A-voice-accuracy-reset",
-  "release": "2026-10-05-phase4a",
-  "canonicalVercelProject": "rebecca_project",
-  "canonicalDomain": "rebeccaproject.vercel.app",
-  "features": [
-    "Rebecca-first first-person copy",
-    "simplified editorial homepage",
-    "single discreet AI concierge presence",
-    "current Singapore rates",
-    "current touring calendar and regional rates",
-    "correct couples and phone-call terms",
-    "privacy-first enquiry flow",
-    "updated concierge source-of-truth"
-  ]
+  "release": "2026-10-05",
+  "canonicalDomain": "rebeccaproject.vercel.app"
 }
