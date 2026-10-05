@@ -20,11 +20,12 @@ The current build is the Phase 6 editorial demo: Rebecca-first, responsive, priv
 
 The concierge uses a lightweight local RAG pipeline:
 
-1. `data/rebecca-data.js` is the single source of truth for mutable public facts: profile, rates, travel, policies, contact, date ideas, wishlist and gallery counts.
-2. `content.js` renders factual website sections from that source.
-3. `lib/rebecca-knowledge.js` derives retrieval chunks from the same source.
-4. `api/concierge.js` derives direct and fallback answers from the same source before using Groq for broader grounded responses.
-5. GitHub Actions runs `npm run validate:data` to catch missing bindings or accidental re-introduction of legacy duplicate data.
+1. `data/rebecca-data.js` remains the canonical safe fallback for Rebecca’s public facts.
+2. RC-02 can overlay owner-approved runtime changes from Rebecca Control through `lib/admin-store.js`.
+3. `content.js` loads the effective public state from `/api/public-content` and falls back to the bundled canonical data if runtime storage is unavailable.
+4. `lib/rebecca-knowledge.js` builds retrieval chunks from the same effective state.
+5. `api/concierge.js` uses that same effective state for direct, fallback and RAG-grounded answers.
+6. `npm run validate` checks canonical bindings, admin authentication and the RC-02 Quick Control data flow.
 
 The default dynamic model is `openai/gpt-oss-20b` with reasoning disabled for speed and cost control. Set `GROQ_MODEL` to override it.
 
@@ -50,7 +51,8 @@ The locked private Date Ideas venue list is deliberately excluded. The concierge
 
 ## Main edit locations
 
-- **Rebecca factual data (edit here first): `data/rebecca-data.js`**
+- **Owner-managed changing facts after RC-02 is connected: `/admin` → Quick Control**
+- Canonical fallback/default factual data: `data/rebecca-data.js`
 - Page layout/editorial copy: each `.html` page
 - Canonical-data page renderer: `content.js`
 - Shared design system: `styles.css`
@@ -90,3 +92,47 @@ Required environment variables:
 - `RC_SESSION_SECRET` with at least 32 characters
 
 RC-02 will add controlled editing behind this same authentication boundary. Persistent editable content should use an isolated Rebecca-specific datastore rather than another client's database.
+
+
+## Rebecca Control — RC-02 Quick Control
+
+RC-02 turns the RC-01 owner shell into a practical, mobile-first control surface for the information Rebecca changes most often.
+
+Rebecca can manage:
+- availability status and public availability message
+- public travel windows
+- Singapore rate amounts, visibility and featured state
+- official contact information
+- repeated profile facts such as base, age display, height, heritage and languages
+
+Runtime flow:
+
+```text
+Rebecca Control
+      ↓
+Rebecca-only content store
+      ↓
+effective public state
+   ↙          ↘
+website     concierge
+```
+
+Safety and fallback rules:
+- Routine edits do not require a GitHub commit or Vercel deployment.
+- If runtime storage cannot be reached, the public website and concierge fall back to `data/rebecca-data.js`.
+- Save is disabled/rejected when persistent storage is not configured; the UI never pretends an edit was published.
+- The Supabase secret is server-only and must never be exposed to browser code.
+- No visitor, enquiry, screening or customer data is introduced by RC-02.
+- WhatsApp and Telegram URLs are derived from the owner-friendly phone/handle fields so Rebecca does not manage technical URLs manually.
+- Availability selections suggest sensible public wording automatically.
+- Travel labels are derived where possible to reduce duplicate editing.
+
+RC-02 storage environment variables:
+- `RC_SUPABASE_URL`
+- `RC_SUPABASE_SECRET_KEY`
+
+Use a **Rebecca-specific Supabase project only**. Do not reuse another client or project database. Apply `supabase/rc-02-quick-control.sql` to that database before enabling writes.
+
+RC-02 validation:
+- `npm run validate:quick-control`
+- `npm run validate`
