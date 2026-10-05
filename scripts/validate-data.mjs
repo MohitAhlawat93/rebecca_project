@@ -1,0 +1,66 @@
+import { readFileSync, existsSync } from 'node:fs';
+import { REBECCA_DATA, formatSingaporeRatesCompact, formatFmtySummary } from '../data/rebecca-data.js';
+import { REBECCA_KNOWLEDGE } from '../lib/rebecca-knowledge.js';
+
+const fail=(message)=>{throw new Error('[Rebecca data validation] '+message);};
+const assert=(condition,message)=>{if(!condition) fail(message);};
+
+const { profile, singapore, travel, policies, contact }=REBECCA_DATA;
+
+assert(profile.displayName && profile.establishedSince,'profile core fields are required');
+assert(profile.languages.length>=1,'at least one language is required');
+assert(profile.homeFacts.length>=5 && profile.aboutFacts.length>=5,'profile fact sets are incomplete');
+
+assert(singapore.rates.length>=1,'Singapore rates are required');
+const rateLabels=new Set();
+for(const rate of singapore.rates){
+  assert(rate.label,'every Singapore rate needs a label');
+  assert(!rateLabels.has(rate.label),'duplicate Singapore rate label: '+rate.label);
+  rateLabels.add(rate.label);
+  if(rate.amount!=null) assert(Number.isFinite(rate.amount)&&rate.amount>0,'invalid amount for '+rate.label);
+}
+assert(Number.isFinite(singapore.extensionPerHour)&&singapore.extensionPerHour>0,'extension amount is invalid');
+assert(Number.isFinite(singapore.terms.couples.surcharge),'couples surcharge is missing');
+assert(typeof singapore.terms.phoneCall.creditTowardBooking==='boolean','phone-call credit flag must be explicit');
+
+assert(travel.calendar.length>=1,'travel calendar is empty');
+assert(travel.fmty.length>=1,'FMTY rules are empty');
+for(const item of travel.fmty) assert(item.id&&item.label&&item.minimum,'incomplete FMTY rule');
+for(const [name,set] of Object.entries(travel.touringRates)){
+  assert(set.items?.length,'touring rates missing for '+name);
+  assert(set.extension,'touring extension missing for '+name);
+}
+
+assert(policies.screening.required===true,'screening should be explicitly required');
+assert(policies.deposits.length>=3,'deposit rules are incomplete');
+assert(policies.cancellations.length>=1,'cancellation rules are missing');
+assert(policies.boundaries.length>=1,'boundary rules are missing');
+
+assert(contact.email.includes('@'),'contact email is invalid');
+assert(contact.whatsappUrl.startsWith('https://wa.me/'),'WhatsApp URL is invalid');
+assert(contact.telegramUrl.startsWith('https://t.me/'),'Telegram URL is invalid');
+
+const knowledgeText=REBECCA_KNOWLEDGE.map((chunk)=>chunk.text).join('\n');
+assert(knowledgeText.includes(formatSingaporeRatesCompact()),'RAG Singapore rates are not derived from canonical data');
+assert(knowledgeText.includes(formatFmtySummary()),'RAG FMTY rules are not derived from canonical data');
+
+const requiredBindings={
+  'index.html':['data-profile-hero-meta','data-profile-home-facts'],
+  'about.html':['data-profile-about-facts'],
+  'rates.html':['data-singapore-rates','data-singapore-terms','data-asia-promo'],
+  'travel.html':['data-travel-calendar','data-fmty-grid','data-touring-rates','data-travel-practicalities'],
+  'etiquette.html':['data-screening-policy','data-deposit-grid','data-cancellation-policy','data-boundaries-policy'],
+  'contact.html':['data-contact-channels','data-duration-options','data-screening-options']
+};
+for(const [file,bindings] of Object.entries(requiredBindings)){
+  const html=readFileSync(new URL('../'+file,import.meta.url),'utf8');
+  for(const binding of bindings) assert(html.includes(binding),file+' is missing '+binding);
+  assert(html.includes('/content.js'),file+' is missing canonical-data renderer');
+}
+
+const script=readFileSync(new URL('../script.js',import.meta.url),'utf8');
+assert(script.includes("fetch('/api/concierge'"),'client is not using canonical-data concierge endpoint');
+assert(!existsSync(new URL('../api/chat.js',import.meta.url)),'legacy api/chat.js should not exist');
+assert(!existsSync(new URL('../lib/rebecca-rag.js',import.meta.url)),'legacy lib/rebecca-rag.js should not exist');
+
+console.log('Rebecca canonical data validation passed.');
