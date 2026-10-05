@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#f4f0ea">
+  <title>Rebecca Control — Private</title>
+  <link rel="icon" href="/favicon.svg">
+  <link rel="stylesheet" href="/admin.css">
+  <script src="/admin.js" defer></script>
+</head>
+<body class="rc-body">
+  <main class="rc-shell">
+    <section class="rc-login" data-login-view>
+      <div class="rc-mark" aria-hidden="true">R</div>
+      <p class="rc-eyebrow">Private owner access</p>
+      <h1>Rebecca Control</h1>
+      <p class="rc-intro">A quiet place to manage the website and concierge. RC-01 establishes secure owner access before editing tools are switched on.</p>
+
+      <form class="rc-login-form" data-login-form>
+        <label>
+          <span>Owner ID</span>
+          <input name="loginId" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+        </label>
+        <label>
+          <span>Password</span>
+          <input name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <button type="submit" class="rc-primary">Sign in</button>
+        <p class="rc-form-message" data-login-message role="status" aria-live="polite"></p>
+      </form>
+
+      <p class="rc-security-note">Private access only. Credentials are verified on the server and are never stored in this page.</p>
+      <a class="rc-back-link" href="/">← Return to website</a>
+    </section>
+
+    <section class="rc-app" data-app-view hidden>
+      <header class="rc-topbar">
+        <div>
+          <p class="rc-eyebrow">Rebecca Control</p>
+          <h1>Good to see you, Rebecca.</h1>
+        </div>
+        <div class="rc-top-actions">
+          <a href="/" target="_blank" rel="noreferrer" class="rc-secondary">View website ↗</a>
+          <button type="button" class="rc-text-button" data-logout>Log out</button>
+        </div>
+      </header>
+
+      <div class="rc-status-strip">
+        <div>
+          <span class="rc-status-dot"></span>
+          <strong>Foundation active</strong>
+          <small>Owner-only session</small>
+        </div>
+        <div>
+          <strong data-data-version>—</strong>
+          <small>Canonical data version</small>
+        </div>
+        <div>
+          <strong data-last-verified>—</strong>
+          <small>Last verified</small>
+        </div>
+      </div>
+
+      <section class="rc-section">
+        <div class="rc-section-heading">
+          <div>
+            <p class="rc-eyebrow">Quick control</p>
+            <h2>The everyday things will live here.</h2>
+          </div>
+          <span class="rc-phase-pill">RC-02 next</span>
+        </div>
+
+        <div class="rc-quick-grid">
+          <article class="rc-action-card">
+            <span class="rc-card-kicker">Availability</span>
+            <h3>Change public status</h3>
+            <p>Available, limited, travelling or away — one change will later update the site and concierge together.</p>
+            <span class="rc-coming">Coming in RC-02</span>
+          </article>
+          <article class="rc-action-card">
+            <span class="rc-card-kicker">Travel</span>
+            <h3>Add or change a trip</h3>
+            <p><strong data-travel-count>—</strong> public travel windows currently come from Rebecca’s single source of truth.</p>
+            <span class="rc-coming">Coming in RC-02</span>
+          </article>
+          <article class="rc-action-card">
+            <span class="rc-card-kicker">Rates</span>
+            <h3>Update consideration</h3>
+            <p><strong data-rate-count>—</strong> Singapore rate entries are currently connected to the canonical data.</p>
+            <span class="rc-coming">Coming in RC-02</span>
+          </article>
+          <article class="rc-action-card">
+            <span class="rc-card-kicker">Photos</span>
+            <h3>Manage the gallery</h3>
+            <p>Mobile-first upload, reorder and hero selection will sit behind this same owner login.</p>
+            <span class="rc-coming">Coming in RC-04</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="rc-section rc-foundation">
+        <div class="rc-section-heading">
+          <div>
+            <p class="rc-eyebrow">RC-01</p>
+            <h2>What is protected now</h2>
+          </div>
+        </div>
+        <div class="rc-foundation-grid">
+          <div><span>01</span><strong>Private owner route</strong><p>/admin is intentionally absent from public navigation and search indexing.</p></div>
+          <div><span>02</span><strong>Server-side authentication</strong><p>The password is never embedded in public HTML or JavaScript.</p></div>
+          <div><span>03</span><strong>Signed owner session</strong><p>Short-lived HttpOnly cookies keep the browser session separate from public content.</p></div>
+          <div><span>04</span><strong>Single-source proof</strong><p>This dashboard reads the same Rebecca data used by the public website and concierge.</p></div>
+        </div>
+      </section>
+
+      <footer class="rc-footer">
+        <span>Rebecca Control · RC-01</span>
+        <span>Owner access only</span>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>

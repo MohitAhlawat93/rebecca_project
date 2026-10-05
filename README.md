@@ -70,3 +70,23 @@ GitHub `main` is connected to Vercel. Production deployment is triggered by the 
 - `robots.txt`, `sitemap.xml`, canonical URLs and homepage structured data are prepared for the review domain.
 - At custom-domain cutover, replace review-domain canonical/OG/sitemap/structured-data URLs with `https://www.risquerebecca.com`.
 - See `LAUNCH_CHECKLIST.md` for the final cutover sequence.
+
+
+## Rebecca Control — RC-01 foundation
+
+RC-01 introduces a private owner-only control surface at `/admin` without changing the public website experience.
+
+Security model:
+- Owner credentials are configured only through Vercel environment variables.
+- Password verification uses scrypt; the plaintext password is never committed to GitHub.
+- Successful sign-in creates a short-lived, signed, HttpOnly, SameSite=Strict session cookie.
+- Admin HTML and API responses are `no-store` and `noindex`.
+- Repeated failed sign-in attempts receive a lightweight server-side rate limit.
+- The dashboard is read-only in RC-01 and proves it can read the existing `data/rebecca-data.js` single source of truth.
+
+Required environment variables:
+- `RC_ADMIN_LOGIN_ID`
+- `RC_ADMIN_PASSWORD_HASH` using `scrypt$N$r$p$salt$hash`
+- `RC_SESSION_SECRET` with at least 32 characters
+
+RC-02 will add controlled editing behind this same authentication boundary. Persistent editable content should use an isolated Rebecca-specific datastore rather than another client's database.
