@@ -134,6 +134,76 @@ function renderPolicies(){
   });
 }
 
+
+function renderPersonality(){
+  const p=REBECCA_DATA.profile;
+
+  document.querySelectorAll('[data-profile-philosophy]').forEach((el)=>{
+    el.innerHTML=`
+      <span>${esc(p.philosophy.label)}</span>
+      <h2>${esc(p.philosophy.title)}</h2>
+      <p>${esc(p.philosophy.body)}</p>`;
+  });
+
+  document.querySelectorAll('[data-profile-interview]').forEach((el)=>{
+    el.innerHTML=p.interview.map((item,index)=>`
+      <details${index===0?' open':''}>
+        <summary>${esc(item.question)}</summary>
+        <div class="detail-body"><p>${esc(item.answer)}</p></div>
+      </details>`).join('');
+  });
+}
+
+function renderReputation(){
+  const reputation=REBECCA_DATA.reputation;
+
+  document.querySelectorAll('[data-reputation-proof]').forEach((el)=>{
+    el.innerHTML=reputation.proofPoints.map((item)=>`
+      <article class="trust-proof-card">
+        <span>${esc(item.label)}</span>
+        <strong>${esc(item.value)}</strong>
+        <p>${esc(item.note)}</p>
+      </article>`).join('');
+  });
+
+  document.querySelectorAll('[data-reputation-reviews]').forEach((el)=>{
+    el.innerHTML=reputation.reviews.map((review)=>`
+      <article class="review-item">
+        <blockquote>“${esc(review.excerpt)}”</blockquote>
+        <footer>${esc(review.source)} · ${esc(review.date)}</footer>
+      </article>`).join('');
+  });
+
+  document.querySelectorAll('[data-home-trust]').forEach((el)=>{
+    el.innerHTML=reputation.proofPoints.map((item)=>`
+      <div class="home-trust-item">
+        <span>${esc(item.label)}</span>
+        <strong>${esc(item.value)}</strong>
+      </div>`).join('');
+  });
+}
+
+function renderDateIdeas(){
+  document.querySelectorAll('[data-date-categories]').forEach((el)=>{
+    el.innerHTML=REBECCA_DATA.dateIdeas.categories.map((item)=>`
+      <article class="taste-card">
+        <span>${esc(item.label)}</span>
+        <h3>${esc(item.title)}</h3>
+        <p>${esc(item.body)}</p>
+        <div class="taste-notes">${item.notes.map((note)=>`<small>${esc(note)}</small>`).join('')}</div>
+      </article>`).join('');
+  });
+
+  document.querySelectorAll('[data-wishlist-categories]').forEach((el)=>{
+    el.innerHTML=REBECCA_DATA.wishlist.categories.map((item)=>`
+      <article class="wishlist-card">
+        <span>${esc(item.label)}</span>
+        <h3>${esc(item.title)}</h3>
+        <p>${esc(item.body)}</p>
+      </article>`).join('');
+  });
+}
+
 function renderContact(){
   const contact=REBECCA_DATA.contact;
   const policies=REBECCA_DATA.policies;
@@ -161,6 +231,9 @@ function renderContact(){
 }
 
 renderProfile();
+renderPersonality();
+renderReputation();
+renderDateIdeas();
 renderSingapore();
 renderTravel();
 renderPolicies();
