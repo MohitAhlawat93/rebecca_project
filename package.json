@@ -7,6 +7,8 @@
     "node": "22.x"
   },
   "scripts": {
-    "validate:data": "node scripts/validate-data.mjs"
+    "validate:data": "node scripts/validate-data.mjs",
+    "validate:syntax": "node --check data/rebecca-data.js && node --check lib/rebecca-knowledge.js && node --check api/concierge.js && node --check content.js && node --check script.js",
+    "validate": "npm run validate:syntax && npm run validate:data"
   }
 }
