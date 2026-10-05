@@ -25,7 +25,7 @@
     <button class="concierge-launcher" type="button" data-open-concierge aria-label="Open Rebecca's concierge" aria-expanded="false" aria-controls="rebecca-concierge"><span class="spark" aria-hidden="true">✦</span><span>Ask the concierge</span></button>
     <aside class="concierge-panel" id="rebecca-concierge" data-concierge-panel hidden role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="rebecca-concierge-title">
       <div class="concierge-panel-head"><div><strong id="rebecca-concierge-title">Rebecca’s Concierge</strong><small>Rates · travel · etiquette</small></div><button class="concierge-close" type="button" data-close-concierge aria-label="Close concierge">×</button></div>
-      <div class="concierge-thread" data-concierge-thread aria-live="polite"><div class="chat-message assistant">Hi, I’m Rebecca’s little concierge ✦ Ask me about her profile, rates, travel, or planning a date.</div></div>
+      <div class="concierge-thread" data-concierge-thread aria-live="polite"><div class="chat-message assistant"><p>Hi ✦ I’m Rebecca’s concierge.</p><p>Ask me anything about her, or just say hello.</p></div></div>
       <div class="concierge-chips"><button class="concierge-chip" type="button" data-chat-prompt="What are Rebecca's Singapore rates?">Singapore rates</button><button class="concierge-chip" type="button" data-chat-prompt="How does screening work?">Screening</button><button class="concierge-chip" type="button" data-chat-prompt="Can Rebecca travel to me?">Travel</button></div>
       <form class="concierge-form" data-concierge-form><input type="text" maxlength="600" autocomplete="off" placeholder="Ask something discreetly…" aria-label="Message Rebecca's concierge" required><button class="concierge-send" type="submit" aria-label="Send">↗</button></form>
       <p class="concierge-disclaimer">Please don’t send ID documents, employer details or other sensitive screening information here. Use Rebecca’s official channels for screening.</p>
@@ -36,8 +36,36 @@
   document.querySelectorAll('[data-open-concierge]').forEach(b=>b.addEventListener('click',()=>setConcierge(true)));
   document.querySelector('[data-close-concierge]')?.addEventListener('click',()=>setConcierge(false));
   panel?.addEventListener('keydown',(event)=>{if(event.key!=='Tab')return;const focusable=[...panel.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')];if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}});
-  const addMessage=(role,text,extra='')=>{if(!thread)return null;const el=document.createElement('div');el.className=`chat-message ${role} ${extra}`.trim();el.innerHTML=escapeHtml(text).replace(/\n/g,'<br>');thread.appendChild(el);thread.scrollTop=thread.scrollHeight;return el};
-  async function askConcierge(message){const q=message.trim();if(!q)return;addMessage('user',q);const pending=addMessage('assistant','One moment…');if(input)input.disabled=true;if(send)send.disabled=true;try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q})});const data=await r.json();if(!r.ok)throw new Error(data?.error||'Concierge unavailable');pending?.remove();addMessage('assistant',data.answer);if(data.suggestion?.path){const link=document.createElement('a');link.className='chat-suggestion';link.href=data.suggestion.path;link.textContent=data.suggestion.label+' →';thread?.appendChild(link);if(thread)thread.scrollTop=thread.scrollHeight}}catch{pending?.remove();addMessage('assistant','I’m having trouble reaching the concierge service. You can still use the Rates, Travel, Etiquette and Contact pages, or message Rebecca through her official channels.','error')}finally{if(send)send.disabled=false;if(input){input.disabled=false;input.value='';input.focus()}}}
+  const chatHistory=[];
+  const formatChatText=(text='')=>{
+    const normalized=String(text)
+      .replace(/\\\r?\\n/g,'\n')
+      .replace(/\\([*_-])/g,'$1')
+      .replace(/\r\n/g,'\n')
+      .trim();
+    const safe=escapeHtml(normalized);
+    const lines=safe.split('\n');
+    const out=[];
+    let inList=false;
+    const closeList=()=>{if(inList){out.push('</ul>');inList=false;}};
+    for(const rawLine of lines){
+      const line=rawLine.trim();
+      if(!line){closeList();continue;}
+      const bullet=line.match(/^[-•]\s+(.*)$/);
+      if(bullet){
+        if(!inList){out.push('<ul>');inList=true;}
+        out.push('<li>'+bullet[1].replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')+'</li>');
+        continue;
+      }
+      closeList();
+      out.push('<p>'+line.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')+'</p>');
+    }
+    closeList();
+    return out.join('');
+  };
+  const addMessage=(role,text,extra='')=>{if(!thread)return null;const el=document.createElement('div');el.className=`chat-message ${role} ${extra}`.trim();el.innerHTML=formatChatText(text);thread.appendChild(el);thread.scrollTop=thread.scrollHeight;return el};
+  const remember=(role,content)=>{chatHistory.push({role,content:String(content).slice(0,800)});if(chatHistory.length>8)chatHistory.splice(0,chatHistory.length-8);};
+  async function askConcierge(message){const q=message.trim();if(!q)return;addMessage('user',q);remember('user',q);const pending=addMessage('assistant','Just a moment ✦','pending');if(input)input.disabled=true;if(send)send.disabled=true;try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q,history:chatHistory.slice(0,-1)})});const data=await r.json();if(!r.ok)throw new Error(data?.error||'Concierge unavailable');pending?.remove();addMessage('assistant',data.answer);remember('assistant',data.answer);if(data.suggestion?.path){const link=document.createElement('a');link.className='chat-suggestion';link.href=data.suggestion.path;link.textContent=data.suggestion.label+' →';thread?.appendChild(link);if(thread)thread.scrollTop=thread.scrollHeight}}catch{pending?.remove();const message='I’m having a little trouble right now. Try again in a moment, or use Rebecca’s official contact page.';addMessage('assistant',message,'error');remember('assistant',message)}finally{if(send)send.disabled=false;if(input){input.disabled=false;input.value='';input.focus()}}}
   form?.addEventListener('submit',e=>{e.preventDefault();if(input)askConcierge(input.value)});
   document.querySelectorAll('[data-chat-prompt]').forEach(b=>b.addEventListener('click',()=>askConcierge(b.getAttribute('data-chat-prompt')||'')));
 
