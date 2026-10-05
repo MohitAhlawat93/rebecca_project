@@ -70,3 +70,7 @@ npm run validate
 This checks JavaScript syntax, required canonical fields, RAG derivation, page bindings, the canonical concierge endpoint, and removal of legacy duplicate data files.
 
 If validation fails, fix the error before deploying.
+
+## Images
+
+Public facts remain in `data/rebecca-data.js`, but photography has its own delivery rules. See `IMAGE_PIPELINE.md` before replacing any image URL so responsive sizes and the homepage LCP priority remain intact.
