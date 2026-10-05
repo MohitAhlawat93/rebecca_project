@@ -363,31 +363,34 @@ export function formatSgd(amount) {
   return amount == null ? 'Bespoke' : `SGD ${Number(amount).toLocaleString('en-US')}`;
 }
 
-export function formatSingaporeRatesCompact() {
-  const rates = REBECCA_DATA.singapore.rates
-    .filter((rate) => rate.amount != null)
+export function formatSingaporeRatesCompact(data = REBECCA_DATA) {
+  const rates = data.singapore.rates
+    .filter((rate) => rate.visible !== false && rate.amount != null)
     .map((rate) => `${rate.short} ${formatSgd(rate.amount).replace('SGD ', '')}`)
     .join('; ');
-  return `Singapore: ${rates}. Longer dates are bespoke; extensions are SGD ${REBECCA_DATA.singapore.extensionPerHour.toLocaleString('en-US')}/hour.`;
+  return `Singapore: ${rates}. Longer dates are bespoke; extensions are SGD ${data.singapore.extensionPerHour.toLocaleString('en-US')}/hour.`;
 }
 
-export function formatTouringRates(name) {
-  const set = REBECCA_DATA.travel.touringRates[name];
+export function formatTouringRates(name, data = REBECCA_DATA) {
+  const set = data.travel.touringRates[name];
   if (!set) return '';
   const prefix = set.minimum ? `${set.minimum}. ` : '';
   const items = set.items.map(([duration, price]) => `${duration} ${price}`).join('; ');
   return `${prefix}${items}. Extensions: ${set.extension}.`;
 }
 
-export function formatFmtySummary() {
-  return REBECCA_DATA.travel.fmty.map((item) => `${item.label}: ${item.minimum}`).join('; ') + '.';
+export function formatFmtySummary(data = REBECCA_DATA) {
+  return data.travel.fmty.map((item) => `${item.label}: ${item.minimum}`).join('; ') + '.';
 }
 
-export function formatCalendarSummary() {
-  const windows = REBECCA_DATA.travel.calendar.map((item) => `${item.kicker.replace(' · ', ' ')} (${item.body})`).join(' Then ');
-  return `Upcoming public windows: ${windows} ${REBECCA_DATA.travel.northAmericaNotice}`;
+export function formatCalendarSummary(data = REBECCA_DATA) {
+  const windows = data.travel.calendar
+    .filter((item) => item.visible !== false)
+    .map((item) => `${item.kicker.replace(' · ', ' ')} (${item.body})`)
+    .join(' Then ');
+  return `Upcoming public windows: ${windows} ${data.travel.northAmericaNotice}`;
 }
 
-export function formatDepositSummary() {
-  return REBECCA_DATA.policies.deposits.map((item) => `${item.label} ${item.value}`).join('; ') + `.`;
+export function formatDepositSummary(data = REBECCA_DATA) {
+  return data.policies.deposits.map((item) => `${item.label} ${item.value}`).join('; ') + `.`;
 }
