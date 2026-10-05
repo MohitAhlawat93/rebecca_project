@@ -328,3 +328,32 @@ body.menu-open{overflow:hidden}
   .form-actions{display:grid;grid-template-columns:1fr}
   .form-actions .button{width:100%;margin:0}
 }
+
+
+/* Phase 4B — responsive QA */
+.page-hero h1{text-wrap:balance}
+.mobile-menu{max-height:calc(100dvh - 68px);overflow-y:auto;overscroll-behavior:contain}
+.concierge-thread{overscroll-behavior:contain}
+body.concierge-open{overflow:hidden}
+
+@media(max-width:640px){
+  .page-hero h1{font-size:clamp(48px,15vw,64px);line-height:.88}
+  .rate-card{min-height:180px;padding:24px}
+  .travel-meta{flex-direction:column;gap:8px}
+  .contact-channel{flex-direction:column;align-items:flex-start;gap:8px}
+  .contact-channel a{font-size:19px;overflow-wrap:anywhere}
+  .field input,.field select,.field textarea,.concierge-form input{font-size:16px}
+  .field input,.field select,.concierge-form input{min-height:50px}
+  .concierge-launcher{right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom))}
+  .concierge-panel{
+    inset:max(7px,env(safe-area-inset-top)) max(7px,env(safe-area-inset-right)) max(7px,env(safe-area-inset-bottom)) max(7px,env(safe-area-inset-left));
+    width:auto;height:auto;right:auto;bottom:auto
+  }
+  .concierge-chip,.concierge-disclaimer,.page-editorial-note span{font-size:10px}
+  .concierge-close,.concierge-send{min-width:44px;min-height:44px}
+}
+
+@media(max-width:420px){
+  .gallery-page-grid{grid-template-columns:1fr;grid-auto-rows:auto}
+  .gallery-page-grid figure:nth-child(n){grid-column:auto;grid-row:auto;aspect-ratio:4/5}
+}
