@@ -11,6 +11,36 @@ const setText=(selector,value)=>{
   document.querySelectorAll(selector).forEach((el)=>{el.textContent=value;});
 };
 
+async function hydrateRuntimeData(){
+  try{
+    const response=await fetch('/api/public-content',{
+      method:'GET',
+      headers:{Accept:'application/json'},
+      cache:'no-store'
+    });
+    if(!response.ok) return;
+    const payload=await response.json();
+    if(!payload?.data||typeof payload.data!=='object') return;
+    Object.entries(payload.data).forEach(([key,value])=>{REBECCA_DATA[key]=value;});
+  }catch{
+    // Canonical bundled data remains the safe fallback.
+  }
+}
+
+function renderAvailability(){
+  const availability=REBECCA_DATA.availability||{
+    status:'accepting',
+    label:'Accepting enquiries',
+    message:'Currently accepting enquiries.'
+  };
+
+  document.querySelectorAll('[data-availability-status]').forEach((el)=>{
+    el.dataset.status=availability.status||'accepting';
+    el.innerHTML=`<span class="availability-dot" aria-hidden="true"></span><span>${esc(availability.label||'Availability')}</span>`;
+    el.setAttribute('title',availability.message||availability.label||'Availability');
+  });
+}
+
 function renderProfile(){
   const p=REBECCA_DATA.profile;
   setText('[data-profile-established]',p.establishedSince);
@@ -49,7 +79,7 @@ function renderSingapore(){
   const sg=REBECCA_DATA.singapore;
 
   document.querySelectorAll('[data-singapore-rates]').forEach((el)=>{
-    el.innerHTML=sg.rates.map((rate)=>`
+    el.innerHTML=sg.rates.filter((rate)=>rate.visible!==false).map((rate)=>`
       <article class="rate-card${rate.featured?' featured':''}">
         <small>${esc(rate.category)}</small>
         <div>
@@ -81,7 +111,7 @@ function renderTravel(){
   const travel=REBECCA_DATA.travel;
 
   document.querySelectorAll('[data-travel-calendar]').forEach((el)=>{
-    const cards=travel.calendar.map((item)=>`
+    const cards=travel.calendar.filter((item)=>item.visible!==false).map((item)=>`
       <article class="travel-card${item.alt?' alt':''}">
         <div>
           <p class="page-kicker" style="color:${item.alt?'#d7ddd2':'#aeb8a7'}">${esc(item.kicker)}</p>
@@ -214,11 +244,11 @@ function renderContact(){
       <div class="contact-channel"><span>Telegram</span><a href="${esc(contact.telegramUrl)}" target="_blank" rel="noreferrer">${esc(contact.telegramHandle)} ↗</a></div>
       <div class="contact-channel"><span>Email</span><a href="mailto:${esc(contact.email)}">${esc(contact.email)}</a></div>
       <div class="contact-channel"><span>Telegram channel</span><a href="${esc(contact.telegramChannelUrl)}" target="_blank" rel="noreferrer">${esc(contact.telegramChannelLabel)} ↗</a></div>
-      <div class="notice" style="margin-top:30px">These are my only official contact routes. Live availability is confirmed by me, not the concierge.</div>`;
+      <div class="notice" style="margin-top:30px"><strong>${esc(REBECCA_DATA.availability?.label||'Availability')}</strong><br>${esc(REBECCA_DATA.availability?.message||'Live availability is confirmed by Rebecca.')}<br><br>These are my only official contact routes. Final live availability is confirmed by me, not the concierge.</div>`;
   });
 
   document.querySelectorAll('[data-duration-options]').forEach((select)=>{
-    const options=REBECCA_DATA.singapore.rates.map((rate)=>`<option>${esc(rate.label.replace('Up to ',''))}</option>`).join('');
+    const options=REBECCA_DATA.singapore.rates.filter((rate)=>rate.visible!==false).map((rate)=>`<option>${esc(rate.label.replace('Up to ',''))}</option>`).join('');
     select.innerHTML='<option value="">Choose</option>'+options;
   });
 
@@ -230,6 +260,8 @@ function renderContact(){
   document.querySelectorAll('[data-telegram-link]').forEach((link)=>{link.href=contact.telegramUrl;});
 }
 
+await hydrateRuntimeData();
+
 renderProfile();
 renderPersonality();
 renderReputation();
@@ -238,6 +270,7 @@ renderSingapore();
 renderTravel();
 renderPolicies();
 renderContact();
+renderAvailability();
 
 window.__REBECCA_DATA__=REBECCA_DATA;
 document.documentElement.dataset.rebeccaDataVersion=REBECCA_DATA.meta.dataVersion;
