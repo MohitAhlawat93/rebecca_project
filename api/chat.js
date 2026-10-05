@@ -54,6 +54,9 @@ function isPromptInjection(message = '') {
 
 function policyAnswerFor(message = '') {
   const q = message.toLowerCase();
+  if (/\b(?:i'?m|i am|age(?:d)?|turning)\s*(?:1[0-7]|[0-9])\b|\bminor\b|under\s*18|underage/.test(q)) {
+    return 'Rebecca’s website and booking enquiries are for adults aged 18+ only. I can’t assist a minor with booking or adult-service questions.';
+  }
   if (/discount|cheaper|negotiate|bargain|special price|lower (the )?(rate|price)|make .* cheaper/.test(q)) {
     return 'Rebecca’s published rates are fixed and I won’t invent a discount. If the listed structure works for you, the next step is a complete enquiry.';
   }
