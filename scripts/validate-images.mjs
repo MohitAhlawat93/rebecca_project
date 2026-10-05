@@ -64,8 +64,8 @@ if (professional.length !== 67) fail(`professional archive expected 67 responsiv
 if (candid.length !== 44) fail(`candid archive expected 44 responsive images, found ${candid.length}`);
 if (heroCount !== 1) fail(`expected exactly one LCP hero image, found ${heroCount}`);
 if (highPriorityCount !== 1) fail(`expected exactly one high-priority image, found ${highPriorityCount}`);
-if (totalImages !== 126) fail(`expected 126 public page images, found ${totalImages}`);
+if (totalImages !== 132) fail(`expected 132 rendered public image elements, found ${totalImages}`);
 
 if (!process.exitCode) {
-  console.log(`Rebecca image validation passed: ${totalImages} responsive images, 1 prioritized hero, 111 archive images.`);
+  console.log(`Rebecca image validation passed: ${totalImages} responsive image elements, 1 prioritized hero, 111 archive images.`);
 }
