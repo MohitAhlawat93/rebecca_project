@@ -171,7 +171,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch('https://api.x.ai/v1/chat/completions', {
+    const response = await fetch('https://api.x.ai/v1/responses', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.XAI_API_KEY}`,
@@ -180,9 +180,11 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: process.env.XAI_MODEL || 'grok-4.3',
-        reasoning_effort: 'none',
-        max_tokens: 240,
-        messages: [
+        reasoning: { effort: 'none' },
+        max_output_tokens: 240,
+        store: false,
+        include: ['no_inline_citations'],
+        input: [
           { role: 'system', content: SYSTEM },
           {
             role: 'user',
@@ -194,7 +196,15 @@ export default async function handler(req, res) {
 
     if (!response.ok) throw new Error(`xAI request failed: ${response.status}`);
     const data = await response.json();
-    const answer = data?.choices?.[0]?.message?.content?.trim();
+    const answer = Array.isArray(data?.output)
+      ? data.output
+          .filter((item) => item?.type === 'message')
+          .flatMap((item) => Array.isArray(item.content) ? item.content : [])
+          .filter((item) => item?.type === 'output_text' && typeof item.text === 'string')
+          .map((item) => item.text)
+          .join('\n')
+          .trim()
+      : '';
     if (!answer) throw new Error('Empty Grok response');
 
     return res.status(200).json({
