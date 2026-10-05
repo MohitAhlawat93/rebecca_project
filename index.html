@@ -27,14 +27,24 @@
     </a>
 
     <nav class="desktop-nav" aria-label="Primary navigation">
-      <a href="#story">Story</a>
-      <a href="#glance">At a glance</a>
-      <a href="#gallery">Gallery</a>
-      <a href="#reviews">Reviews</a>
+      <a href="/about">About</a>
+      <a href="/rates">Rates</a>
+      <a href="/travel">Travel</a>
+      <a href="/gallery">Gallery</a>
+      <a href="/etiquette">Etiquette</a>
     </nav>
 
-    <a class="header-cta" href="#contact">Let’s meet <span aria-hidden="true">↗</span></a>
+    <div class="header-actions">
+      <a class="header-cta" href="/contact">Let’s meet <span aria-hidden="true">↗</span></a>
+      <button class="menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-menu">Menu</button>
+    </div>
   </header>
+  <div class="mobile-menu" id="mobile-menu" data-mobile-menu hidden>
+    <nav aria-label="Mobile navigation">
+      <a href="/about">About</a><a href="/rates">Rates</a><a href="/travel">Travel</a><a href="/date-ideas">Date ideas</a>
+      <a href="/gallery">Gallery</a><a href="/etiquette">Etiquette</a><a href="/reviews">Reviews</a><a href="/contact">Contact</a>
+    </nav>
+  </div>
 
   <main id="main">
     <section class="hero" id="top" aria-labelledby="hero-title">
@@ -45,7 +55,7 @@
           Beautiful, cultured and unconventional. Equal parts polished and playful, Rebecca creates the kind of company that feels effortless in the moment—and lingers long after it ends.
         </p>
         <div class="hero-actions">
-          <a class="button button-dark" href="#story">Meet Rebecca</a>
+          <a class="button button-dark" href="/about">Meet Rebecca</a>
           <button class="text-button" type="button" data-open-concierge aria-haspopup="dialog">
             Ask the concierge <span aria-hidden="true">✦</span>
           </button>
@@ -148,7 +158,7 @@
           <img src="https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/309ccac6-1cbe-4065-bc1e-0d139478d446/processed__DSC7889.jpeg" alt="Rebecca editorial photograph" loading="lazy" />
         </figure>
       </div>
-      <a class="button button-outline" href="https://www.risquerebecca.com/professional" target="_blank" rel="noreferrer">View current gallery <span aria-hidden="true">↗</span></a>
+      <a class="button button-outline" href="/gallery">Explore the gallery <span aria-hidden="true">→</span></a>
     </section>
 
     <section class="reviews section-pad" id="reviews">
@@ -180,12 +190,12 @@
           <div class="section-label"><span>05</span> A quieter kind of AI</div>
           <h2 id="concierge-title">Need the practical answer<br />before the personal one?</h2>
           <p>
-            Rebecca’s concierge will eventually answer questions about her profile, etiquette, travel calendar, rates and enquiry process—without turning the whole website into a chatbot.
+            Rebecca’s concierge can answer questions about her public profile, etiquette, travel, rates and enquiry process—without turning the whole website into a chatbot.
           </p>
-          <button class="button button-light" type="button" data-open-concierge>Preview concierge</button>
+          <button class="button button-light" type="button" data-open-concierge>Ask Rebecca’s concierge</button>
         </div>
         <div class="concierge-mock" aria-label="Concierge interface preview">
-          <div class="concierge-topline"><span class="concierge-dot"></span><span>Rebecca’s Concierge</span><span>Phase II</span></div>
+          <div class="concierge-topline"><span class="concierge-dot"></span><span>Rebecca’s Concierge</span><span>Online</span></div>
           <div class="concierge-message">
             <span class="mini-mark">✦</span>
             <p>Good evening. I can help with Rebecca’s profile, travel, etiquette and the best way to introduce yourself.</p>
@@ -209,7 +219,7 @@
         <h2>Nothing risqué,<br />nothing gained.</h2>
         <p>A thoughtful introduction goes further than a long one. Use one of Rebecca’s verified contact channels and include the details requested in her enquiry guidance.</p>
         <div class="contact-actions">
-          <a class="button button-dark" href="mailto:risquerebeccaxo@protonmail.com">Write to Rebecca</a>
+          <a class="button button-dark" href="/contact">Start an enquiry</a>
           <a class="inline-link" href="https://wa.me/6585282912" target="_blank" rel="noreferrer">WhatsApp <span aria-hidden="true">↗</span></a>
           <a class="inline-link" href="https://t.me/forkmerebecca" target="_blank" rel="noreferrer">Telegram <span aria-hidden="true">↗</span></a>
         </div>
@@ -221,21 +231,11 @@
   <footer class="site-footer">
     <div class="footer-brand"><span aria-hidden="true">❀</span><strong>Risqué Rebecca</strong></div>
     <div class="footer-links">
-      <a href="#story">Introduction</a><a href="#glance">Profile</a><a href="#gallery">Gallery</a><a href="#reviews">Reviews</a>
+      <a href="/about">About</a><a href="/rates">Rates</a><a href="/travel">Travel</a><a href="/gallery">Gallery</a><a href="/reviews">Reviews</a><a href="/contact">Contact</a>
     </div>
     <div class="footer-meta"><span>© 2026 Risqué Rebecca</span><span>Made with discretion.</span></div>
   </footer>
 
-  <dialog class="concierge-dialog" data-concierge-dialog aria-labelledby="dialog-title">
-    <button class="dialog-close" type="button" data-close-concierge aria-label="Close concierge">×</button>
-    <div class="dialog-mark" aria-hidden="true">✦</div>
-    <p class="eyebrow">Rebecca’s concierge</p>
-    <h2 id="dialog-title">Coming in the next phase.</h2>
-    <p>
-      The homepage already reserves the right amount of space for AI. Next we can connect this interface to Rebecca’s approved knowledge base, with clear boundaries and human handoff for enquiries.
-    </p>
-    <button class="button button-dark" type="button" data-close-concierge>Back to Rebecca</button>
-  </dialog>
 
   <script src="/script.js" defer></script>
 </body>
