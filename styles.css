@@ -335,6 +335,7 @@ body.menu-open{overflow:hidden}
 .mobile-menu{max-height:calc(100dvh - 68px);overflow-y:auto;overscroll-behavior:contain}
 .concierge-thread{overscroll-behavior:contain}
 body.concierge-open{overflow:hidden}
+body.concierge-open::before{content:"";position:fixed;inset:0;z-index:75;background:rgba(25,25,24,.22);backdrop-filter:blur(2px)}
 
 @media(max-width:640px){
   .page-hero h1{font-size:clamp(48px,15vw,64px);line-height:.88}
