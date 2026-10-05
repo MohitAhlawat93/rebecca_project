@@ -1,0 +1,9 @@
+{
+  "name": "Risqué Rebecca",
+  "short_name": "Rebecca",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5efe7",
+  "theme_color": "#4e2d31",
+  "icons": []
+}
