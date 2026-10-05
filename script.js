@@ -21,6 +21,14 @@
   document.querySelector('[data-review-next]')?.addEventListener('click',()=>showReview(current+1)); showReview(0);
 
   const escapeHtml=(text)=>{const d=document.createElement('div');d.textContent=text;return d.innerHTML};
+  const conciergePageConfig={
+    '/rates':{intro:'Tell me the city and duration you have in mind.',prompts:[['Choose a duration','Help me choose a duration for a first meeting.'],['Couples','What are the published terms for couples?'],['Singapore rates',"What are Rebecca's Singapore rates?"]]},
+    '/travel':{intro:'Tell me your city and approximate dates. I’ll match the public travel guidance.',prompts:[['Plan my city','I want Rebecca to visit my city. What details do you need?'],['India','What are Rebecca’s India rates?'],['FMTY','Explain Rebecca’s fly-me-to-you minimums.']]},
+    '/date-ideas':{intro:'Tell me the mood you want and I’ll use Rebecca’s public preferences.',prompts:[['Food-focused','Suggest a food-focused date using Rebecca’s public preferences.'],['Relaxed','Suggest a relaxed date using Rebecca’s public preferences.'],['Playful','Suggest a playful date using Rebecca’s public preferences.']]},
+    '/etiquette':{intro:'I can make the practical rules easier to understand.',prompts:[['Screening','Explain screening simply.'],['Deposits','Explain Rebecca’s deposits.'],['Cancellations','Explain Rebecca’s cancellation policy.']]},
+    '/contact':{intro:'I can help turn your details into a complete enquiry.',prompts:[['Draft enquiry','Help me draft a complete enquiry.'],['What to include','What should I include in my enquiry?'],['Screening','How does screening work?']]}
+  };
+  const conciergeConfig=conciergePageConfig[currentPath]||{intro:'Ask me about Rebecca’s public rates, travel, etiquette or how to enquire.',prompts:[['Singapore rates',"What are Rebecca's Singapore rates?"],['Screening','How does screening work?'],['Travel','Can Rebecca travel to me?']]};
   document.body.insertAdjacentHTML('beforeend',`
     <button class="concierge-launcher" type="button" data-open-concierge aria-label="Open Rebecca's concierge" aria-expanded="false" aria-controls="rebecca-concierge"><span class="spark" aria-hidden="true">✦</span><span>Ask the concierge</span></button>
     <aside class="concierge-panel" id="rebecca-concierge" data-concierge-panel hidden role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="rebecca-concierge-title">
