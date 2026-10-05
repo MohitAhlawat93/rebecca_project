@@ -463,4 +463,10 @@ saveButton?.addEventListener('click', async () => {
   }
 });
 
+window.addEventListener('beforeunload', (event) => {
+  if (!dirty) return;
+  event.preventDefault();
+  event.returnValue = '';
+});
+
 loadSession();
