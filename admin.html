@@ -16,7 +16,7 @@
       <div class="rc-mark" aria-hidden="true">R</div>
       <p class="rc-eyebrow">Private owner access</p>
       <h1>Rebecca Control</h1>
-      <p class="rc-intro">A quiet place to manage the website and concierge. RC-01 establishes secure owner access before editing tools are switched on.</p>
+      <p class="rc-intro">Manage the things that change most often without touching code, GitHub or Vercel.</p>
 
       <form class="rc-login-form" data-login-form>
         <label>
@@ -38,7 +38,7 @@
     <section class="rc-app" data-app-view hidden>
       <header class="rc-topbar">
         <div>
-          <p class="rc-eyebrow">Rebecca Control</p>
+          <p class="rc-eyebrow">Rebecca Control · RC-02</p>
           <h1>Good to see you, Rebecca.</h1>
         </div>
         <div class="rc-top-actions">
@@ -47,76 +47,138 @@
         </div>
       </header>
 
+      <div class="rc-store-banner" data-store-banner hidden>
+        <strong>Quick Control storage is not connected yet.</strong>
+        <span>The editor is visible, but Save & Apply stays disabled so no change can be lost or accidentally published.</span>
+      </div>
+
       <div class="rc-status-strip">
         <div>
           <span class="rc-status-dot"></span>
-          <strong>Foundation active</strong>
-          <small>Owner-only session</small>
+          <strong data-control-status>Quick Control</strong>
+          <small>Private owner session</small>
         </div>
         <div>
-          <strong data-data-version>—</strong>
-          <small>Canonical data version</small>
+          <strong data-availability-summary>—</strong>
+          <small>Public availability</small>
         </div>
         <div>
-          <strong data-last-verified>—</strong>
-          <small>Last verified</small>
+          <strong data-last-saved>Not saved here yet</strong>
+          <small>Last Quick Control update</small>
         </div>
       </div>
 
-      <section class="rc-section">
+      <section class="rc-section rc-editor">
         <div class="rc-section-heading">
           <div>
-            <p class="rc-eyebrow">Quick control</p>
-            <h2>The everyday things will live here.</h2>
+            <p class="rc-eyebrow">Quick Control</p>
+            <h2>Change what matters today.</h2>
           </div>
-          <span class="rc-phase-pill">RC-02 next</span>
+          <span class="rc-phase-pill" data-store-mode>Loading…</span>
         </div>
 
-        <div class="rc-quick-grid">
-          <article class="rc-action-card">
-            <span class="rc-card-kicker">Availability</span>
-            <h3>Change public status</h3>
-            <p>Available, limited, travelling or away — one change will later update the site and concierge together.</p>
-            <span class="rc-coming">Coming in RC-02</span>
-          </article>
-          <article class="rc-action-card">
-            <span class="rc-card-kicker">Travel</span>
-            <h3>Add or change a trip</h3>
-            <p><strong data-travel-count>—</strong> public travel windows currently come from Rebecca’s single source of truth.</p>
-            <span class="rc-coming">Coming in RC-02</span>
-          </article>
-          <article class="rc-action-card">
-            <span class="rc-card-kicker">Rates</span>
-            <h3>Update consideration</h3>
-            <p><strong data-rate-count>—</strong> Singapore rate entries are currently connected to the canonical data.</p>
-            <span class="rc-coming">Coming in RC-02</span>
-          </article>
-          <article class="rc-action-card">
-            <span class="rc-card-kicker">Photos</span>
-            <h3>Manage the gallery</h3>
-            <p>Mobile-first upload, reorder and hero selection will sit behind this same owner login.</p>
-            <span class="rc-coming">Coming in RC-04</span>
-          </article>
-        </div>
+        <nav class="rc-tabs" aria-label="Rebecca Control sections">
+          <button type="button" class="is-active" data-tab="availability">Availability</button>
+          <button type="button" data-tab="travel">Travel</button>
+          <button type="button" data-tab="rates">Rates</button>
+          <button type="button" data-tab="contact">Contact</button>
+          <button type="button" data-tab="profile">Profile</button>
+        </nav>
+
+        <section class="rc-panel is-active" data-panel="availability">
+          <div class="rc-panel-intro">
+            <p class="rc-eyebrow">Availability</p>
+            <h3>One status for the whole experience.</h3>
+            <p>This will be the status used by the website and concierge together.</p>
+          </div>
+
+          <div class="rc-status-choices" data-availability-choices>
+            <button type="button" data-status="accepting"><strong>Accepting enquiries</strong><span>Normal public state</span></button>
+            <button type="button" data-status="limited"><strong>Limited availability</strong><span>Use when dates are tight</span></button>
+            <button type="button" data-status="travelling"><strong>Travelling</strong><span>Useful during a tour</span></button>
+            <button type="button" data-status="away"><strong>Temporarily away</strong><span>Pause expectations politely</span></button>
+            <button type="button" data-status="unavailable"><strong>Not accepting enquiries</strong><span>Close enquiries clearly</span></button>
+          </div>
+
+          <div class="rc-form-grid">
+            <label class="rc-field rc-field-wide">
+              <span>Message visitors see</span>
+              <input type="text" data-availability-message maxlength="280">
+            </label>
+            <label class="rc-field">
+              <span>Until <small>optional</small></span>
+              <input type="date" data-availability-until>
+            </label>
+          </div>
+        </section>
+
+        <section class="rc-panel" data-panel="travel" hidden>
+          <div class="rc-panel-intro rc-panel-intro-row">
+            <div>
+              <p class="rc-eyebrow">Travel</p>
+              <h3>Upcoming public windows.</h3>
+              <p>Add, edit, hide or remove a trip. Exact private locations do not belong here.</p>
+            </div>
+            <button type="button" class="rc-secondary" data-add-trip>+ Add trip</button>
+          </div>
+          <div class="rc-stack" data-travel-list></div>
+        </section>
+
+        <section class="rc-panel" data-panel="rates" hidden>
+          <div class="rc-panel-intro">
+            <p class="rc-eyebrow">Singapore rates</p>
+            <h3>Simple structured pricing.</h3>
+            <p>Change a number once. The website and concierge will use the same value.</p>
+          </div>
+          <div class="rc-stack" data-rates-list></div>
+        </section>
+
+        <section class="rc-panel" data-panel="contact" hidden>
+          <div class="rc-panel-intro">
+            <p class="rc-eyebrow">Contact</p>
+            <h3>Official ways to reach you.</h3>
+            <p>Only public contact routes belong here. Never put private screening documents or credentials in these fields.</p>
+          </div>
+          <div class="rc-form-grid" data-contact-form>
+            <label class="rc-field"><span>Phone display</span><input data-contact="phoneDisplay"></label>
+            <label class="rc-field"><span>WhatsApp URL</span><input data-contact="whatsappUrl" inputmode="url"></label>
+            <label class="rc-field"><span>Telegram handle</span><input data-contact="telegramHandle"></label>
+            <label class="rc-field"><span>Telegram URL</span><input data-contact="telegramUrl" inputmode="url"></label>
+            <label class="rc-field"><span>Email</span><input data-contact="email" inputmode="email"></label>
+            <label class="rc-field"><span>Channel name</span><input data-contact="telegramChannelLabel"></label>
+            <label class="rc-field rc-field-wide"><span>Channel URL</span><input data-contact="telegramChannelUrl" inputmode="url"></label>
+          </div>
+        </section>
+
+        <section class="rc-panel" data-panel="profile" hidden>
+          <div class="rc-panel-intro">
+            <p class="rc-eyebrow">Profile</p>
+            <h3>The facts most likely to change.</h3>
+            <p>These fields update the repeated profile facts automatically, so you do not edit the same detail in multiple places.</p>
+          </div>
+          <div class="rc-form-grid" data-profile-form>
+            <label class="rc-field"><span>Display name</span><input data-profile="displayName"></label>
+            <label class="rc-field"><span>Base</span><input data-profile="base"></label>
+            <label class="rc-field"><span>Secondary base</span><input data-profile="secondaryBase"></label>
+            <label class="rc-field"><span>Age display</span><input data-profile="age"></label>
+            <label class="rc-field"><span>Height metric</span><input data-profile="heightMetric"></label>
+            <label class="rc-field"><span>Height imperial</span><input data-profile="heightImperial"></label>
+            <label class="rc-field"><span>Heritage</span><input data-profile="heritage"></label>
+            <label class="rc-field"><span>Languages <small>comma separated</small></span><input data-profile="languages"></label>
+          </div>
+        </section>
       </section>
 
-      <section class="rc-section rc-foundation">
-        <div class="rc-section-heading">
-          <div>
-            <p class="rc-eyebrow">RC-01</p>
-            <h2>What is protected now</h2>
-          </div>
+      <div class="rc-savebar" data-savebar>
+        <div>
+          <strong data-save-state>No changes</strong>
+          <span data-save-detail>Quick Control is ready.</span>
         </div>
-        <div class="rc-foundation-grid">
-          <div><span>01</span><strong>Private owner route</strong><p>/admin is intentionally absent from public navigation and search indexing.</p></div>
-          <div><span>02</span><strong>Server-side authentication</strong><p>The password is never embedded in public HTML or JavaScript.</p></div>
-          <div><span>03</span><strong>Signed owner session</strong><p>Short-lived HttpOnly cookies keep the browser session separate from public content.</p></div>
-          <div><span>04</span><strong>Single-source proof</strong><p>This dashboard reads the same Rebecca data used by the public website and concierge.</p></div>
-        </div>
-      </section>
+        <button type="button" class="rc-primary" data-save disabled>Save & apply</button>
+      </div>
 
       <footer class="rc-footer">
-        <span>Rebecca Control · RC-01</span>
+        <span>Rebecca Control · RC-02</span>
         <span>Owner access only</span>
       </footer>
     </section>
