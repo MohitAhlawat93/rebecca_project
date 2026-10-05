@@ -9,7 +9,7 @@
   "scripts": {
     "validate:data": "node scripts/validate-data.mjs",
     "validate:admin": "node scripts/validate-admin-auth.mjs",
-    "validate:syntax": "node --check data/rebecca-data.js && node --check lib/rebecca-knowledge.js && node --check lib/admin-auth.js && node --check api/concierge.js && node --check api/admin/login.js && node --check api/admin/session.js && node --check api/admin/logout.js && node --check content.js && node --check script.js && node --check admin.js",
+    "validate:syntax": "node --check data/rebecca-data.js && node --check lib/rebecca-knowledge.js && node --check lib/admin-auth.js && node --check lib/admin-store.js && node --check api/concierge.js && node --check api/admin/login.js && node --check api/admin/session.js && node --check api/admin/logout.js && node --check content.js && node --check script.js && node --check admin.js",
     "validate": "npm run validate:syntax && npm run validate:data && npm run validate:admin"
   }
 }
