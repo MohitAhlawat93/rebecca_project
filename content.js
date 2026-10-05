@@ -45,6 +45,7 @@ function renderProfile(){
   const p=REBECCA_DATA.profile;
   setText('[data-profile-established]',p.establishedSince);
   setText('[data-profile-countries]',p.countriesVisited);
+  setText('[data-profile-base-eyebrow]',`${p.base}-based + globally chased professional sweetheart`);
 
   document.querySelectorAll('[data-profile-hero-meta]').forEach((el)=>{
     el.innerHTML=[
