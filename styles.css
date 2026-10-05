@@ -284,3 +284,47 @@ button { font: inherit; }
 
 .chat-suggestion{align-self:flex-start;margin-top:-5px;margin-left:4px;padding:8px 11px;border:1px solid var(--line);border-radius:999px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.45)}
 .chat-suggestion:hover{background:var(--ink);color:var(--white)}
+
+/* Phase 3 production polish */
+.desktop-nav a[aria-current="page"]{color:var(--wine)}
+.desktop-nav a[aria-current="page"]::after{right:0}
+.mobile-menu a[aria-current="page"]{color:var(--wine);font-style:italic}
+body.menu-open{overflow:hidden}
+
+.page-editorial-media{max-width:var(--max);margin:0 auto;padding:0 var(--pad) clamp(74px,9vw,130px);display:grid;grid-template-columns:minmax(0,1.38fr) minmax(260px,.62fr);gap:14px;align-items:stretch}
+.page-editorial-shot{margin:0;min-height:clamp(420px,57vw,780px);overflow:hidden;background:#d8cec1}
+.page-editorial-shot img{width:100%;height:100%;object-fit:cover;object-position:center 30%;transition:transform .8s cubic-bezier(.2,.65,.25,1)}
+.page-editorial-shot:hover img{transform:scale(1.018)}
+.page-editorial-note{background:var(--wine);color:var(--white);padding:clamp(30px,4vw,58px);display:flex;flex-direction:column;justify-content:flex-end;min-height:360px}
+.page-editorial-note span{font-size:9px;line-height:1.5;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,250,244,.6)}
+.page-editorial-note p{margin:24px 0 0;font-family:var(--serif);font-size:clamp(29px,3vw,46px);line-height:1.08;letter-spacing:-.025em}
+
+.page-section>.page-kicker:first-child{margin-bottom:36px}
+.rate-grid,.fact-grid,.idea-grid,.review-list{box-shadow:0 18px 55px rgba(61,42,36,.035)}
+.rate-card,.fact-card,.idea-card,.review-item{transition:transform .22s ease,background .22s ease,box-shadow .22s ease}
+.rate-card:hover,.fact-card:hover,.idea-card:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(49,32,28,.055)}
+.rate-card.featured:hover{box-shadow:0 18px 50px rgba(55,26,31,.18)}
+.contact-channel a,.inline-link{transition:opacity .2s ease}
+.contact-channel a:hover,.inline-link:hover{opacity:.62}
+
+.enquiry-form input:focus,.enquiry-form select:focus,.enquiry-form textarea:focus,.concierge-form input:focus{outline:2px solid var(--wine);outline-offset:1px;border-color:transparent}
+.field .required-mark{color:var(--wine);font-size:10px}
+.form-actions .button{min-width:150px}
+.concierge-panel{border-radius:18px;overflow:hidden}
+.concierge-launcher{transition:transform .2s ease,box-shadow .2s ease}
+.concierge-launcher:hover{transform:translateY(-2px);box-shadow:0 16px 42px rgba(0,0,0,.26)}
+.concierge-send:disabled,.concierge-form input:disabled{opacity:.55;cursor:not-allowed}
+
+@media(max-width:980px){
+  .page-editorial-media{grid-template-columns:1fr .54fr}
+  .page-editorial-shot{min-height:620px}
+}
+@media(max-width:700px){
+  .page-editorial-media{grid-template-columns:1fr;padding-left:var(--pad);padding-right:var(--pad);gap:0}
+  .page-editorial-shot{min-height:500px}
+  .page-editorial-note{min-height:auto;padding:30px 24px}
+  .page-editorial-note p{font-size:31px}
+  .page-section{padding-top:78px;padding-bottom:78px}
+  .form-actions{display:grid;grid-template-columns:1fr}
+  .form-actions .button{width:100%;margin:0}
+}
