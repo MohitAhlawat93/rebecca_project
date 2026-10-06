@@ -7,11 +7,29 @@ const saveButton = document.querySelector('[data-save]');
 const saveState = document.querySelector('[data-save-state]');
 const saveDetail = document.querySelector('[data-save-detail]');
 const storeBanner = document.querySelector('[data-store-banner]');
+const quickSavebar = document.querySelector('[data-quick-savebar]');
+const mediaSaveButton = document.querySelector('[data-media-save-draft]');
+const mediaPublishButton = document.querySelector('[data-media-publish]');
+const mediaPreviewButton = document.querySelector('[data-media-preview]');
+const mediaPlacementSelect = document.querySelector('[data-media-placement]');
+const mediaFileInput = document.querySelector('[data-media-file]');
+const mediaChoosePhoto = document.querySelector('[data-media-choose-photo]');
+const mediaUploadButton = document.querySelector('[data-media-upload-button]');
+const mediaUploadStatus = document.querySelector('[data-media-upload-status]');
 
 let quickState = null;
 let persistentStore = false;
 let dirty = false;
 let activeTab = 'availability';
+let mediaState = null;
+let mediaPublished = null;
+let mediaPlacements = [];
+let mediaHistory = [];
+let mediaPersistent = false;
+let mediaDirty = false;
+let mediaDraftAhead = false;
+let mediaLoaded = false;
+let activeMediaPlacement = 'hero';
 
 const STATUS_LABELS = {
   accepting: 'Accepting enquiries',
@@ -89,6 +107,8 @@ function activateTab(name) {
     panel.hidden = !selected;
     panel.classList.toggle('is-active', selected);
   });
+  if (quickSavebar) quickSavebar.hidden = name === 'media';
+  if (name === 'media' && !mediaLoaded) loadMedia();
 }
 
 function renderAvailability() {
@@ -250,6 +270,311 @@ function collectState() {
   };
 }
 
+
+function mediaPlacement() {
+  return mediaPlacements.find((item) => item.key === activeMediaPlacement)
+    || mediaPlacements[0]
+    || { key: 'hero', label: 'Homepage rotation', max: 6 };
+}
+
+function mediaById(id) {
+  return mediaState?.library?.find((item) => item.id === id) || null;
+}
+
+function mediaPreviewPath() {
+  const paths = {
+    hero: '/',
+    aboutFeature: '/about',
+    about: '/about',
+    reviews: '/reviews',
+    travel: '/travel',
+    favouritesHero: '/favourites',
+    favourites: '/favourites',
+    journal: '/journal',
+    press: '/press',
+    galleryProfessional: '/gallery',
+    galleryCandid: '/gallery',
+    dateIdeas: '/date-ideas',
+    etiquette: '/etiquette'
+  };
+  return paths[activeMediaPlacement] || '/';
+}
+
+function setMediaDirty(value = true) {
+  mediaDirty = value;
+  const canSave = mediaPersistent && mediaDirty;
+  if (mediaSaveButton) mediaSaveButton.disabled = !canSave;
+  if (mediaPublishButton) mediaPublishButton.disabled = !mediaPersistent || !(mediaDirty || mediaDraftAhead);
+  renderMediaStatus();
+}
+
+function renderMediaStatus(meta = {}) {
+  setText('[data-media-connection]', mediaPersistent ? 'Connected' : 'Unavailable');
+  setText('[data-media-live-version]', mediaPersistent ? ('v' + (meta.publishedVersion ?? window.__rcMediaPublishedVersion ?? 0)) : 'Fallback');
+  setText('[data-media-published-at]', friendlyDate(meta.publishedAt ?? window.__rcMediaPublishedAt));
+  setText('[data-media-library-count]', mediaState?.library?.length ?? 0);
+
+  const draftLabel = mediaDirty
+    ? 'Unsaved changes'
+    : mediaDraftAhead
+      ? 'Saved draft'
+      : 'Matches live';
+  setText('[data-media-draft-status]', draftLabel);
+  setText(
+    '[data-media-draft-detail]',
+    mediaDirty
+      ? 'Save the draft before previewing or publishing.'
+      : mediaDraftAhead
+        ? 'Preview it privately, then publish when ready.'
+        : 'No unpublished media changes.'
+  );
+
+  if (mediaSaveButton) mediaSaveButton.disabled = !mediaPersistent || !mediaDirty;
+  if (mediaPublishButton) mediaPublishButton.disabled = !mediaPersistent || !(mediaDirty || mediaDraftAhead);
+}
+
+function renderMediaPlacementSelect() {
+  if (!mediaPlacementSelect) return;
+  mediaPlacementSelect.innerHTML = mediaPlacements.map((item) =>
+    '<option value="' + esc(item.key) + '">' + esc(item.label) + '</option>'
+  ).join('');
+  mediaPlacementSelect.value = activeMediaPlacement;
+  setText('[data-media-placement-label]', mediaPlacement().label);
+}
+
+function selectedMediaIds() {
+  return mediaState?.placements?.[activeMediaPlacement] || [];
+}
+
+function renderMediaSelected() {
+  const holder = document.querySelector('[data-media-selected]');
+  if (!holder || !mediaState) return;
+
+  const ids = selectedMediaIds();
+  if (!ids.length) {
+    holder.innerHTML = '<div class="rc-empty">No photos selected for this area. Choose from the library below.</div>';
+    return;
+  }
+
+  holder.innerHTML = ids.map((id, index) => {
+    const item = mediaById(id);
+    if (!item) return '';
+    return `
+      <article class="rc-media-selected-card">
+        <img src="${esc(item.url)}" alt="${esc(item.alt || 'Rebecca editorial portrait')}" loading="lazy">
+        <div>
+          <strong>${String(index + 1).padStart(2, '0')} · ${esc(item.name || 'Photo')}</strong>
+          <small>${esc(item.source === 'upload' ? 'Uploaded' : 'Current library')}</small>
+        </div>
+        <div class="rc-media-order-actions">
+          <button type="button" data-media-move="up" data-media-id="${esc(id)}" aria-label="Move photo earlier" ${index === 0 ? 'disabled' : ''}>↑</button>
+          <button type="button" data-media-move="down" data-media-id="${esc(id)}" aria-label="Move photo later" ${index === ids.length - 1 ? 'disabled' : ''}>↓</button>
+          <button type="button" data-media-toggle="${esc(id)}" class="rc-danger-link">Remove</button>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+function renderMediaGrid() {
+  const holder = document.querySelector('[data-media-grid]');
+  if (!holder || !mediaState) return;
+
+  const selected = new Set(selectedMediaIds());
+  holder.innerHTML = mediaState.library.map((item) => {
+    const isSelected = selected.has(item.id);
+    return `
+      <article class="rc-media-card ${isSelected ? 'is-selected' : ''}">
+        <button type="button" class="rc-media-thumb" data-media-toggle="${esc(item.id)}" aria-pressed="${isSelected ? 'true' : 'false'}">
+          <img src="${esc(item.url)}" alt="${esc(item.alt || 'Rebecca editorial portrait')}" loading="lazy">
+          <span>${isSelected ? 'Selected ✓' : 'Use here +'}</span>
+        </button>
+        <div class="rc-media-card-copy">
+          <div><strong>${esc(item.name || 'Photo')}</strong><small>${item.source === 'upload' ? 'Uploaded' : 'Current site'}</small></div>
+          <label class="rc-field">
+            <span>Alt text</span>
+            <input value="${esc(item.alt || '')}" data-media-alt="${esc(item.id)}" maxlength="220">
+          </label>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+function renderMediaHistory() {
+  setText('[data-media-history-count]', mediaHistory.length);
+  const holder = document.querySelector('[data-media-history]');
+  if (!holder) return;
+  if (!mediaHistory.length) {
+    holder.innerHTML = '<div class="rc-empty">Published versions will appear here after the second publish.</div>';
+    return;
+  }
+
+  holder.innerHTML = mediaHistory.map((entry) => `
+    <article class="rc-history-row">
+      <div>
+        <strong>Published version ${esc(entry.version)}</strong>
+        <small>${esc(friendlyDate(entry.publishedAt))}</small>
+      </div>
+      <button type="button" class="rc-secondary" data-media-restore="${esc(entry.version)}">Restore to draft</button>
+    </article>
+  `).join('');
+}
+
+function renderMedia() {
+  if (!mediaState) return;
+  renderMediaPlacementSelect();
+  renderMediaSelected();
+  renderMediaGrid();
+  renderMediaHistory();
+  renderMediaStatus();
+}
+
+async function loadMedia() {
+  try {
+    const response = await fetch('/api/admin/media', {
+      method: 'GET',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { Accept: 'application/json' }
+    });
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      showLogin('Your owner session expired. Please sign in again.');
+      return;
+    }
+    if (!response.ok) throw new Error(data.error || 'Could not load Media & Publish.');
+
+    mediaState = data.draft;
+    mediaPublished = data.published;
+    mediaPlacements = data.placements || [];
+    mediaHistory = data.history || [];
+    mediaPersistent = Boolean(data.persistent && data.configured);
+    mediaDraftAhead = Boolean(data.hasDraftChanges);
+    mediaDirty = false;
+    mediaLoaded = true;
+    window.__rcMediaPublishedVersion = data.publishedVersion || 0;
+    window.__rcMediaPublishedAt = data.publishedAt || null;
+    renderMedia();
+  } catch (error) {
+    mediaPersistent = false;
+    mediaLoaded = false;
+    setText('[data-media-connection]', 'Unavailable');
+    setText('[data-media-draft-status]', 'Could not load');
+    setText('[data-media-draft-detail]', error?.message || 'Media storage is unavailable.');
+  }
+}
+
+async function saveMediaDraft({ quiet = false } = {}) {
+  if (!mediaPersistent || !mediaState) return false;
+  if (!mediaDirty && !quiet) return true;
+
+  if (mediaSaveButton) {
+    mediaSaveButton.disabled = true;
+    mediaSaveButton.textContent = 'Saving…';
+  }
+
+  try {
+    const response = await fetch('/api/admin/media', {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ state: mediaState })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Could not save the media draft.');
+
+    mediaState = data.draft;
+    mediaPublished = data.published;
+    mediaHistory = data.history || [];
+    mediaDraftAhead = Boolean(data.hasDraftChanges);
+    mediaDirty = false;
+    window.__rcMediaPublishedVersion = data.publishedVersion || 0;
+    window.__rcMediaPublishedAt = data.publishedAt || null;
+    renderMedia();
+    return true;
+  } catch (error) {
+    mediaDirty = true;
+    setText('[data-media-draft-status]', 'Not saved');
+    setText('[data-media-draft-detail]', error?.message || 'Nothing was published.');
+    return false;
+  } finally {
+    if (mediaSaveButton) mediaSaveButton.textContent = 'Save draft';
+    setMediaDirty(mediaDirty);
+  }
+}
+
+async function previewMediaDraft() {
+  if (mediaDirty) {
+    const saved = await saveMediaDraft();
+    if (!saved) return;
+  }
+  const join = mediaPreviewPath().includes('?') ? '&' : '?';
+  window.open(mediaPreviewPath() + join + 'rc_preview=1', '_blank', 'noopener');
+}
+
+async function publishMedia() {
+  if (!mediaPersistent) return;
+  if (mediaDirty) {
+    const saved = await saveMediaDraft();
+    if (!saved) return;
+  }
+  if (!mediaDraftAhead) return;
+  if (!window.confirm('Publish these media changes to the live website now?')) return;
+
+  mediaPublishButton.disabled = true;
+  mediaPublishButton.textContent = 'Publishing…';
+
+  try {
+    const response = await fetch('/api/admin/media', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ action: 'publish' })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Could not publish media.');
+
+    mediaState = data.draft;
+    mediaPublished = data.published;
+    mediaHistory = data.history || [];
+    mediaDraftAhead = Boolean(data.hasDraftChanges);
+    mediaDirty = false;
+    window.__rcMediaPublishedVersion = data.publishedVersion || 0;
+    window.__rcMediaPublishedAt = data.publishedAt || null;
+    renderMedia();
+  } catch (error) {
+    setText('[data-media-draft-status]', 'Publish failed');
+    setText('[data-media-draft-detail]', error?.message || 'The live website was not changed.');
+  } finally {
+    mediaPublishButton.textContent = 'Publish to website';
+    setMediaDirty(mediaDirty);
+  }
+}
+
+async function restoreMedia(version) {
+  if (!window.confirm('Restore this older published version to Draft? The live website will stay unchanged.')) return;
+  try {
+    const response = await fetch('/api/admin/media', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ action: 'restore', version })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Could not restore this version.');
+
+    mediaState = data.draft;
+    mediaHistory = data.history || [];
+    mediaDraftAhead = true;
+    mediaDirty = false;
+    renderMedia();
+  } catch (error) {
+    setText('[data-media-draft-status]', 'Restore failed');
+    setText('[data-media-draft-detail]', error?.message || 'Nothing was changed.');
+  }
+}
+
 async function loadQuickControl() {
   try {
     const response = await fetch('/api/admin/quick-control', {
@@ -357,6 +682,8 @@ logoutButton?.addEventListener('click', async () => {
   } finally {
     logoutButton.disabled = false;
     quickState = null;
+    mediaState = null;
+    mediaLoaded = false;
     showLogin('Signed out.');
   }
 });
@@ -365,6 +692,55 @@ document.addEventListener('click', (event) => {
   const tab = event.target.closest('[data-tab]');
   if (tab) {
     activateTab(tab.dataset.tab);
+    return;
+  }
+
+  if (event.target.closest('[data-media-choose-photo]')) {
+    mediaFileInput?.click();
+    return;
+  }
+
+  const mediaToggle = event.target.closest('[data-media-toggle]');
+  if (mediaToggle && mediaState) {
+    const id = mediaToggle.dataset.mediaToggle;
+    const placement = mediaPlacement();
+    const list = mediaState.placements[activeMediaPlacement] || [];
+    const index = list.indexOf(id);
+    if (index >= 0) {
+      if (list.length <= 1) {
+        setText('[data-media-draft-detail]', 'Keep at least one photo in every website area.');
+        return;
+      }
+      list.splice(index, 1);
+    } else if (list.length < placement.max) list.push(id);
+    else {
+      setText('[data-media-draft-detail]', 'This area can rotate up to ' + placement.max + ' photos.');
+      return;
+    }
+    mediaState.placements[activeMediaPlacement] = list;
+    setMediaDirty(true);
+    renderMediaSelected();
+    renderMediaGrid();
+    return;
+  }
+
+  const mediaMove = event.target.closest('[data-media-move]');
+  if (mediaMove && mediaState) {
+    const id = mediaMove.dataset.mediaId;
+    const list = mediaState.placements[activeMediaPlacement] || [];
+    const index = list.indexOf(id);
+    const target = mediaMove.dataset.mediaMove === 'up' ? index - 1 : index + 1;
+    if (index >= 0 && target >= 0 && target < list.length) {
+      [list[index], list[target]] = [list[target], list[index]];
+      setMediaDirty(true);
+      renderMediaSelected();
+    }
+    return;
+  }
+
+  const restore = event.target.closest('[data-media-restore]');
+  if (restore) {
+    restoreMedia(restore.dataset.mediaRestore);
     return;
   }
 
@@ -418,11 +794,32 @@ document.addEventListener('input', (event) => {
   ) {
     setDirty(true);
   }
+
+  if (event.target.matches('[data-media-alt]') && mediaState) {
+    const item = mediaById(event.target.dataset.mediaAlt);
+    if (item) {
+      item.alt = event.target.value;
+      setMediaDirty(true);
+    }
+  }
 });
 
 document.addEventListener('change', (event) => {
   if (event.target.matches('[data-trip-visible], [data-rate-visible], [data-rate-featured]')) {
     setDirty(true);
+  }
+
+  if (event.target.matches('[data-media-placement]')) {
+    activeMediaPlacement = event.target.value;
+    renderMediaPlacementSelect();
+    renderMediaSelected();
+    renderMediaGrid();
+  }
+
+  if (event.target.matches('[data-media-file]')) {
+    const file = event.target.files?.[0];
+    if (mediaUploadButton) mediaUploadButton.hidden = !file;
+    if (mediaUploadStatus) mediaUploadStatus.textContent = file ? file.name : '';
   }
 });
 
@@ -463,8 +860,36 @@ saveButton?.addEventListener('click', async () => {
   }
 });
 
+mediaSaveButton?.addEventListener('click', () => saveMediaDraft());
+mediaPreviewButton?.addEventListener('click', previewMediaDraft);
+mediaPublishButton?.addEventListener('click', publishMedia);
+
+document.addEventListener('rc:media-uploaded', async (event) => {
+  if (!mediaState || !event.detail?.url) return;
+  const id = 'upload-' + (crypto.randomUUID?.() || Date.now().toString(36));
+  const item = {
+    id,
+    url: event.detail.url,
+    pathname: event.detail.pathname || null,
+    name: event.detail.name || 'Uploaded photo',
+    alt: 'Rebecca editorial portrait',
+    source: 'upload',
+    createdAt: new Date().toISOString()
+  };
+  mediaState.library.unshift(item);
+
+  const placement = mediaPlacement();
+  const list = mediaState.placements[activeMediaPlacement] || [];
+  if (list.length < placement.max) list.push(id);
+  mediaState.placements[activeMediaPlacement] = list;
+
+  setMediaDirty(true);
+  renderMedia();
+  await saveMediaDraft({ quiet: true });
+});
+
 window.addEventListener('beforeunload', (event) => {
-  if (!dirty) return;
+  if (!dirty && !mediaDirty) return;
   event.preventDefault();
   event.returnValue = '';
 });

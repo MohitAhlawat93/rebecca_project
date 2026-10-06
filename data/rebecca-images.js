@@ -282,5 +282,12 @@ export const REBECCA_IMAGES={
 }
 };
 
-export function imageVariant(url,width){return `${url}?format=${width}w`;}
-export function imageSrcset(url,widths=[300,500,750,1000,1500]){return widths.map((w)=>`${imageVariant(url,w)} ${w}w`).join(', ');}
+const isSquarespaceImage=(url='')=>String(url).includes('images.squarespace-cdn.com');
+export function imageVariant(url,width){
+  return isSquarespaceImage(url) ? `${url}?format=${width}w` : url;
+}
+export function imageSrcset(url,widths=[300,500,750,1000,1500]){
+  return isSquarespaceImage(url)
+    ? widths.map((w)=>`${imageVariant(url,w)} ${w}w`).join(', ')
+    : url;
+}

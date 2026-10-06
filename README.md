@@ -101,3 +101,53 @@ Required Vercel environment variables:
 - `RC_STORE_SECRET`
 
 The current testing database belongs to Mohit's Supabase account. Before handoff, reproduce `supabase/rc-02-quick-control.sql` in Rebecca's Supabase project, set a fresh `RC_STORE_SECRET`, copy the current payload, and replace only these environment values.
+
+
+## Rebecca Control — RC-03 Media & Publishing
+
+RC-03 adds a safe media workflow without replacing the preserved photography archive.
+
+Owner workflow:
+
+```text
+Upload / choose photos
+        ↓
+Save Draft
+        ↓
+Private Preview
+        ↓
+Publish
+        ↓
+Live website
+```
+
+Key behavior:
+- Existing curated Squarespace images remain the safe fallback.
+- New uploads go directly from the owner's browser to the project's public Vercel Blob store.
+- Upload authorization requires a valid Rebecca Control owner session.
+- Accepted formats: JPG, PNG, WebP and AVIF, up to 25 MB.
+- A media Draft never changes the public website.
+- Private draft preview uses `?rc_preview=1` and requires the authenticated owner session.
+- Published media overrides only the selected curated placement; the legacy professional/candid archives stay intact.
+- Published history retains up to 12 previous states. Restore sends an older version back to Draft first; it does not silently republish it.
+- Optimistic version matching protects against one admin tab overwriting newer media edits.
+- Blob images are supported by the existing rotators without Squarespace-specific resize query parameters.
+
+Current editable placements:
+- Homepage rotation
+- About feature + About editorial
+- Reviews
+- Travel
+- Favourites hero + editorial
+- Journal
+- Press
+- Gallery professional/candid previews
+- Date ideas
+- Etiquette
+
+Storage:
+- image files → Vercel Blob store `rebecca-media`
+- draft / published metadata / history → Supabase `rebecca_media_state`
+- portable schema → `supabase/rc-03-media-publishing.sql`
+
+The current Supabase state is temporary in Mohit's account. At Rebecca handoff, apply the schema in her project, use a fresh `RC_STORE_SECRET`, copy the media state, and update the existing Vercel persistence environment variables. Media files can remain in the project's Blob store while the same Vercel project is retained; otherwise migrate Blob assets during infrastructure handoff.

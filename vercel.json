@@ -10,6 +10,9 @@
     },
     "api/newsletter.js": {
       "maxDuration": 30
+    },
+    "api/admin/media-upload.js": {
+      "maxDuration": 30
     }
   },
   "headers": [
@@ -73,7 +76,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; img-src 'self' https://images.squarespace-cdn.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self' 'unsafe-inline'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+          "value": "default-src 'self'; img-src 'self' https://images.squarespace-cdn.com https://*.blob.vercel-storage.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self' 'unsafe-inline' https://esm.sh; connect-src 'self' https://blob.vercel-storage.com https://*.blob.vercel-storage.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
         },
         {
           "key": "Cross-Origin-Opener-Policy",

@@ -28,6 +28,68 @@ async function hydrateRuntimeData(){
   }
 }
 
+function mediaPreviewMode(){
+  const params=new URLSearchParams(window.location.search);
+  const flag=params.get('rc_preview');
+  if(flag==='1'){
+    sessionStorage.setItem('rc-media-preview','1');
+    return true;
+  }
+  if(flag==='0'){
+    sessionStorage.removeItem('rc-media-preview');
+    return false;
+  }
+  return sessionStorage.getItem('rc-media-preview')==='1';
+}
+
+function applyRuntimeMediaState(state){
+  if(!state?.library||!state?.placements)return;
+  const byId=new Map(state.library.map((item)=>[item.id,item]));
+  Object.entries(state.placements).forEach(([key,ids])=>{
+    if(!Array.isArray(ids))return;
+    const urls=ids.map((id)=>byId.get(id)?.url).filter(Boolean);
+    if(urls.length)REBECCA_IMAGES.curated[key]=urls;
+  });
+}
+
+function renderDraftPreviewBanner(){
+  if(document.querySelector('[data-rc-preview-banner]'))return;
+  const banner=document.createElement('div');
+  banner.className='rc-preview-banner';
+  banner.dataset.rcPreviewBanner='true';
+  banner.innerHTML='<strong>Rebecca Control preview</strong><span>Draft media · not live</span><button type="button" data-exit-rc-preview>Exit preview</button>';
+  document.body.prepend(banner);
+  document.body.classList.add('has-rc-preview-banner');
+  banner.querySelector('[data-exit-rc-preview]')?.addEventListener('click',()=>{
+    sessionStorage.removeItem('rc-media-preview');
+    const url=new URL(window.location.href);
+    url.searchParams.delete('rc_preview');
+    window.location.href=url.pathname+url.search+url.hash;
+  });
+}
+
+async function hydrateRuntimeMedia(){
+  const preview=mediaPreviewMode();
+  try{
+    const response=await fetch('/api/media-content'+(preview?'?preview=1':''),{
+      method:'GET',
+      headers:{Accept:'application/json'},
+      credentials:'same-origin',
+      cache:'no-store'
+    });
+    if(!response.ok){
+      if(preview&&response.status===401)sessionStorage.removeItem('rc-media-preview');
+      return;
+    }
+    const payload=await response.json();
+    applyRuntimeMediaState(payload?.state);
+    window.__REBECCA_MEDIA__=payload?.state||null;
+    if(preview)renderDraftPreviewBanner();
+  }catch{
+    // Existing curated images remain the safe fallback.
+  }
+}
+
 function renderAvailability(){
   const availability=REBECCA_DATA.availability||{
     status:'accepting',
@@ -421,7 +483,7 @@ function renderContact(){
   document.querySelectorAll('[data-telegram-link]').forEach((link)=>{link.href=contact.telegramUrl;});
 }
 
-await hydrateRuntimeData();
+await Promise.all([hydrateRuntimeData(),hydrateRuntimeMedia()]);
 
 renderProfile();
 renderPersonality();
@@ -440,5 +502,7 @@ renderContact();
 renderAvailability();
 
 window.__REBECCA_DATA__=REBECCA_DATA;
+window.__REBECCA_IMAGES__=REBECCA_IMAGES;
 document.documentElement.dataset.rebeccaDataVersion=REBECCA_DATA.meta.dataVersion;
+document.documentElement.dataset.rebeccaContentReady='true';
 document.dispatchEvent(new CustomEvent('rebecca:content-ready'));

@@ -856,3 +856,20 @@ body.concierge-open .page-scroll-rail,body.gallery-lightbox-open .page-scroll-ra
 .availability-chip[data-status="away"] .availability-dot,
 .availability-chip[data-status="unavailable"] .availability-dot{background:#8a625c;box-shadow:0 0 0 4px rgba(138,98,92,.10)}
 .page-availability-chip{margin-top:16px}
+
+/* Rebecca Control private draft preview */
+.rc-preview-banner{
+  position:fixed;z-index:9999;left:50%;top:12px;transform:translateX(-50%);
+  display:flex;align-items:center;gap:10px;max-width:calc(100vw - 24px);
+  padding:10px 12px;border:1px solid rgba(255,255,255,.25);border-radius:999px;
+  background:rgba(30,27,24,.92);color:#fff;box-shadow:0 12px 34px rgba(0,0,0,.2);
+  backdrop-filter:blur(15px);font-family:Manrope,system-ui,sans-serif;font-size:.72rem
+}
+.rc-preview-banner strong{white-space:nowrap}.rc-preview-banner span{opacity:.72;white-space:nowrap}
+.rc-preview-banner button{
+  border:0;border-radius:999px;background:#f5efe7;color:#25211e;padding:7px 10px;font:inherit;font-weight:700;cursor:pointer;white-space:nowrap
+}
+@media(max-width:560px){
+  .rc-preview-banner{left:10px;right:10px;top:8px;transform:none;justify-content:space-between}
+  .rc-preview-banner span{display:none}
+}
