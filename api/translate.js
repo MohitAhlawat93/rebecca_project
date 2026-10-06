@@ -34,9 +34,9 @@ export default async function handler(req,res){
 
   const body=req.body||{};
   const language=LANGUAGE_NAMES[body.language]?body.language:null;
-  const texts=Array.isArray(body.texts)?body.texts.slice(0,60).map((value)=>String(value??'').slice(0,900)):[];
+  const texts=Array.isArray(body.texts)?body.texts.slice(0,50).map((value)=>String(value??'').slice(0,900)):[];
   const total=texts.reduce((sum,value)=>sum+value.length,0);
-  if(!language||!texts.length||total>14000) return res.status(400).json({error:'Invalid translation request.'});
+  if(!language||!texts.length||total>16000) return res.status(400).json({error:'Invalid translation request.'});
   if(!process.env.GROQ_API_KEY) return res.status(200).json({translations:texts,mode:'source-fallback'});
 
   const system=`You are a precision website translator. Translate each input string independently into ${LANGUAGE_NAMES[language]}.
@@ -52,7 +52,7 @@ Do not add facts, remove facts, censor, explain, summarise, soften, or change bo
       body:JSON.stringify({
         model:process.env.GROQ_MODEL||'openai/gpt-oss-20b',
         temperature:0,
-        max_completion_tokens:5000,
+        max_completion_tokens:6000,
         response_format:{type:'json_object'},
         messages:[
           {role:'system',content:system},

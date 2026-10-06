@@ -48,7 +48,7 @@ function singaporeTermRows(){
     ['Long private dates',`For dates of ${sg.terms.longPrivate.minHours} hours or longer where you prefer complete privacy, add a flat SGD ${sg.terms.longPrivate.surcharge.toLocaleString('en-US')} and please include room service.`],
     ['Hosting in Singapore',`Hosting starts from SGD ${sg.terms.hosting.from.toLocaleString('en-US')} with a ${sg.terms.hosting.minHours}-hour minimum. In Singapore, hosting is occasional and reserved for ${sg.terms.hosting.eligibility}.`],
     ['Couples',`Two-hour minimum. Please add SGD ${sg.terms.couples.surcharge.toLocaleString('en-US')}.`],
-    ['Phone call before booking',`A ${sg.terms.phoneCall.minutes}-minute call is SGD ${sg.terms.phoneCall.fee.toLocaleString('en-US')}. Screening is required.`],
+    ['Phone call before booking',`A ${sg.terms.phoneCall.minutes}-minute call is SGD ${sg.terms.phoneCall.fee.toLocaleString('en-US')}. Screening is required.${sg.terms.phoneCall.creditTowardBooking?' The amount can be credited toward the booking.':''}`],
     ['Bespoke additions',`Enhanced experiences are discussed privately and typically begin from +SGD ${sg.terms.bespokeAdditionsFrom.toLocaleString('en-US')} above standard rates.`]
   ];
 }
@@ -248,8 +248,22 @@ function renderAuthority(){
     el.innerHTML=REBECCA_DATA.journal.entries.map((item)=>`<article class="journal-card"><span>${esc(item.outlet)} · ${esc(item.year)}</span><h3>${esc(item.title)}</h3><p>${esc(item.note)}</p><a class="inline-link" href="${esc(item.url)}" target="_blank" rel="noreferrer">Read the original <span aria-hidden="true">↗</span></a></article>`).join('');
   });
   document.querySelectorAll('[data-updates-card]').forEach((el)=>{
-    const u=REBECCA_DATA.updates;
-    el.innerHTML=`<p class="page-kicker">Stay in the loop</p><h2>${esc(u.title)}</h2><p>${esc(u.body)}</p><a class="button button-dark" href="${esc(u.channelUrl)}" target="_blank" rel="noreferrer">${esc(u.channelLabel)} ↗</a>`;
+    const n=REBECCA_DATA.newsletter;
+    el.innerHTML=`
+      <p class="page-kicker">Stay in the loop</p>
+      <h2>${esc(n.title)}</h2>
+      <p>${esc(n.body)}</p>
+      <form class="newsletter-form" data-newsletter-form>
+        <div class="newsletter-name-row">
+          <label><span>First name</span><input name="firstName" autocomplete="given-name" maxlength="80" placeholder="First name"></label>
+          <label><span>Last name</span><input name="lastName" autocomplete="family-name" maxlength="80" placeholder="Last name (optional)"></label>
+        </div>
+        <label><span>Email</span><input name="email" type="email" autocomplete="email" maxlength="180" placeholder="you@example.com" required></label>
+        <button class="button button-dark" type="submit">Join updates</button>
+        <p class="newsletter-status" data-newsletter-status aria-live="polite">Checking email-list connection…</p>
+      </form>
+      <p class="newsletter-privacy">${esc(n.privacy)}</p>
+      <a class="inline-link newsletter-fallback" href="${esc(n.fallbackUrl)}" target="_blank" rel="noreferrer">Or join ${esc(n.fallbackLabel)} <span aria-hidden="true">↗</span></a>`;
   });
 }
 

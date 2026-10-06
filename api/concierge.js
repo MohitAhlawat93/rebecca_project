@@ -7,7 +7,7 @@ import {
   formatFmtySummary
 } from '../data/rebecca-data.js';
 
-const SYSTEM=`You are Rebecca's website concierge: elegant, concise, warm, discreet and useful.
+const SYSTEM=`You are the assistant at Rebecca’s Desk: elegant, concise, warm, discreet and useful.
 
 Rules:
 - For questions about Rebecca, use only the RETRIEVED PUBLIC CONTEXT.
@@ -92,13 +92,13 @@ function directAnswerFor(message=''){
 
   if(/^(hi|hello|hey|hiya|good morning|good afternoon|good evening)[!.?\s]*$/.test(q)) return 'Hi ✦ Lovely to meet you. How are you?';
   if(/^(how are you|how are u|how r you|how r u|how’s it going|hows it going)[!.?\s]*$/.test(q)) return 'I’m good, thank you ✦ How are you?';
-  if(/^(who are you|what are you|what is your name|what’s your name|whats your name)[!.?\s]*$/.test(q)) return 'I’m Rebecca’s concierge ✦ I’m here to help with her public profile and practical information.';
+  if(/^(who are you|what are you|what is your name|what’s your name|whats your name)[!.?\s]*$/.test(q)) return 'I’m the assistant at Rebecca’s Desk ✦ I’m here to help with her public profile and practical information.';
 
   if(/couple|two of us|my partner/.test(q)){
     return `Rebecca’s published Singapore terms have a ${sg.terms.couples.minHours}-hour minimum for couples and add SGD ${sg.terms.couples.surcharge.toLocaleString('en-US')} to the standard rate.`;
   }
   if(/phone call|call before|20.?minute call|call her|speak.{0,12}phone|chat.{0,12}phone/.test(q)){
-    return `A ${sg.terms.phoneCall.minutes}-minute phone call is SGD ${sg.terms.phoneCall.fee.toLocaleString('en-US')} and screening is required.`;
+    return `A ${sg.terms.phoneCall.minutes}-minute phone call is SGD ${sg.terms.phoneCall.fee.toLocaleString('en-US')} and screening is required.${sg.terms.phoneCall.creditTowardBooking?' The amount can be credited toward the booking.':''}`;
   }
   if(/deposit/.test(q)){
     return `Deposits are required for confirmed dates: ${policies.deposits.map((item)=>`${item.label} ${item.value}`).join(', ')}. Rebecca asks for the deposit ${policies.depositTiming}.`;

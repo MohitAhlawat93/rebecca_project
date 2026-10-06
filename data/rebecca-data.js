@@ -4,7 +4,7 @@
 
 export const REBECCA_DATA = {
   meta: {
-    dataVersion: '2026-10-06.7E',
+    dataVersion: '2026-10-06.7G-rc',
     lastVerified: '2026-10-05',
     originalPublicSite: 'https://www.risquerebecca.com/',
     reviewDomain: 'https://rebeccaproject.vercel.app'
@@ -137,8 +137,8 @@ export const REBECCA_DATA = {
         frequency: 'up to three times a year',
         eligibility: 'subscribers and people Rebecca has met before'
       },
-      couples: { minHours: 2, surcharge: 500 },
-      phoneCall: { minutes: 20, fee: 250, screeningRequired: true, creditTowardBooking: false },
+      couples: { minHours: 2, surcharge: 800 },
+      phoneCall: { minutes: 20, fee: 250, screeningRequired: true, creditTowardBooking: true },
       bespokeAdditionsFrom: 1000,
       ratesFixed: true
     }
@@ -170,7 +170,7 @@ export const REBECCA_DATA = {
       {
         id: 'selected-asia',
         label: 'Selected Asia destinations',
-        minimum: '18 hours + travel',
+        minimum: '14 hours + travel',
         destinations: ['Hong Kong', 'Taipei', 'Macau', 'Bali', 'Bangkok', 'Kuala Lumpur', 'Maldives', 'Ho Chi Minh City', 'Hanoi', 'Manila']
       },
       { id: 'rest-asia-india', label: 'Rest of Asia + India', minimum: '24 hours + flights' },
@@ -398,6 +398,15 @@ export const REBECCA_DATA = {
       { title: 'Tough Love: An Escort on Dating Her Clients', year: 2017, outlet: 'RICE Media', url: 'https://www.ricemedia.co/culture-people-tough-love-an-escort-on-dating-her-clients/', note: 'A personal column about privacy, trust and the complications of attraction outside work.' },
       { title: 'Risqué Rebecca: My Double Life as a Student Escort', year: 2017, outlet: 'RICE Media', url: 'https://www.ricemedia.co/risque-rebecca-my-double-life-as-a-student-escort/', note: 'A first-person reflection on identity, secrecy and maintaining a parallel professional life.' }
     ]
+  },
+
+  newsletter: {
+    title: 'Notes, travel dates & occasional invitations.',
+    body: 'A low-volume email list for public travel news, new writing and occasional invitations. No spam, no selling the list.',
+    privacy: 'Your details go only to the configured newsletter provider. The website does not store a local mailing database.',
+    fallbackLabel: 'Rebecca Afterhours',
+    fallbackUrl: 'https://tinyurl.com/rebecca-afterhours',
+    providerConfiguredByEnvironment: true
   },
 
   updates: {

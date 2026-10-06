@@ -37,3 +37,7 @@ Phase 7E deliberately preserves the approved canonical values until Rebecca conf
 ## Newsletter
 
 The old site has an email subscription form, but the provider/account handoff is not available in this repository. Phase 7E does not create a fake subscription endpoint. The public updates card uses the already-approved Rebecca Afterhours channel. Once the newsletter provider is handed over, the same data/UI slot can be connected without redesigning the site.
+
+## Resolved in Phase 7G
+
+Rebecca confirmed the current original-site terms can be used. Canonical data now uses: couples +SGD 800; selected-Asia FMTY minimum 14 hours + travel; and the SGD 250 / 20-minute pre-booking call can be credited toward the booking.

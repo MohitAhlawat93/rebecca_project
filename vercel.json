@@ -7,6 +7,9 @@
     },
     "api/translate.js": {
       "maxDuration": 30
+    },
+    "api/newsletter.js": {
+      "maxDuration": 30
     }
   },
   "headers": [
@@ -61,5 +64,8 @@
       "destination": "/contact",
       "permanent": true
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
 }
