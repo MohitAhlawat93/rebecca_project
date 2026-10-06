@@ -58,5 +58,8 @@
       "destination": "/contact",
       "permanent": true
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
 }

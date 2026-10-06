@@ -535,3 +535,35 @@ body.gallery-lightbox-open{overflow:hidden}
     height:min(56svh,450px)
   }
 }
+
+
+/* Phase 7E — Content Recovery & Authority */
+.fragment-grid,.authority-preview-grid,.authority-grid,.journal-grid,.side-trip-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.fragment-card,.authority-card,.journal-card,.side-trip-card,.authority-preview-card{border:1px solid rgba(44,39,37,.12);background:rgba(255,255,255,.36);padding:26px;text-decoration:none;color:inherit}
+.fragment-card span,.authority-card>span,.journal-card>span,.side-trip-card span,.authority-preview-card>span,.review-year-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--wine)}
+.fragment-card p,.authority-card p,.journal-card p,.authority-preview-card p{margin:12px 0 0;line-height:1.7}
+.authority-card h3,.journal-card h3,.authority-preview-card h2{font-family:"Cormorant Garamond",serif;font-weight:400;line-height:1.08}
+.authority-card h3,.journal-card h3{font-size:clamp(28px,3vw,42px);margin:12px 0}
+.authority-preview{background:#ece4da}
+.authority-preview-grid{grid-template-columns:1fr 1fr 1fr}
+.authority-preview-card{min-height:300px;display:flex;flex-direction:column;justify-content:flex-end;transition:transform .18s ease,background .18s ease}
+.authority-preview-card:hover{transform:translateY(-2px);background:rgba(255,255,255,.6)}
+.authority-preview-card h2{font-size:clamp(31px,3.5vw,50px);margin:14px 0 0}
+.authority-preview-live .button{margin-top:22px;align-self:flex-start}
+.review-archive{display:grid;gap:42px}
+.review-year{display:grid;grid-template-columns:110px 1fr;gap:24px;border-top:1px solid rgba(44,39,37,.15);padding-top:22px}
+.review-year-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.review-year-grid .review-item{min-height:220px}
+.review-copy{font-family:"Cormorant Garamond",serif;font-size:clamp(24px,2.5vw,34px);line-height:1.15;margin:0}
+.review-copy.quoted::before{content:"“"}.review-copy.quoted::after{content:"”"}
+.review-item footer{margin-top:22px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.detail-chips{display:flex;flex-wrap:wrap;gap:8px}
+.detail-chips span{border:1px solid rgba(44,39,37,.13);border-radius:999px;padding:7px 10px;font-size:10px}
+.wishlist-details-section [data-wishlist-links]{margin-top:26px}
+.side-trip-card{min-height:145px;display:flex;flex-direction:column;justify-content:space-between}
+.side-trip-card strong{font-family:"Cormorant Garamond",serif;font-size:30px;font-weight:400}
+.authority-links{display:flex;flex-direction:column;border-top:1px solid rgba(44,39,37,.14)}
+.authority-link{padding:18px 0;border-bottom:1px solid rgba(44,39,37,.14);color:inherit;text-decoration:none;display:flex;justify-content:space-between}
+.site-footer .footer-meta{max-width:520px;line-height:1.5}
+@media(max-width:900px){.authority-preview-grid{grid-template-columns:1fr}.fragment-grid,.authority-grid,.journal-grid,.side-trip-grid,.review-year-grid{grid-template-columns:1fr}.review-year{grid-template-columns:1fr}}
+@media(max-width:640px){.authority-preview-card{min-height:230px}.fragment-card,.authority-card,.journal-card,.side-trip-card,.authority-preview-card{padding:21px}}
