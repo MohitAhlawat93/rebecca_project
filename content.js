@@ -253,6 +253,35 @@ function renderAuthority(){
   });
 }
 
+
+function renderFavourites(){
+  const w=REBECCA_DATA.wishlist;
+  const p=REBECCA_DATA.profile;
+  const card=(label,title,items)=>`<article class="favourite-card"><span>${esc(label)}</span><h3>${esc(title)}</h3><div class="favourite-tags">${items.map((item)=>`<span>${esc(item)}</span>`).join('')}</div></article>`;
+
+  document.querySelectorAll('[data-favourites-table]').forEach((el)=>{
+    el.innerHTML=[
+      card('Eat','At the table',w.food),
+      card('Champagne','Bubbles worth opening',w.champagneHouses),
+      card('Wine','Regions & curiosities',w.wineInterests),
+      card('Pour','Beyond wine',w.drinks)
+    ].join('');
+  });
+
+  document.querySelectorAll('[data-favourites-things]').forEach((el)=>{
+    el.innerHTML=[
+      card('Wear','Lingerie & details',[...w.lingerie,...w.fashion]),
+      card('Flowers','Soft colours, big gestures',w.flowers),
+      card('Experience','Useful indulgences',w.giftCards),
+      card('Keepsake','Jewellery',[w.jewellery])
+    ].join('');
+  });
+
+  document.querySelectorAll('[data-favourites-interests]').forEach((el)=>{
+    el.innerHTML=p.interests.map((item)=>`<span>${esc(item)}</span>`).join('');
+  });
+}
+
 function renderContact(){
   const contact=REBECCA_DATA.contact;
   const policies=REBECCA_DATA.policies;
@@ -284,6 +313,7 @@ renderPersonality();
 renderReputation();
 renderDateIdeas();
 renderAuthority();
+renderFavourites();
 renderSingapore();
 renderTravel();
 renderPolicies();

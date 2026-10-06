@@ -4,6 +4,9 @@
   "functions": {
     "api/concierge.js": {
       "maxDuration": 30
+    },
+    "api/translate.js": {
+      "maxDuration": 30
     }
   },
   "headers": [
@@ -58,5 +61,8 @@
       "destination": "/contact",
       "permanent": true
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
 }
