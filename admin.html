@@ -9,6 +9,7 @@
   <link rel="icon" href="/favicon.svg">
   <link rel="stylesheet" href="/admin.css">
   <script src="/admin.js" defer></script>
+  <script type="module" src="/admin-media-upload.js"></script>
 </head>
 <body class="rc-body">
   <main class="rc-shell">
@@ -38,7 +39,7 @@
     <section class="rc-app" data-app-view hidden>
       <header class="rc-topbar">
         <div>
-          <p class="rc-eyebrow">Rebecca Control · RC-02</p>
+          <p class="rc-eyebrow">Rebecca Control · RC-03</p>
           <h1>Good to see you, Rebecca.</h1>
         </div>
         <div class="rc-top-actions">
@@ -71,8 +72,8 @@
       <section class="rc-section rc-editor">
         <div class="rc-section-heading">
           <div>
-            <p class="rc-eyebrow">Quick Control</p>
-            <h2>Change what matters today.</h2>
+            <p class="rc-eyebrow">Control centre</p>
+            <h2>Change it once. Keep everything aligned.</h2>
           </div>
           <span class="rc-phase-pill" data-store-mode>Loading…</span>
         </div>
@@ -83,6 +84,7 @@
           <button type="button" data-tab="rates">Rates</button>
           <button type="button" data-tab="contact">Contact</button>
           <button type="button" data-tab="profile">Profile</button>
+          <button type="button" data-tab="media">Media & Publish</button>
         </nav>
 
         <section class="rc-panel is-active" data-panel="availability">
@@ -161,9 +163,78 @@
             <label class="rc-field"><span>Languages <small>comma separated</small></span><input data-profile="languages"></label>
           </div>
         </section>
+
+        <section class="rc-panel rc-media-panel" data-panel="media" hidden>
+          <div class="rc-panel-intro rc-panel-intro-row">
+            <div>
+              <p class="rc-eyebrow">Media & publishing</p>
+              <h3>Prepare quietly. Publish deliberately.</h3>
+              <p>Upload images, choose where they appear, preview the draft privately, then publish only when it feels right.</p>
+            </div>
+            <span class="rc-phase-pill" data-media-connection>Loading…</span>
+          </div>
+
+          <div class="rc-media-status-grid">
+            <div><span>Live version</span><strong data-media-live-version>—</strong><small data-media-published-at>Not published here yet</small></div>
+            <div><span>Draft</span><strong data-media-draft-status>Loading…</strong><small data-media-draft-detail>Checking media state</small></div>
+            <div><span>Library</span><strong data-media-library-count>—</strong><small>curated + uploaded photos</small></div>
+          </div>
+
+          <form class="rc-media-upload" data-media-upload-form>
+            <div>
+              <span class="rc-card-kicker">Add a new photo</span>
+              <strong>Upload from phone or laptop</strong>
+              <small>JPG, PNG, WebP or AVIF · up to 25 MB · upload stays in Draft until you publish.</small>
+            </div>
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" data-media-file hidden>
+            <button type="button" class="rc-secondary" data-media-choose-photo>Choose photo</button>
+            <button type="submit" class="rc-primary" data-media-upload-button hidden>Upload photo</button>
+            <span class="rc-media-upload-status" data-media-upload-status></span>
+          </form>
+
+          <div class="rc-media-toolbar">
+            <label class="rc-field">
+              <span>Choose a website area</span>
+              <select data-media-placement></select>
+            </label>
+            <div class="rc-media-toolbar-actions">
+              <button type="button" class="rc-secondary" data-media-save-draft disabled>Save draft</button>
+              <button type="button" class="rc-secondary" data-media-preview>Preview draft ↗</button>
+              <button type="button" class="rc-primary" data-media-publish disabled>Publish to website</button>
+            </div>
+          </div>
+
+          <section class="rc-media-selected-section">
+            <div class="rc-media-section-title">
+              <div>
+                <span class="rc-card-kicker">Current rotation</span>
+                <strong data-media-placement-label>Homepage rotation</strong>
+              </div>
+              <small>Use ↑ ↓ to control the order. The website rotates in this order.</small>
+            </div>
+            <div class="rc-media-selected" data-media-selected></div>
+          </section>
+
+          <section class="rc-media-library-section">
+            <div class="rc-media-section-title">
+              <div>
+                <span class="rc-card-kicker">Photo library</span>
+                <strong>Tap a photo to add or remove it from this area.</strong>
+              </div>
+              <small>Alt text can be edited for accessibility and search context.</small>
+            </div>
+            <div class="rc-media-grid" data-media-grid></div>
+          </section>
+
+          <details class="rc-media-history">
+            <summary>Published history <span data-media-history-count>0</span></summary>
+            <p>Restoring a version sends it back to Draft first. Nothing goes live until you publish again.</p>
+            <div class="rc-stack" data-media-history></div>
+          </details>
+        </section>
       </section>
 
-      <div class="rc-savebar" data-savebar>
+      <div class="rc-savebar" data-savebar data-quick-savebar>
         <div>
           <strong data-save-state>No changes</strong>
           <span data-save-detail>Quick Control is ready.</span>
@@ -172,7 +243,7 @@
       </div>
 
       <footer class="rc-footer">
-        <span>Rebecca Control · RC-02</span>
+        <span>Rebecca Control · RC-03</span>
         <span>Owner access only</span>
       </footer>
     </section>
