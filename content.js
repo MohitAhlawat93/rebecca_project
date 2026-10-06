@@ -31,6 +31,14 @@ function renderProfile(){
   document.querySelectorAll('[data-profile-about-facts]').forEach((el)=>{
     el.innerHTML=p.aboutFacts.map((item)=>`<div class="fact-card"><span>${esc(item.label)}</span><strong>${esc(item.value)}</strong></div>`).join('');
   });
+
+  document.querySelectorAll('[data-profile-fragments]').forEach((el)=>{
+    el.innerHTML=p.fragments.map((item)=>`<article class="fragment-card"><span>${esc(item.label)}</span><p>${esc(item.value)}</p></article>`).join('');
+  });
+
+  document.querySelectorAll('[data-profile-faq]').forEach((el)=>{
+    el.innerHTML=p.faq.map((item,index)=>`<details${index===0?' open':''}><summary>${esc(item.question)}</summary><div class="detail-body"><p>${esc(item.answer)}</p></div></details>`).join('');
+  });
 }
 
 function singaporeTermRows(){
@@ -107,6 +115,11 @@ function renderTravel(){
     }).join('');
   });
 
+  document.querySelectorAll('[data-travel-side-trips]').forEach((el)=>{
+    const labels={londonToUkEurope:'From London → Greater UK / major Europe',hongKongToChinaJapanKorea:'From Hong Kong → China / Japan / Korea',domesticUsa:'Domestic USA',domesticChina:'Domestic China',domesticIndia:'Domestic India',indiaToSriLankaMaldives:'India → Sri Lanka / Maldives',domesticAustralia:'Domestic Australia',australiaToOceania:'Australia → other Oceania'};
+    el.innerHTML=Object.entries(travel.tourSideMinimums).map(([key,value])=>`<article class="side-trip-card"><span>${esc(labels[key]||key)}</span><strong>${esc(value)}</strong></article>`).join('');
+  });
+
   document.querySelectorAll('[data-travel-practicalities]').forEach((el)=>{
     el.innerHTML=travel.practicalities.map((paragraph)=>`<p>${esc(paragraph)}</p>`).join('');
   });
@@ -131,6 +144,10 @@ function renderPolicies(){
 
   document.querySelectorAll('[data-boundaries-policy]').forEach((el)=>{
     el.innerHTML=policies.boundaries.map((paragraph)=>`<p>${esc(paragraph)}</p>`).join('');
+  });
+
+  document.querySelectorAll('[data-etiquette-more]').forEach((el)=>{
+    el.innerHTML=policies.expanded.map((item,index)=>`<details${index===0?' open':''}><summary>${esc(item.title)}</summary><div class="detail-body"><p>${esc(item.body)}</p></div></details>`).join('');
   });
 }
 
@@ -167,11 +184,15 @@ function renderReputation(){
   });
 
   document.querySelectorAll('[data-reputation-reviews]').forEach((el)=>{
-    el.innerHTML=reputation.reviews.map((review)=>`
-      <article class="review-item">
-        <blockquote>“${esc(review.excerpt)}”</blockquote>
-        <footer>${esc(review.source)} · ${esc(review.date)}</footer>
-      </article>`).join('');
+    const years=[...new Set(reputation.reviews.map((review)=>review.year))].sort((a,b)=>b-a);
+    el.innerHTML=years.map((year)=>{
+      const items=reputation.reviews.filter((review)=>review.year===year).map((review)=>`
+        <article class="review-item">
+          <p class="review-copy${review.type==='excerpt'?' quoted':''}">${esc(review.excerpt)}</p>
+          <footer>${esc(review.source)} · ${esc(review.date)}</footer>
+        </article>`).join('');
+      return `<section class="review-year"><div class="review-year-label">${year}</div><div class="review-year-grid">${items}</div></section>`;
+    }).join('');
   });
 
   document.querySelectorAll('[data-home-trust]').forEach((el)=>{
@@ -201,6 +222,34 @@ function renderDateIdeas(){
         <h3>${esc(item.title)}</h3>
         <p>${esc(item.body)}</p>
       </article>`).join('');
+  });
+
+  document.querySelectorAll('[data-wishlist-details]').forEach((el)=>{
+    el.innerHTML=REBECCA_DATA.wishlist.details.map((group,index)=>`
+      <details${index===0?' open':''}>
+        <summary>${esc(group.title)}</summary>
+        <div class="detail-body detail-chips">${group.items.map((item)=>`<span>${esc(item)}</span>`).join('')}</div>
+      </details>`).join('');
+  });
+
+  document.querySelectorAll('[data-wishlist-links]').forEach((el)=>{
+    el.innerHTML=`<a class="button button-outline" href="${esc(REBECCA_DATA.wishlist.throneUrl)}" target="_blank" rel="noreferrer">View Rebecca’s Throne wishlist ↗</a>`;
+  });
+}
+
+function renderAuthority(){
+  document.querySelectorAll('[data-press-appearances]').forEach((el)=>{
+    el.innerHTML=REBECCA_DATA.press.appearances.map((item)=>`<article class="authority-card"><span>${esc(item.outlet)} · ${esc(item.year)}</span><h3>${esc(item.title)}</h3><p>${esc(item.note)}</p><a class="inline-link" href="${esc(item.url)}" target="_blank" rel="noreferrer">Read source <span aria-hidden="true">↗</span></a></article>`).join('');
+  });
+  document.querySelectorAll('[data-external-profiles]').forEach((el)=>{
+    el.innerHTML=REBECCA_DATA.press.externalProfiles.map((item)=>`<a class="authority-link" href="${esc(item.url)}" target="_blank" rel="noreferrer">${esc(item.label)} <span aria-hidden="true">↗</span></a>`).join('');
+  });
+  document.querySelectorAll('[data-journal-entries]').forEach((el)=>{
+    el.innerHTML=REBECCA_DATA.journal.entries.map((item)=>`<article class="journal-card"><span>${esc(item.outlet)} · ${esc(item.year)}</span><h3>${esc(item.title)}</h3><p>${esc(item.note)}</p><a class="inline-link" href="${esc(item.url)}" target="_blank" rel="noreferrer">Read the original <span aria-hidden="true">↗</span></a></article>`).join('');
+  });
+  document.querySelectorAll('[data-updates-card]').forEach((el)=>{
+    const u=REBECCA_DATA.updates;
+    el.innerHTML=`<p class="page-kicker">Stay in the loop</p><h2>${esc(u.title)}</h2><p>${esc(u.body)}</p><a class="button button-dark" href="${esc(u.channelUrl)}" target="_blank" rel="noreferrer">${esc(u.channelLabel)} ↗</a>`;
   });
 }
 
@@ -234,6 +283,7 @@ renderProfile();
 renderPersonality();
 renderReputation();
 renderDateIdeas();
+renderAuthority();
 renderSingapore();
 renderTravel();
 renderPolicies();

@@ -4,7 +4,7 @@
 
 export const REBECCA_DATA = {
   meta: {
-    dataVersion: '2026-10-05.7B',
+    dataVersion: '2026-10-06.7E-rc',
     lastVerified: '2026-10-05',
     originalPublicSite: 'https://www.risquerebecca.com/',
     reviewDomain: 'https://rebeccaproject.vercel.app'
@@ -59,6 +59,21 @@ export const REBECCA_DATA = {
       { label: 'Style', value: 'Elegant · feminine · quiet luxury' },
       { label: 'Weaknesses', value: 'Heels · tasting menus · good wine' },
       { label: 'Values', value: 'Freedom · balance · openness · curiosity' }
+    ],
+    fragments: [
+      { label: 'Favourite places', value: 'Uzbekistan · Japan · Argentina · Bolivia · Czech Republic' },
+      { label: 'Talk to me about', value: 'Books · travel · food · wine · culture · history · economics · F1 + cars' },
+      { label: 'Unexpected skills', value: 'Retired student athlete · classically trained pianist' },
+      { label: 'How to feed me', value: 'Tasting menus · sushi · steak · fresh seafood · thoughtful pairings' },
+      { label: 'Style', value: 'Elegant · feminine · quiet luxury' },
+      { label: 'Values', value: 'Freedom · balance · openness · curiosity' }
+    ],
+    faq: [
+      { question: 'Are you real?', answer: 'The public record is deliberately substantial: a long-running website, years of independent reviews, public writing and a large photo archive. Live availability and identity-sensitive details are still confirmed directly by Rebecca.' },
+      { question: 'I am new to this. What matters most?', answer: 'Read the practical pages, send a complete introduction, be reliable and make the logistics easy. Thoughtfulness beats overcomplication.' },
+      { question: 'What does a date with you tend to feel like?', answer: 'Natural, attentive and unhurried. Conversation, good food, humour and a sense that neither person is watching the clock matter more than theatre.' },
+      { question: 'Are you coming to my city?', answer: 'Public tours are selective. If you already know you would like to meet, an invitation with city, dates and duration is more useful than waiting for a tour announcement.' },
+      { question: 'What if we live in the same city and value privacy?', answer: 'Mutual discretion is part of the arrangement. Public dates and locations stay deliberately broad, and private logistics are shared only after the practical steps are complete.' }
     ],
     philosophy: {
       label: 'Pragmatic romantic',
@@ -256,6 +271,14 @@ export const REBECCA_DATA = {
       { title: 'If I have to cancel', body: 'If I cancel for ordinary reasons, your deposit is returned in full. Unsafe, pushy or disrespectful behaviour is a separate matter and ends the booking immediately.' },
       { title: 'When should I contact you?', body: 'When you are ready to complete screening and send the required deposit within 24 hours after details are agreed.' }
     ],
+    expanded: [
+      { title: 'Hosting in Singapore', body: 'Hosting is occasional and limited. Exact dates are shared privately with screened subscribers or returning guests rather than published broadly.' },
+      { title: 'Communication', body: 'Complete enquiries save time. Messaging channels are for respectful, practical communication; sensitive screening material should stay out of the website concierge.' },
+      { title: 'Inclusivity & accessibility', body: 'Rebecca welcomes respectful adults from varied backgrounds. If you need an accessibility accommodation, include it in the initial enquiry so logistics can be planned properly.' },
+      { title: 'Privacy & discretion', body: 'Public tour dates and locations remain deliberately broad. Exact logistics are shared privately after screening and the required deposit.' },
+      { title: 'References', body: 'Reference requests require Rebecca’s prior permission and should only be made when the relationship is recent enough for her to vouch accurately.' },
+      { title: 'Touring standards', body: 'When hosting on tour, Rebecca uses high-standard four- or five-star hotels and shares exact locations only close to the confirmed date.' }
+    ],
     boundaries: [
       'My rates are not negotiated. A boundary should never need to be stated twice. Private conversations, contact information and anything shared in confidence stay between us.',
       'I do not meet “off the clock.” I do not publicly show my face and I do not send extra private selfies on request. Outfit requests are welcome; micromanagement is not.',
@@ -310,6 +333,15 @@ export const REBECCA_DATA = {
     jewellery: '18K white or rose gold jewellery',
     champagneHouses: ['Krug', 'Billecart-Salmon', 'Egly-Ouriet'],
     wineInterests: ['Bordeaux', 'Montepulciano', 'Provence', 'Piedmont', 'Marlborough', 'Shandong/Ningxia', 'natural orange wines'],
+    throneUrl: 'https://throne.com/risquerebecca',
+    details: [
+      { title: 'Lingerie & fashion', items: ['Bordelle', 'Anoeses', 'Salute by Wacoal', 'Mariemur', 'Lululemon underwear size M', 'Hermès 90×90 silk scarves and twillies'] },
+      { title: 'Flowers', items: ['Light-coloured roses', 'Peonies', 'Hydrangeas', 'Orchids'] },
+      { title: 'Gift cards', items: ['Aman', 'Mandarin Oriental', 'ClassPass', 'Sephora'] },
+      { title: 'Bottles', items: ['Krug', 'Billecart-Salmon', 'Egly-Ouriet', 'Bordeaux', 'Montepulciano', 'Provence', 'Piedmont', 'Marlborough', 'Chinese wine from Shandong or Ningxia', 'Natural orange wines', 'Whisky', 'Sake', 'Gin', 'Mezcal', 'Tequila'] },
+      { title: 'Food', items: ['Oscietra caviar', 'Sea urchin', 'French unsalted butter', 'Premium seasonal fruit', 'Thoughtfully sourced regional ingredients', 'Charcuterie and cheese'] },
+      { title: 'Jewellery & keepsakes', items: ['18K white or rose gold jewellery', 'Watches — ask Rebecca for the current shortlist'] }
+    ],
     categories: [
       { label: 'Flowers', title: 'Big bouquets, soft colours.', body: 'Light-coloured roses, peonies, hydrangeas and orchids.' },
       { label: 'Bottles', title: 'Something worth opening together.', body: 'Krug, Billecart-Salmon, Egly-Ouriet, interesting wine, whisky, sake, gin, mezcal or tequila.' },
@@ -329,13 +361,51 @@ export const REBECCA_DATA = {
       { label: 'Public photography', value: '111 photographs', note: 'A substantial professional and candid archive, intentionally photo-only.' }
     ],
     reviews: [
-      { excerpt: 'Stunning in person, great communicator, reliable service, fun attitude, effortlessly professional.', source: 'Ivy Societe', date: 'June 2026', year: 2026 },
-      { excerpt: 'Classy, intellectual, engaging, energetic.', source: 'TER', date: 'November 2025', year: 2025 },
-      { excerpt: 'The full package and more.', source: 'Ivy Societe', date: 'March 2025', year: 2025 },
-      { excerpt: 'Genuine and magnetic.', source: 'Scarlet Blue', date: 'December 2024', year: 2024 },
-      { excerpt: 'Sweet, quirky, funny and genuine.', source: 'Scarlet Blue', date: 'December 2021', year: 2021 },
-      { excerpt: 'Anything shorter than a dinner date is limiting her magic.', source: 'Scarlet Blue', date: 'December 2018', year: 2018 }
+      { excerpt: 'Stunning in person, great communicator, reliable service, fun attitude, effortlessly professional.', source: 'Ivy Societe', date: 'June 2026', year: 2026, type: 'excerpt' },
+      { excerpt: 'A 2026 Scarlet Blue reviewer described Rebecca as exceptionally attentive, charismatic and even more striking in person than her photographs suggest.', source: 'Scarlet Blue', date: 'February 2026', year: 2026, type: 'summary' },
+      { excerpt: 'A returning guest wrote that four years later the same warmth, energy and ease were still there, with conversation feeling like catching up with an old friend.', source: 'Ivy Societe', date: 'January 2026', year: 2026, type: 'summary' },
+      { excerpt: 'A Hong Kong guest praised the effortless booking process, immediate chemistry, attentive presence and the feeling that the meeting never became routine.', source: 'Ivy Societe', date: 'November 2025', year: 2025, type: 'summary' },
+      { excerpt: 'Classy, intellectual, engaging, energetic.', source: 'TER', date: 'November 2025', year: 2025, type: 'excerpt' },
+      { excerpt: 'An August 2025 guest highlighted quiet confidence, easy conversation, affection and a strong sense of genuine presence rather than a rehearsed encounter.', source: 'AussieAffairs', date: 'August 2025', year: 2025, type: 'summary' },
+      { excerpt: 'Another August 2025 review focused on her cheerful energy, captivating conversation and the feeling of being the centre of her attention.', source: 'Ivy Societe', date: 'August 2025', year: 2025, type: 'summary' },
+      { excerpt: 'The full package and more.', source: 'Ivy Societe', date: 'March 2025', year: 2025, type: 'excerpt' },
+      { excerpt: 'A December 2024 Ivy Societe review described a date with Rebecca as something to experience rather than simply spend time on, with charm and conversation standing out as much as appearance.', source: 'Ivy Societe', date: 'December 2024', year: 2024, type: 'summary' },
+      { excerpt: 'Genuine and magnetic.', source: 'Scarlet Blue', date: 'December 2024', year: 2024, type: 'excerpt' },
+      { excerpt: 'A second Scarlet Blue review from December 2024 compared the date to a carefully paced tasting menu: warm, witty, playful and memorable.', source: 'Scarlet Blue', date: 'December 2024', year: 2024, type: 'summary' },
+      { excerpt: 'Sweet, quirky, funny and genuine.', source: 'Scarlet Blue', date: 'December 2021', year: 2021, type: 'excerpt' },
+      { excerpt: 'A February 2021 reviewer described multiple meetings marked by polished presentation, infectious energy and an easy ability to make someone feel relaxed.', source: 'Scarlet Blue', date: 'February 2021', year: 2021, type: 'summary' },
+      { excerpt: 'Anything shorter than a dinner date is limiting her magic.', source: 'Scarlet Blue', date: 'December 2018', year: 2018, type: 'excerpt' }
     ]
+  },
+
+  press: {
+    appearances: [
+      { outlet: 'Vogue Singapore', title: 'Two Singaporean sex workers on body shaming, OnlyFans and why they don’t need to be rescued', year: 2025, url: 'https://vogue.sg/two-singaporean-sex-workers-on-body-shaming-onlyfans-and-why-they-dont-need-to-be-rescued/', note: 'Interview feature on work, boundaries, independence and financial agency.' },
+      { outlet: 'VICE', title: 'What It’s Like Being an Escort in Singapore', year: 2021, url: 'https://www.vice.com/en/article/independent-escort-service-singapore-online-coronavirus-pandemic/', note: 'Interview on independent work, the pandemic, boundaries and running a solo practice.' },
+      { outlet: 'RICE Media', title: 'Risqué Rebecca: My Double Life as a Student Escort', year: 2017, url: 'https://www.ricemedia.co/risque-rebecca-my-double-life-as-a-student-escort/', note: 'Personal essay on privacy, identity and balancing two lives.' },
+      { outlet: 'RICE Media', title: 'The Economics of Social Escorts', year: 2017, url: 'https://www.ricemedia.co/the-economics-of-social-escorting/', note: 'Interview and analysis of the economics surrounding independent social escorting.' },
+      { outlet: 'RICE Media', title: '21, Sex Worker, and … a Feminist?', year: 2017, url: 'https://www.ricemedia.co/culture-people-21-sex-worker-feminist/', note: 'Profile discussing autonomy, stigma, work and personal agency.' }
+    ],
+    externalProfiles: [
+      { label: 'Original site', url: 'https://www.risquerebecca.com/' },
+      { label: 'Singapore duo partner', url: 'https://www.sgfemmefantasy.com/' }
+    ]
+  },
+
+  journal: {
+    entries: [
+      { title: 'Does True Love Exist? A Social Escort Responds.', year: 2017, outlet: 'RICE Media', url: 'https://www.ricemedia.co/culture-life-true-love-social-escort-responds/', note: 'Rebecca writes about the difference between professional intimacy and romantic attachment.' },
+      { title: 'Tough Love: An Escort on Dating Her Clients', year: 2017, outlet: 'RICE Media', url: 'https://www.ricemedia.co/culture-people-tough-love-an-escort-on-dating-her-clients/', note: 'A personal column about privacy, trust and the complications of attraction outside work.' },
+      { title: 'Risqué Rebecca: My Double Life as a Student Escort', year: 2017, outlet: 'RICE Media', url: 'https://www.ricemedia.co/risque-rebecca-my-double-life-as-a-student-escort/', note: 'A first-person reflection on identity, secrecy and maintaining a parallel professional life.' }
+    ]
+  },
+
+  updates: {
+    title: 'Notes, travel dates & occasional invitations.',
+    body: 'For public updates right now, Rebecca Afterhours is the active channel. An email-list provider can be connected later without changing the page structure.',
+    channelLabel: 'Rebecca Afterhours',
+    channelUrl: 'https://tinyurl.com/rebecca-afterhours',
+    emailSignupEnabled: false
   },
 
   gallery: {
