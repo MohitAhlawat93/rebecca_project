@@ -4,7 +4,7 @@
 
 export const REBECCA_DATA = {
   meta: {
-    dataVersion: '2026-10-06.7E-rc',
+    dataVersion: '2026-10-06.7E',
     lastVerified: '2026-10-05',
     originalPublicSite: 'https://www.risquerebecca.com/',
     reviewDomain: 'https://rebeccaproject.vercel.app'
