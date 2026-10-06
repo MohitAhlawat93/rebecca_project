@@ -28,13 +28,20 @@
   if(currentPath==='/'&&document.querySelector('.authority-preview-grid')){
     const cards=[...document.querySelectorAll('.authority-preview-card')];
     const previews=[
-      {href:'/journal',label:'Journal',title:'Essays, notes & Rebecca in her own words.',body:'Read selected public writing on travel, taste, work, relationships and the things that keep her curious.',cta:'Read the journal',image:'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/0897481e-d4dd-4cde-9884-7f88d8e4b099/_DSC8781-copy.jpg',alt:'Rebecca editorial portrait for the Journal'},
-      {href:'/press',label:'Press & appearances',title:'Interviews, profiles & public appearances.',body:'Explore interviews, profiles and independent coverage from Rebecca’s public record.',cta:'View press & appearances',image:'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/04454536-91f8-44d4-941a-da3be1203bde/_DSC8088-copy.jpg',alt:'Rebecca editorial portrait for Press and appearances'}
+      {href:'/journal',label:'Journal',title:'Essays, notes & Rebecca in her own words.',body:'Read selected public writing on travel, taste, work, relationships and the things that keep her curious.',cta:'Read the journal',alt:'Rebecca editorial portrait for the Journal',images:[
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/0880df2d-3552-4896-a01e-c4cee47c0b14/_DSC9200-copy.jpg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/5123b6bb-49ba-49d0-a517-bd6b0f78f568/_DSC7850-censored.jpg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/2380b139-2528-4e3f-993b-10b08b4d8675/_DSC8453-copy.jpg']},
+      {href:'/press',label:'Press & appearances',title:'Interviews, profiles & public appearances.',body:'Explore interviews, profiles and independent coverage from Rebecca’s public record.',cta:'View press & appearances',alt:'Rebecca editorial portrait for Press and appearances',images:[
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/2b883ed8-ef4a-42f8-b957-35734cdacf80/_DSC8677-copy.jpg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/ede1df29-536a-4398-8511-98d26c3187b8/_DSC8011-copy.jpg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/2ca283eb-d85a-4d40-9c6e-53b38d339d81/_DSC8859-copy.jpg']}
     ];
     cards.slice(0,2).forEach((card,index)=>{
       const item=previews[index]; if(!item)return;
       card.classList.add('has-image'); card.href=item.href;
-      card.innerHTML=`<img class="authority-preview-image" src="${item.image}?format=750w" alt="${item.alt}" loading="lazy" decoding="async" srcset="${item.image}?format=500w 500w, ${item.image}?format=750w 750w, ${item.image}?format=1000w 1000w" sizes="(max-width: 900px) 100vw, 50vw"><span>${item.label}</span><h2>${item.title}</h2><p>${item.body}</p><em>${item.cta} <b aria-hidden="true">→</b></em>`;
+      const media=item.images.map((image,imageIndex)=>`<img data-rotating-image class="authority-preview-image${imageIndex===0?' is-active':''}" src="${image}?format=${imageIndex===0?'750':'500'}w" alt="${imageIndex===0?item.alt:''}" loading="lazy" decoding="async" srcset="${image}?format=500w 500w, ${image}?format=750w 750w, ${image}?format=1000w 1000w" sizes="(max-width: 900px) 100vw, 50vw">`).join('');
+      card.innerHTML=`<div class="authority-card-rotator" data-image-rotator>${media}</div><span>${item.label}</span><h2>${item.title}</h2><p>${item.body}</p><em>${item.cta} <b aria-hidden="true">→</b></em>`;
     });
   }
   const SEO_LOCALIZED_PATHS=new Set(['/','/about','/rates','/travel','/date-ideas','/favourites','/gallery','/etiquette','/reviews','/journal','/press','/contact']);
