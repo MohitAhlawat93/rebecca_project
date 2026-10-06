@@ -315,7 +315,7 @@ function renderEditorialBreaks(){
   const images=(REBECCA_IMAGES.curated[item.key]||REBECCA_IMAGES.curated.hero||[]).slice(0,item.rotate?3:1);
   const el=document.createElement('section');
   el.className='editorial-motion-break';el.dataset.editorialBreak=item.key;el.setAttribute('aria-label','Rebecca editorial interlude');
-  const media=images.map((url,index)=>`<img class="editorial-motion-slide${index===0?' is-active':''}" src="${esc(imageVariant(url,1500))}" srcset="${esc(imageSrcset(url,[750,1000,1500,2500]))}" sizes="100vw" alt="Rebecca editorial portrait" loading="lazy" decoding="async" data-image-role="editorial-motion">`).join('');
+  const media=images.map((url,index)=>`<img class="editorial-motion-slide${index===0?' is-active':''}" src="${esc(imageVariant(url,1000))}" srcset="${esc(imageSrcset(url,[500,750,1000,1500]))}" sizes="100vw" alt="Rebecca editorial portrait" loading="lazy" decoding="async" data-image-role="editorial-motion">`).join('');
   el.innerHTML=`<div class="editorial-motion-media${item.rotate?' is-rotating':''}" ${item.rotate?'data-editorial-rotator':''} data-parallax>${media}</div><div class="editorial-motion-copy" data-reveal><p class="page-kicker">${esc(item.kicker)}</p><h2>${esc(item.title)}</h2><p>${esc(item.body)}</p></div>`;
   if(item.placement==='after')section.insertAdjacentElement('afterend',el);else section.insertAdjacentElement('beforebegin',el);
 }

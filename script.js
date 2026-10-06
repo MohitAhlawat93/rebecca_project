@@ -8,6 +8,35 @@
   const localizedMatch=rawPath.match(/^\/(zh|hi|fr|es)(?:\/(.*))?$/);
   const routeLocale=localizedMatch?LOCALE_PREFIXES[localizedMatch[1]]:null;
   const currentPath=localizedMatch?('/'+(localizedMatch[2]||'')).replace(/\/$/,'')||'/':rawPath;
+  // Phase 7H.1 visual balance and clearer destinations.
+  document.body.classList.toggle('favourites-page',currentPath==='/favourites');
+
+  if(currentPath==='/gallery'){
+    const panels=[...document.querySelectorAll('.archive-link-panel')];
+    const galleryCopy=[
+      {label:'Professional gallery',title:'Editorial portraits & polished shoots',body:'Styled portraits, commissioned shoots and Rebecca’s more polished portfolio photography.',cta:'Browse professional gallery',href:'/professional'},
+      {label:'Candid gallery',title:'Selfies, travel & everyday moments',body:'Less-produced photographs, selfies and candid moments from Rebecca’s public collection.',cta:'Browse candid gallery',href:'/selfies-of-risquerebecca'}
+    ];
+    panels.slice(0,2).forEach((panel,index)=>{
+      const item=galleryCopy[index]; if(!item)return;
+      panel.classList.add(index===0?'professional':'candid');
+      panel.href=item.href;
+      panel.innerHTML=`<span>${item.label}</span><strong>${item.title}</strong><p>${item.body}</p><em>${item.cta} <b aria-hidden="true">→</b></em>`;
+    });
+  }
+
+  if(currentPath==='/'&&document.querySelector('.authority-preview-grid')){
+    const cards=[...document.querySelectorAll('.authority-preview-card')];
+    const previews=[
+      {href:'/journal',label:'Journal',title:'Essays, notes & Rebecca in her own words.',body:'Read selected public writing on travel, taste, work, relationships and the things that keep her curious.',cta:'Read the journal',image:'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/0897481e-d4dd-4cde-9884-7f88d8e4b099/_DSC8781-copy.jpg',alt:'Rebecca editorial portrait for the Journal'},
+      {href:'/press',label:'Press & appearances',title:'Interviews, profiles & public appearances.',body:'Explore interviews, profiles and independent coverage from Rebecca’s public record.',cta:'View press & appearances',image:'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/04454536-91f8-44d4-941a-da3be1203bde/_DSC8088-copy.jpg',alt:'Rebecca editorial portrait for Press and appearances'}
+    ];
+    cards.slice(0,2).forEach((card,index)=>{
+      const item=previews[index]; if(!item)return;
+      card.classList.add('has-image'); card.href=item.href;
+      card.innerHTML=`<img class="authority-preview-image" src="${item.image}?format=750w" alt="${item.alt}" loading="lazy" decoding="async" srcset="${item.image}?format=500w 500w, ${item.image}?format=750w 750w, ${item.image}?format=1000w 1000w" sizes="(max-width: 900px) 100vw, 50vw"><span>${item.label}</span><h2>${item.title}</h2><p>${item.body}</p><em>${item.cta} <b aria-hidden="true">→</b></em>`;
+    });
+  }
   const SEO_LOCALIZED_PATHS=new Set(['/','/about','/rates','/travel','/date-ideas','/favourites','/gallery','/etiquette','/reviews','/journal','/press','/contact']);
 
   const SUPPORTED_LANGUAGES={
