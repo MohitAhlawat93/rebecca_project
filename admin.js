@@ -706,8 +706,13 @@ document.addEventListener('click', (event) => {
     const placement = mediaPlacement();
     const list = mediaState.placements[activeMediaPlacement] || [];
     const index = list.indexOf(id);
-    if (index >= 0) list.splice(index, 1);
-    else if (list.length < placement.max) list.push(id);
+    if (index >= 0) {
+      if (list.length <= 1) {
+        setText('[data-media-draft-detail]', 'Keep at least one photo in every website area.');
+        return;
+      }
+      list.splice(index, 1);
+    } else if (list.length < placement.max) list.push(id);
     else {
       setText('[data-media-draft-detail]', 'This area can rotate up to ' + placement.max + ' photos.');
       return;
