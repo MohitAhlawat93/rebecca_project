@@ -1,6 +1,6 @@
 {
   "name": "risque-rebecca",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -8,8 +8,9 @@
   },
   "scripts": {
     "validate:data": "node scripts/validate-data.mjs",
-    "validate:syntax": "node --check data/rebecca-data.js && node --check lib/rebecca-knowledge.js && node --check api/concierge.js && node --check content.js && node --check script.js",
-    "validate": "npm run validate:syntax && npm run validate:data && npm run validate:images",
-    "validate:images": "node scripts/validate-images.mjs"
+    "validate:syntax": "node --check data/rebecca-data.js && node --check lib/rebecca-knowledge.js && node --check lib/concierge-planner.js && node --check api/concierge.js && node --check content.js && node --check script.js",
+    "validate": "npm run validate:syntax && npm run validate:data && npm run validate:images && npm run validate:concierge",
+    "validate:images": "node scripts/validate-images.mjs",
+    "validate:concierge": "node scripts/validate-concierge.mjs"
   }
 }
