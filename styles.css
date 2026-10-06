@@ -618,3 +618,9 @@ body.gallery-lightbox-open{overflow:hidden}
 .newsletter-fallback{margin-top:13px!important}
 @media(max-width:640px){.image-chapter{height:520px}.image-chapter>img{object-position:58% 34%}.image-chapter::after{background:linear-gradient(0deg,rgba(20,16,15,.72),rgba(20,16,15,.1) 72%)}.image-chapter-copy{left:24px;right:24px;bottom:34px}.image-chapter-copy blockquote{font-size:54px}.newsletter-name-row{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.hero-frame .hero-slide{transition:none}}
+
+
+/* Phase 7G.1 — tablet footer QA hotfix */
+@media(max-width:820px){
+  .footer-links{flex-wrap:wrap;row-gap:14px}
+}
