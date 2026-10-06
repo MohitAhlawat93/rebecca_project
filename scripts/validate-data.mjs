@@ -24,6 +24,9 @@ for(const rate of singapore.rates){
 assert(Number.isFinite(singapore.extensionPerHour)&&singapore.extensionPerHour>0,'extension amount is invalid');
 assert(Number.isFinite(singapore.terms.couples.surcharge),'couples surcharge is missing');
 assert(typeof singapore.terms.phoneCall.creditTowardBooking==='boolean','phone-call credit flag must be explicit');
+assert(singapore.terms.couples.surcharge===800,'confirmed couples surcharge must be SGD 800');
+assert(singapore.terms.phoneCall.creditTowardBooking===true,'confirmed phone-call credit must be enabled');
+assert(travel.fmty.find((item)=>item.id==='selected-asia')?.minimum==='14 hours + travel','confirmed selected-Asia FMTY minimum must be 14 hours + travel');
 
 assert(travel.calendar.length>=1,'travel calendar is empty');
 assert(travel.fmty.length>=1,'FMTY rules are empty');

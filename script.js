@@ -97,6 +97,7 @@
     });
   };
   rewriteInternalLinks();
+  setTimeout(rewriteInternalLinks,0);
 
   const menuToggle=document.querySelector('[data-menu-toggle]');
   const mobileMenu=document.querySelector('[data-mobile-menu]');
@@ -360,6 +361,7 @@
     });
   }
   setTimeout(hydrateNewsletter,0);
+  window.addEventListener('load',hydrateNewsletter,{once:true});
   document.addEventListener('submit',async(event)=>{
     const newsletterForm=event.target.closest?.('[data-newsletter-form]');if(!newsletterForm)return;event.preventDefault();
     const status=newsletterForm.querySelector('[data-newsletter-status]'),button=newsletterForm.querySelector('button[type="submit"]');
