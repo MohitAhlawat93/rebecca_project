@@ -1,11 +1,13 @@
+import { REBECCA_IMAGES } from './rebecca-images.js';
+
 // Canonical public facts for Risqué Rebecca.
 // Edit mutable profile/rate/travel/policy/contact facts here first.
 // Website renderers and the AI concierge consume this same module.
 
 export const REBECCA_DATA = {
   meta: {
-    dataVersion: '2026-10-06.7G',
-    lastVerified: '2026-10-05',
+    dataVersion: '2026-10-06.7H-rc',
+    lastVerified: '2026-10-06',
     originalPublicSite: 'https://www.risquerebecca.com/',
     reviewDomain: 'https://rebeccaproject.vercel.app'
   },
@@ -418,9 +420,9 @@ export const REBECCA_DATA = {
   },
 
   gallery: {
-    professionalCount: 67,
-    candidCount: 44,
-    totalCount: 111,
+    professionalCount: REBECCA_IMAGES.professional.length,
+    candidCount: REBECCA_IMAGES.candid.length,
+    totalCount: REBECCA_IMAGES.archiveTotal,
     photoOnly: true,
     professionalPath: '/professional',
     candidPath: '/selfies-of-risquerebecca'
