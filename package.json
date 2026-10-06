@@ -1,6 +1,6 @@
 {
   "name": "risque-rebecca",
-  "version": "2.8.1",
+  "version": "2.9.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -8,10 +8,11 @@
   },
   "scripts": {
     "validate:data": "node scripts/validate-data.mjs",
-    "validate:syntax": "node --check data/rebecca-data.js && node --check lib/rebecca-knowledge.js && node --check lib/concierge-planner.js && node --check api/concierge.js && node --check api/translate.js && node --check api/newsletter.js && node --check content.js && node --check script.js",
+    "validate:syntax": "node --check data/rebecca-images.js && node --check data/rebecca-data.js && node --check lib/rebecca-knowledge.js && node --check lib/concierge-planner.js && node --check api/concierge.js && node --check api/translate.js && node --check api/newsletter.js && node --check content.js && node --check script.js",
     "validate": "npm run validate:syntax && npm run validate:data && npm run validate:images && npm run validate:concierge && npm run validate:i18n",
     "validate:images": "node scripts/validate-images.mjs",
     "validate:concierge": "node scripts/validate-concierge.mjs",
-    "validate:i18n": "node scripts/validate-navigation-i18n.mjs"
+    "validate:i18n": "node scripts/validate-navigation-i18n.mjs",
+    "sync:images": "node scripts/sync-image-pages.mjs"
   }
 }

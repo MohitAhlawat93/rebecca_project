@@ -1,4 +1,5 @@
 import { REBECCA_DATA, formatSgd } from './data/rebecca-data.js';
+import { REBECCA_IMAGES, imageVariant, imageSrcset } from './data/rebecca-images.js';
 
 const esc=(value='')=>String(value)
   .replaceAll('&','&amp;')
@@ -296,6 +297,29 @@ function renderFavourites(){
   });
 }
 
+function renderEditorialBreaks(){
+  const config={
+    '/about':{key:'about',kicker:'A pause',title:'Luxury is ease, not theatre.',body:'The best meetings feel unforced: enough time, somewhere beautiful, and no need to perform.',anchor:'[data-profile-interview]',placement:'after',rotate:false},
+    '/reviews':{key:'reviews',kicker:'Since 2015',title:'A reputation built slowly.',body:'Trust is more convincing when it accumulates over years rather than arriving as a marketing claim.',anchor:'[data-reputation-reviews]',placement:'before',rotate:false},
+    '/travel':{key:'travel',kicker:'Somewhere else',title:'Bring me somewhere worth staying.',body:'A different city changes the rhythm. The invitation matters more when the destination has a point of view.',anchor:'[data-fmty-grid]',placement:'before',rotate:true},
+    '/favourites':{key:'favourites',kicker:'Taste',title:'Good taste is part of the conversation.',body:'The table, the bottle, the room and the small details are all part of how a date feels.',anchor:'[data-favourites-things]',placement:'before',rotate:true},
+    '/date-ideas':{key:'dateIdeas',kicker:'After dinner',title:'Make dinner the beginning.',body:'A good date has texture: something to taste, somewhere to wander, something neither of us needs to rush.',anchor:'[data-wishlist-categories]',placement:'before',rotate:true},
+    '/etiquette':{key:'etiquette',kicker:'Discretion',title:'Privacy is part of the luxury.',body:'Clear expectations make everything else easier, warmer and considerably more relaxed.',anchor:'[data-etiquette-more]',placement:'before',rotate:false}
+  };
+  const raw=(window.location.pathname.replace(/\/$/,'')||'/');
+  const path=raw.replace(/^\/(zh|hi|fr|es)(?=\/|$)/,'')||'/';
+  const item=config[path];
+  if(!item||document.querySelector(`[data-editorial-break="${item.key}"]`))return;
+  const section=document.querySelector(item.anchor)?.closest('section');
+  if(!section)return;
+  const images=(REBECCA_IMAGES.curated[item.key]||REBECCA_IMAGES.curated.hero||[]).slice(0,item.rotate?3:1);
+  const el=document.createElement('section');
+  el.className='editorial-motion-break';el.dataset.editorialBreak=item.key;el.setAttribute('aria-label','Rebecca editorial interlude');
+  const media=images.map((url,index)=>`<img class="editorial-motion-slide${index===0?' is-active':''}" src="${esc(imageVariant(url,1500))}" srcset="${esc(imageSrcset(url,[750,1000,1500,2500]))}" sizes="100vw" alt="Rebecca editorial portrait" loading="lazy" decoding="async" data-image-role="editorial-motion">`).join('');
+  el.innerHTML=`<div class="editorial-motion-media${item.rotate?' is-rotating':''}" ${item.rotate?'data-editorial-rotator':''} data-parallax>${media}</div><div class="editorial-motion-copy" data-reveal><p class="page-kicker">${esc(item.kicker)}</p><h2>${esc(item.title)}</h2><p>${esc(item.body)}</p></div>`;
+  if(item.placement==='after')section.insertAdjacentElement('afterend',el);else section.insertAdjacentElement('beforebegin',el);
+}
+
 function renderContact(){
   const contact=REBECCA_DATA.contact;
   const policies=REBECCA_DATA.policies;
@@ -328,6 +352,7 @@ renderReputation();
 renderDateIdeas();
 renderAuthority();
 renderFavourites();
+renderEditorialBreaks();
 renderSingapore();
 renderTravel();
 renderPolicies();
@@ -335,3 +360,4 @@ renderContact();
 
 window.__REBECCA_DATA__=REBECCA_DATA;
 document.documentElement.dataset.rebeccaDataVersion=REBECCA_DATA.meta.dataVersion;
+document.dispatchEvent(new CustomEvent('rebecca:content-ready'));
