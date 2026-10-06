@@ -70,3 +70,15 @@ GitHub `main` is connected to Vercel. Production deployment is triggered by the 
 - `robots.txt`, `sitemap.xml`, canonical URLs and homepage structured data are prepared for the review domain.
 - At custom-domain cutover, replace review-domain canonical/OG/sitemap/structured-data URLs with `https://www.risquerebecca.com`.
 - See `LAUNCH_CHECKLIST.md` for the final cutover sequence.
+
+
+## Rebecca Control — RC-01 + RC-02 integrated
+
+The current site includes the private Rebecca Control foundation and Quick Control editor at `/admin`.
+
+- RC-01: server-side owner authentication, signed HttpOnly session, login throttling, noindex/no-store admin boundary.
+- RC-02: availability, travel, Singapore rates, contact details and core profile facts in one mobile-first editor.
+- Public pages and the AI concierge consume the same effective runtime content.
+- `data/rebecca-data.js` remains the fail-safe fallback if persistent runtime storage is unavailable.
+- Normal owner edits do not require GitHub or a Vercel deployment after Rebecca's isolated runtime store is connected.
+- Until `RC_SUPABASE_URL` and `RC_SUPABASE_SECRET_KEY` are configured, Quick Control remains safely read-only and will not pretend edits were saved.
