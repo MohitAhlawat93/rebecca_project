@@ -10,9 +10,18 @@ import { REBECCA_DATA, formatSingaporeRatesCompact } from '../data/rebecca-data.
 import { retrieveRebeccaKnowledge } from '../lib/rebecca-knowledge.js';
 
 delete process.env.RC_SUPABASE_URL;
-delete process.env.RC_SUPABASE_SECRET_KEY;
+delete process.env.RC_SUPABASE_PUBLISHABLE_KEY;
+delete process.env.RC_STORE_SECRET;
 
 assert.equal(adminStoreConfigured(), false);
+
+process.env.RC_SUPABASE_URL = 'https://example.supabase.co';
+process.env.RC_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_test';
+process.env.RC_STORE_SECRET = 'test-only-secret';
+assert.equal(adminStoreConfigured(), true);
+delete process.env.RC_SUPABASE_URL;
+delete process.env.RC_SUPABASE_PUBLISHABLE_KEY;
+delete process.env.RC_STORE_SECRET;
 
 const defaults = buildDefaultQuickControlState();
 assert.equal(defaults.availability.status, 'accepting');
