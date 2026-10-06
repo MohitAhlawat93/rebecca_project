@@ -39,9 +39,14 @@ export default async function handler(req, res) {
       const saved = await writeQuickControlState(body.state, 'Rebecca');
       return res.status(200).json({ ok: true, ...saved });
     } catch (error) {
-      if (error?.code === 'STORE_NOT_CONFIGURED') {
+      if (error?.code === 'STORE_NOT_CONFIGURED' || error?.code === 'STORE_UNAVAILABLE') {
         return res.status(503).json({
-          error: 'RC-02 storage is ready in code but has not been connected yet. No public content was changed.'
+          error: 'Quick Control storage is not available right now. No public content was changed.'
+        });
+      }
+      if (error?.code === 'STORE_CONFLICT') {
+        return res.status(409).json({
+          error: 'This content changed in another session. Reload Rebecca Control before saving again.'
         });
       }
       console.error('RC-02 save failed:', error);

@@ -81,4 +81,23 @@ The current site includes the private Rebecca Control foundation and Quick Contr
 - Public pages and the AI concierge consume the same effective runtime content.
 - `data/rebecca-data.js` remains the fail-safe fallback if persistent runtime storage is unavailable.
 - Normal owner edits do not require GitHub or a Vercel deployment after Rebecca's isolated runtime store is connected.
-- Until `RC_SUPABASE_URL` and `RC_SUPABASE_SECRET_KEY` are configured, Quick Control remains safely read-only and will not pretend edits were saved.
+- Quick Control persists through a least-privilege Supabase RLS store using `RC_SUPABASE_URL`, `RC_SUPABASE_PUBLISHABLE_KEY` and a server-only `RC_STORE_SECRET`. The website never needs a Supabase service-role/master key.
+
+
+### RC-02B persistence
+
+Rebecca Control uses a deliberately narrow persistence model:
+
+- Vercel holds a Supabase publishable key plus a separate high-entropy `RC_STORE_SECRET`.
+- The browser never receives either the control secret or direct database access.
+- Supabase RLS checks the server-only `x-rc-control-secret` header for the single `current` row.
+- `anon` receives column-level SELECT/UPDATE only for the public content fields. It cannot insert/delete rows or read/change the stored secret hash.
+- Optimistic version checks prevent one admin session from silently overwriting a newer edit.
+- `data/rebecca-data.js` stays the canonical fail-safe if storage cannot be reached.
+
+Required Vercel environment variables:
+- `RC_SUPABASE_URL`
+- `RC_SUPABASE_PUBLISHABLE_KEY`
+- `RC_STORE_SECRET`
+
+The current testing database belongs to Mohit's Supabase account. Before handoff, reproduce `supabase/rc-02-quick-control.sql` in Rebecca's Supabase project, set a fresh `RC_STORE_SECRET`, copy the current payload, and replace only these environment values.
