@@ -42,7 +42,13 @@ assert(contact.email.includes('@'),'contact email is invalid');
 assert(contact.whatsappUrl.startsWith('https://wa.me/'),'WhatsApp URL is invalid');
 assert(contact.telegramUrl.startsWith('https://t.me/'),'Telegram URL is invalid');
 assert(REBECCA_DATA.reputation.proofPoints?.length>=4,'reputation proof points are incomplete');
-assert(REBECCA_DATA.reputation.reviews?.length>=6,'review history is incomplete');
+assert(REBECCA_DATA.reputation.reviews?.length>=12,'review history is incomplete');
+assert(REBECCA_DATA.press.appearances?.length>=4,'press archive is incomplete');
+assert(REBECCA_DATA.journal.entries?.length>=3,'journal archive is incomplete');
+assert(REBECCA_DATA.profile.fragments?.length>=6,'profile fragments are incomplete');
+assert(REBECCA_DATA.profile.faq?.length>=4,'profile FAQ is incomplete');
+assert(REBECCA_DATA.policies.expanded?.length>=5,'expanded etiquette is incomplete');
+assert(REBECCA_DATA.wishlist.details?.length>=5,'wishlist details are incomplete');
 assert(REBECCA_DATA.dateIdeas.categories?.length>=5,'date idea categories are incomplete');
 assert(REBECCA_DATA.wishlist.categories?.length>=5,'wishlist categories are incomplete');
 
@@ -52,12 +58,14 @@ assert(knowledgeText.includes(formatFmtySummary()),'RAG FMTY rules are not deriv
 
 const requiredBindings={
   'index.html':['data-profile-hero-meta','data-profile-home-facts'],
-  'about.html':['data-profile-about-facts','data-profile-philosophy','data-profile-interview'],
+  'about.html':['data-profile-about-facts','data-profile-philosophy','data-profile-interview','data-profile-fragments','data-profile-faq'],
   'reviews.html':['data-reputation-proof','data-reputation-reviews'],
-  'date-ideas.html':['data-date-categories','data-wishlist-categories'],
+  'journal.html':['data-journal-entries'],
+  'press.html':['data-press-appearances','data-external-profiles'],
+  'date-ideas.html':['data-date-categories','data-wishlist-categories','data-wishlist-details','data-wishlist-links'],
   'rates.html':['data-singapore-rates','data-singapore-terms','data-asia-promo'],
-  'travel.html':['data-travel-calendar','data-fmty-grid','data-touring-rates','data-travel-practicalities'],
-  'etiquette.html':['data-screening-policy','data-deposit-grid','data-cancellation-policy','data-boundaries-policy'],
+  'travel.html':['data-travel-calendar','data-fmty-grid','data-touring-rates','data-travel-side-trips','data-travel-practicalities'],
+  'etiquette.html':['data-screening-policy','data-deposit-grid','data-cancellation-policy','data-boundaries-policy','data-etiquette-more'],
   'contact.html':['data-contact-channels','data-duration-options','data-screening-options']
 };
 for(const [file,bindings] of Object.entries(requiredBindings)){
