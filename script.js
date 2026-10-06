@@ -149,19 +149,60 @@
   mobileMenu?.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>setMenu(false)));
   document.addEventListener('keydown',(event)=>{if(event.key==='Escape'){setMenu(false);if(!document.querySelector('[data-concierge-panel]')?.hidden)setConcierge(false);}});
 
-  const heroRotator=document.querySelector('[data-hero-rotator]');
-  if(heroRotator&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  const initHeroRotator=()=>{
+    const heroRotator=document.querySelector('[data-hero-rotator]');
+    if(!heroRotator||heroRotator.dataset.rcRotatorReady==='true'||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    heroRotator.dataset.rcRotatorReady='true';
+
     const slides=[...heroRotator.querySelectorAll('.hero-slide')];
-    const images=[
-      {base:'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/65d6926c-8342-4873-9532-2d809b0dccc1/processed__DSC9552-censored.jpeg',alt:'Rebecca in an editorial portrait'},
-      {base:'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/43fe8123-bcbe-4a80-88f5-a1f1a063a5fa/_DSC9244-copy.jpg',alt:'Rebecca editorial portrait'},
-      {base:'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/c4bcb8eb-8070-4c6e-95b7-98767443e03d/_DSC7015-copy.jpg',alt:'Rebecca lifestyle portrait'},
-      {base:'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/309ccac6-1cbe-4065-bc1e-0d139478d446/processed__DSC7889.jpeg',alt:'Rebecca portrait'}
+    const fallback=[
+      'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/65d6926c-8342-4873-9532-2d809b0dccc1/processed__DSC9552-censored.jpeg',
+      'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/43fe8123-bcbe-4a80-88f5-a1f1a063a5fa/_DSC9244-copy.jpg',
+      'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/c4bcb8eb-8070-4c6e-95b7-98767443e03d/_DSC7015-copy.jpg',
+      'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/309ccac6-1cbe-4065-bc1e-0d139478d446/processed__DSC7889.jpeg'
     ];
-    const setImage=(img,item)=>{img.src=item.base+'?format=1500w';img.srcset=[750,1000,1500,2500].map((w)=>item.base+'?format='+w+'w '+w+'w').join(', ');img.sizes='(max-width: 760px) 100vw, 50vw';img.alt=item.alt};
+    const runtime=window.__REBECCA_IMAGES__?.curated?.hero;
+    const source=Array.isArray(runtime)&&runtime.length?runtime:fallback;
+    const images=source.map((base,index)=>({
+      base,
+      alt:index===0?'Rebecca in an editorial portrait':'Rebecca editorial portrait'
+    }));
+    if(!images.length)return;
+
+    const isSquarespace=(url)=>String(url).includes('images.squarespace-cdn.com');
+    const setImage=(img,item)=>{
+      img.src=isSquarespace(item.base)?item.base+'?format=1500w':item.base;
+      img.srcset=isSquarespace(item.base)
+        ? [750,1000,1500,2500].map((w)=>item.base+'?format='+w+'w '+w+'w').join(', ')
+        : item.base;
+      img.sizes='(max-width: 760px) 100vw, 50vw';
+      img.alt=item.alt;
+    };
+
+    setImage(slides[0],images[0]);
+    if(slides[1])setImage(slides[1],images[Math.min(1,images.length-1)]);
+
     let activeSlide=0,imageIndex=0,rotating=false;
-    const rotate=async()=>{if(rotating||document.hidden)return;rotating=true;const nextImage=(imageIndex+1)%images.length,nextSlide=1-activeSlide,incoming=slides[nextSlide],outgoing=slides[activeSlide];if(!incoming||!outgoing){rotating=false;return}setImage(incoming,images[nextImage]);try{await incoming.decode?.()}catch{}incoming.classList.add('is-active');outgoing.classList.remove('is-active');imageIndex=nextImage;activeSlide=nextSlide;setTimeout(()=>{rotating=false},1300)};
+    const rotate=async()=>{
+      if(rotating||document.hidden||images.length<2)return;
+      rotating=true;
+      const nextImage=(imageIndex+1)%images.length,nextSlide=1-activeSlide,incoming=slides[nextSlide],outgoing=slides[activeSlide];
+      if(!incoming||!outgoing){rotating=false;return}
+      setImage(incoming,images[nextImage]);
+      try{await incoming.decode?.()}catch{}
+      incoming.classList.add('is-active');
+      outgoing.classList.remove('is-active');
+      imageIndex=nextImage;
+      activeSlide=nextSlide;
+      setTimeout(()=>{rotating=false},1300);
+    };
     setInterval(rotate,3000);
+  };
+
+  if(document.documentElement.dataset.rebeccaContentReady==='true')initHeroRotator();
+  else{
+    document.addEventListener('rebecca:content-ready',initHeroRotator,{once:true});
+    setTimeout(initHeroRotator,1800);
   }
 
   // Phase 7H.2 global scroll rail + elegant back-to-top control.
