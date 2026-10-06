@@ -62,6 +62,7 @@ const requiredBindings={
   'reviews.html':['data-reputation-proof','data-reputation-reviews'],
   'journal.html':['data-journal-entries'],
   'press.html':['data-press-appearances','data-external-profiles'],
+  'favourites.html':['data-favourites-table','data-favourites-things','data-favourites-interests'],
   'date-ideas.html':['data-date-categories','data-wishlist-categories','data-wishlist-details','data-wishlist-links'],
   'rates.html':['data-singapore-rates','data-singapore-terms','data-asia-promo'],
   'travel.html':['data-travel-calendar','data-fmty-grid','data-touring-rates','data-travel-side-trips','data-travel-practicalities'],

@@ -39,6 +39,8 @@ assert(!/available|confirmed booking|accepted/i.test(draft),'Draft must not clai
 
 const script=fs.readFileSync('script.js','utf8');
 assert(script.includes('page:currentPath'),'Client does not send page context');
+assert(script.includes('language:preferredLanguage'),'Client does not send preferred language');
+assert(script.includes('Rebecca’s Private Concierge'),'Premium concierge name is missing');
 assert(script.includes('renderChatActions'),'Client does not render structured actions');
 assert(script.includes("matchMedia('(max-width: 640px)')"),'Mobile keyboard behavior is not guarded');
 

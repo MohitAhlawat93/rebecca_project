@@ -16,7 +16,7 @@ Rules:
 - Never ask for or accept ID documents, employer documents, financial details, passwords or sensitive screening material.
 - Never reveal or reconstruct Rebecca's locked private Date Ideas list.
 - Rates are fixed. Never negotiate, invent discounts or imply exceptions.
-- Usually answer in 1-4 short sentences.
+- Usually answer in 1-4 short sentences.\n- If a preferred response language is supplied, answer naturally in that language while preserving all rates, dates, currencies and proper names exactly.
 - For simple greetings or casual chat, answer simply without immediately steering into booking.
 - For enquiry intent, help the visitor organize the public details they already provided, then point them to Rebecca’s official contact routes.
 - Never claim a booking is accepted or available. Rebecca confirms live availability herself.
@@ -54,7 +54,10 @@ function suggestionFor(message=''){
   if(/rate|price|cost|how much|sgd|couple|phone call/.test(q)) return {path:'/rates',label:'View rates'};
   if(/travel|tour|fly|city|india|hong kong|dubai|tokyo|london/.test(q)) return {path:'/travel',label:'View travel guidance'};
   if(/review|testimonial|reputation/.test(q)) return {path:'/reviews',label:'Read reviews'};
-  if(/date idea|dinner|gift|wishlist|restaurant|wine|spa/.test(q)) return {path:'/date-ideas',label:'Explore date ideas'};
+  if(/press|media|interview|appearance/.test(q)) return {path:'/press',label:'Press & appearances'};
+  if(/journal|blog|writing|essay|musings/.test(q)) return {path:'/journal',label:'Read Rebecca’s journal'};
+  if(/favourite|favorite|food|wine|champagne|gift|wishlist|flower|lingerie|jewellery|jewelry/.test(q)) return {path:'/favourites',label:'Explore favourites'};
+  if(/date idea|dinner|restaurant|spa|activity/.test(q)) return {path:'/date-ideas',label:'Explore date ideas'};
   if(/about|who|profile|height|language|education/.test(q)) return {path:'/about',label:'Meet Rebecca'};
   if(/contact|book|enquir|available|availability|meet/.test(q)) return {path:'/contact',label:'Start an enquiry'};
   return null;
@@ -132,7 +135,7 @@ function fallbackFor(message=''){
   if(/travel|tour|fly|city|india|hong kong|dubai|tokyo|london/.test(q)) return `Rebecca is based primarily in Asia and can travel by invitation. ${formatFmtySummary()} See the Travel page for details.`;
   if(/contact|book|enquir|available|availability|meet/.test(q)) return 'For live availability or an enquiry, use the Contact page and Rebecca will confirm directly.';
   if(/etiquette|deposit|cancel|rule|boundary/.test(q)) return 'Rebecca requires screening and a deposit to confirm dates, values discretion and good manners, and does not negotiate rates. See the Etiquette page for her current policies.';
-  return 'I can help with Rebecca’s public profile, rates, travel, etiquette, reviews and enquiry process. For anything private or live, please use her official contact channels.';
+  return 'I can help with Rebecca’s public profile, rates, travel, etiquette, reviews, favourites, press, journal and enquiry process. For anything private or live, please use her official contact channels.';
 }
 
 export default async function handler(req,res){
@@ -152,6 +155,8 @@ export default async function handler(req,res){
     content:typeof item?.content==='string'?item.content.trim().slice(0,800):''
   })).filter((item)=>item.content):[];
   const page=typeof body.page==='string'?body.page.trim().slice(0,120):'';
+  const languageNames={en:'English','zh-CN':'Simplified Chinese',hi:'Hindi',fr:'French',es:'Spanish'};
+  const language=languageNames[body.language]?body.language:'en';
 
   if(!message) return res.status(400).json({error:'Please enter a message.'});
   if(isPromptInjection(message)) return res.status(200).json({answer:'I can’t reveal or override private instructions. I can still help with Rebecca’s public information.',mode:'guardrail',suggestion:null});
@@ -180,7 +185,7 @@ export default async function handler(req,res){
         temperature:0.35,
         max_completion_tokens:280,
         messages:[
-          {role:'system',content:SYSTEM},
+          {role:'system',content:`${SYSTEM}\nPreferred response language: ${languageNames[language]}.`},
           ...history,
           {role:'user',content:`VISITOR QUESTION:\n${message}\n\nRETRIEVED PUBLIC CONTEXT:\n${context}`}
         ]
