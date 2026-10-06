@@ -50,4 +50,19 @@ if(!fs.readFileSync('script.js','utf8').includes("Phase 7H.1 visual balance"))fa
 if(!fs.readFileSync('script.js','utf8').includes('Browse professional gallery')||!fs.readFileSync('script.js','utf8').includes('Browse candid gallery'))fail('gallery destinations are not explicit');
 if(!fs.readFileSync('styles.css','utf8').includes('.favourites-page .page-hero'))fail('Favourites photographic hero missing');
 if(content.includes('imageVariant(url,1500)')||content.includes('[750,1000,1500,2500]'))fail('editorial motion still requests oversized default imagery');
-if(!process.exitCode)console.log(`Rebecca image validation passed: ${total} static responsive image elements, balanced editorial sections, and 163 normalized archive images.`);
+// Phase 7H.2 rotation and scroll checks
+const script72=fs.readFileSync('script.js','utf8');
+const content72=fs.readFileSync('content.js','utf8');
+const styles72=fs.readFileSync('styles.css','utf8');
+if(!script72.includes("Phase 7H.2 global scroll rail"))fail('global scroll rail missing');
+if(!script72.includes("},3000);")&&!script72.includes("},3000);"))fail('3-second rotator cadence missing');
+if(!script72.includes("setInterval(rotate,3000)"))fail('homepage hero is not on 3-second cadence');
+if(!content72.includes("Curiosity makes better company."))fail('About duplicate quote replacement missing');
+if(content72.includes("title:'Luxury is ease, not theatre.'"))fail('About duplicate image quote still present');
+for(const key of ['favouritesHero','journal','press','aboutFeature','galleryProfessional','galleryCandid']){
+  if(!fs.readFileSync('data/rebecca-images.js','utf8').includes('"'+key+'"'))fail('image set missing: '+key);
+}
+if(!content72.includes("renderPagePhotoHeroes()"))fail('Journal/Press/Favourites photo heroes missing');
+if(!styles72.includes(".page-scroll-rail"))fail('scroll rail styles missing');
+if(!styles72.includes(".page-hero-photo"))fail('rotating page hero styles missing');
+if(!process.exitCode)console.log(`Rebecca image validation passed: ${total} static responsive image elements, 3-second rotating editorial photography, global scroll rail, and 163 normalized archive images.`);
