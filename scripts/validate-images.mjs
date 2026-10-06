@@ -45,4 +45,9 @@ for(const file of ['gallery.html','zh/gallery.html','hi/gallery.html','fr/galler
   const html=fs.readFileSync(file,'utf8');
   if(!html.includes('professional archive — 81 public photographs')||!html.includes('candid archive — 82 public photographs'))fail(`${file}: gallery counts stale`);
 }
-if(!process.exitCode)console.log(`Rebecca image validation passed: ${total} static responsive image elements, 81 professional + 82 candid = 163 normalized archive images.`);
+// Phase 7H.1 visual checks
+if(!fs.readFileSync('script.js','utf8').includes("Phase 7H.1 visual balance"))fail('7H.1 page enhancement hook missing');
+if(!fs.readFileSync('script.js','utf8').includes('Browse professional gallery')||!fs.readFileSync('script.js','utf8').includes('Browse candid gallery'))fail('gallery destinations are not explicit');
+if(!fs.readFileSync('styles.css','utf8').includes('.favourites-page .page-hero'))fail('Favourites photographic hero missing');
+if(content.includes('imageVariant(url,1500)')||content.includes('[750,1000,1500,2500]'))fail('editorial motion still requests oversized default imagery');
+if(!process.exitCode)console.log(`Rebecca image validation passed: ${total} static responsive image elements, balanced editorial sections, and 163 normalized archive images.`);

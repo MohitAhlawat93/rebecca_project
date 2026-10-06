@@ -39,6 +39,10 @@
         {
           "key": "Cross-Origin-Opener-Policy",
           "value": "same-origin-allow-popups"
+        },
+        {
+          "key": "Link",
+          "value": "<https://images.squarespace-cdn.com>; rel=preconnect; crossorigin"
         }
       ]
     }
@@ -64,5 +68,8 @@
       "destination": "/contact",
       "permanent": true
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
 }
