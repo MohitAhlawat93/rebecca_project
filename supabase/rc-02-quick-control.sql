@@ -85,4 +85,15 @@ with check (
   ) = secret_hash
 );
 
+create or replace view public.rebecca_control_api
+with (security_invoker = true)
+as
+select id, version, payload, updated_by, updated_at
+from public.rebecca_control_state;
+
+revoke all on public.rebecca_control_api from anon, authenticated;
+grant select on public.rebecca_control_api to anon;
+grant update (version, payload, updated_by, updated_at)
+  on public.rebecca_control_api to anon;
+
 notify pgrst, 'reload schema';
