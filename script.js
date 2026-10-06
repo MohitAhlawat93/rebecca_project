@@ -14,27 +14,41 @@
   if(currentPath==='/gallery'){
     const panels=[...document.querySelectorAll('.archive-link-panel')];
     const galleryCopy=[
-      {label:'Professional gallery',title:'Editorial portraits & polished shoots',body:'Styled portraits, commissioned shoots and Rebecca’s more polished portfolio photography.',cta:'Browse professional gallery',href:'/professional'},
-      {label:'Candid gallery',title:'Selfies, travel & everyday moments',body:'Less-produced photographs, selfies and candid moments from Rebecca’s public collection.',cta:'Browse candid gallery',href:'/selfies-of-risquerebecca'}
+      {label:'Professional gallery',title:'Editorial portraits & polished shoots',body:'Styled portraits, commissioned shoots and Rebecca’s more polished portfolio photography.',cta:'Browse professional gallery',href:'/professional',alt:'Rebecca professional gallery preview',images:[
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/79b7180c-8aeb-4491-9a59-58bff4d2d69e/processed_I62A3592+copy.jpeg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/07dae98f-dd47-4faa-b37b-cd2624955ae0/processed__DSC9066.jpeg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/aa8270ef-b44f-4140-8de2-7a539c3166ed/processed_REO_0304+copy.jpeg']},
+      {label:'Candid gallery',title:'Selfies, travel & everyday moments',body:'Less-produced photographs, selfies and candid moments from Rebecca’s public collection.',cta:'Browse candid gallery',href:'/selfies-of-risquerebecca',alt:'Rebecca candid gallery preview',images:[
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/9b5f9b93-122a-428f-bf1f-cf697df4c4e1/photo_2026-02-28+00.40.18.jpeg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/d97fc01e-c8ab-47c0-b6a2-e8aaf2f98534/photo_2026-02-28+00.38.47.jpeg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/8e7f0798-c0a2-4b0b-81f1-159427df66da/photo_2026-02-28+00.38.36.jpeg']}
     ];
     panels.slice(0,2).forEach((panel,index)=>{
       const item=galleryCopy[index]; if(!item)return;
       panel.classList.add(index===0?'professional':'candid');
       panel.href=item.href;
-      panel.innerHTML=`<span>${item.label}</span><strong>${item.title}</strong><p>${item.body}</p><em>${item.cta} <b aria-hidden="true">→</b></em>`;
+      const media=item.images.map((image,imageIndex)=>`<img data-rotating-image class="page-photo-slide${imageIndex===0?' is-active':''}" src="${image}?format=${imageIndex===0?'750':'500'}w" alt="${imageIndex===0?item.alt:''}" loading="lazy" decoding="async" srcset="${image}?format=500w 500w, ${image}?format=750w 750w, ${image}?format=1000w 1000w" sizes="(max-width: 640px) 100vw, 50vw">`).join('');
+      panel.innerHTML=`<span class="archive-card-rotator" data-image-rotator>${media}</span><span>${item.label}</span><strong>${item.title}</strong><p>${item.body}</p><em>${item.cta} <b aria-hidden="true">→</b></em>`;
     });
   }
 
   if(currentPath==='/'&&document.querySelector('.authority-preview-grid')){
     const cards=[...document.querySelectorAll('.authority-preview-card')];
     const previews=[
-      {href:'/journal',label:'Journal',title:'Essays, notes & Rebecca in her own words.',body:'Read selected public writing on travel, taste, work, relationships and the things that keep her curious.',cta:'Read the journal',image:'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/0897481e-d4dd-4cde-9884-7f88d8e4b099/_DSC8781-copy.jpg',alt:'Rebecca editorial portrait for the Journal'},
-      {href:'/press',label:'Press & appearances',title:'Interviews, profiles & public appearances.',body:'Explore interviews, profiles and independent coverage from Rebecca’s public record.',cta:'View press & appearances',image:'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/04454536-91f8-44d4-941a-da3be1203bde/_DSC8088-copy.jpg',alt:'Rebecca editorial portrait for Press and appearances'}
+      {href:'/journal',label:'Journal',title:'Essays, notes & Rebecca in her own words.',body:'Read selected public writing on travel, taste, work, relationships and the things that keep her curious.',cta:'Read the journal',alt:'Rebecca editorial portrait for the Journal',images:[
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/0880df2d-3552-4896-a01e-c4cee47c0b14/_DSC9200-copy.jpg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/5123b6bb-49ba-49d0-a517-bd6b0f78f568/_DSC7850-censored.jpg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/2380b139-2528-4e3f-993b-10b08b4d8675/_DSC8453-copy.jpg']},
+      {href:'/press',label:'Press & appearances',title:'Interviews, profiles & public appearances.',body:'Explore interviews, profiles and independent coverage from Rebecca’s public record.',cta:'View press & appearances',alt:'Rebecca editorial portrait for Press and appearances',images:[
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/2b883ed8-ef4a-42f8-b957-35734cdacf80/_DSC8677-copy.jpg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/ede1df29-536a-4398-8511-98d26c3187b8/_DSC8011-copy.jpg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/2ca283eb-d85a-4d40-9c6e-53b38d339d81/_DSC8859-copy.jpg']}
     ];
     cards.slice(0,2).forEach((card,index)=>{
       const item=previews[index]; if(!item)return;
       card.classList.add('has-image'); card.href=item.href;
-      card.innerHTML=`<img class="authority-preview-image" src="${item.image}?format=750w" alt="${item.alt}" loading="lazy" decoding="async" srcset="${item.image}?format=500w 500w, ${item.image}?format=750w 750w, ${item.image}?format=1000w 1000w" sizes="(max-width: 900px) 100vw, 50vw"><span>${item.label}</span><h2>${item.title}</h2><p>${item.body}</p><em>${item.cta} <b aria-hidden="true">→</b></em>`;
+      const media=item.images.map((image,imageIndex)=>`<img data-rotating-image class="authority-preview-image${imageIndex===0?' is-active':''}" src="${image}?format=${imageIndex===0?'750':'500'}w" alt="${imageIndex===0?item.alt:''}" loading="lazy" decoding="async" srcset="${image}?format=500w 500w, ${image}?format=750w 750w, ${image}?format=1000w 1000w" sizes="(max-width: 900px) 100vw, 50vw">`).join('');
+      card.innerHTML=`<div class="authority-card-rotator" data-image-rotator>${media}</div><span>${item.label}</span><h2>${item.title}</h2><p>${item.body}</p><em>${item.cta} <b aria-hidden="true">→</b></em>`;
     });
   }
   const SEO_LOCALIZED_PATHS=new Set(['/','/about','/rates','/travel','/date-ideas','/favourites','/gallery','/etiquette','/reviews','/journal','/press','/contact']);
@@ -147,8 +161,23 @@
     const setImage=(img,item)=>{img.src=item.base+'?format=1500w';img.srcset=[750,1000,1500,2500].map((w)=>item.base+'?format='+w+'w '+w+'w').join(', ');img.sizes='(max-width: 760px) 100vw, 50vw';img.alt=item.alt};
     let activeSlide=0,imageIndex=0,rotating=false;
     const rotate=async()=>{if(rotating||document.hidden)return;rotating=true;const nextImage=(imageIndex+1)%images.length,nextSlide=1-activeSlide,incoming=slides[nextSlide],outgoing=slides[activeSlide];if(!incoming||!outgoing){rotating=false;return}setImage(incoming,images[nextImage]);try{await incoming.decode?.()}catch{}incoming.classList.add('is-active');outgoing.classList.remove('is-active');imageIndex=nextImage;activeSlide=nextSlide;setTimeout(()=>{rotating=false},1300)};
-    setInterval(rotate,9000);
+    setInterval(rotate,3000);
   }
+
+  // Phase 7H.2 global scroll rail + elegant back-to-top control.
+  document.body.insertAdjacentHTML('beforeend','<aside class="page-scroll-rail" data-scroll-rail aria-hidden="true"><span class="page-scroll-track"><i data-scroll-progress></i></span><button type="button" data-scroll-top aria-label="Back to top">↑</button></aside>');
+  const scrollRail=document.querySelector('[data-scroll-rail]'),scrollFill=document.querySelector('[data-scroll-progress]'),scrollTopButton=document.querySelector('[data-scroll-top]');
+  const updateScrollRail=()=>{
+    const max=Math.max(0,document.documentElement.scrollHeight-innerHeight);
+    const ratio=max?Math.min(1,Math.max(0,scrollY/max)):0;
+    if(scrollFill)scrollFill.style.height=Math.round(ratio*100)+'%';
+    scrollRail?.classList.toggle('is-active',max>320);
+    scrollRail?.classList.toggle('has-scrolled',scrollY>260);
+  };
+  updateScrollRail();
+  addEventListener('scroll',updateScrollRail,{passive:true});
+  addEventListener('resize',updateScrollRail,{passive:true});
+  scrollTopButton?.addEventListener('click',()=>scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}));
 
   const reviews=[...document.querySelectorAll('[data-review]')],counter=document.querySelector('[data-review-count]'); let current=0;
   const showReview=(i)=>{if(!reviews.length)return;current=(i+reviews.length)%reviews.length;reviews.forEach((r,n)=>{r.hidden=n!==current;r.classList.toggle('is-active',n===current)});if(counter)counter.textContent=`${String(current+1).padStart(2,'0')} / ${String(reviews.length).padStart(2,'0')}`;};
@@ -484,10 +513,20 @@
       revealItems.forEach((el)=>observer.observe(el));
     }else revealItems.forEach((el)=>el.classList.add('is-visible'));
     if(reducedMotion)return;
-    document.querySelectorAll('[data-editorial-rotator]').forEach((rotator)=>{
-      if(rotator.dataset.rotationReady)return;rotator.dataset.rotationReady='true';
-      const slides=[...rotator.querySelectorAll('.editorial-motion-slide')];if(slides.length<2)return;let active=0;
-      setInterval(()=>{if(document.hidden)return;slides[active].classList.remove('is-active');active=(active+1)%slides.length;slides[active].classList.add('is-active');},10500);
+    document.querySelectorAll('[data-image-rotator]').forEach((rotator)=>{
+      if(rotator.dataset.rotationReady)return;
+      rotator.dataset.rotationReady='true';
+      const slides=[...rotator.querySelectorAll('[data-rotating-image]')];
+      if(slides.length<2)return;
+      let active=Math.max(0,slides.findIndex((slide)=>slide.classList.contains('is-active')));
+      setInterval(async()=>{
+        if(document.hidden)return;
+        const next=(active+1)%slides.length,incoming=slides[next];
+        try{if(!incoming.complete)await incoming.decode?.();}catch{}
+        slides[active].classList.remove('is-active');
+        incoming.classList.add('is-active');
+        active=next;
+      },3000);
     });
     if(!window.__rrParallaxBound&&window.matchMedia('(min-width: 900px)').matches){
       const parallax=[...document.querySelectorAll('[data-parallax]')];

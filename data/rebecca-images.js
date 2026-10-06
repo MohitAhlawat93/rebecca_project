@@ -239,6 +239,36 @@ export const REBECCA_IMAGES={
     "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/1ca6b607-68b0-40dc-a376-54dc7287dd29/_DSC5631-censored.jpg",
     "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/b5bd9e66-3242-40e9-8cc5-156a22c254db/_DSC6786-censored.jpg"
   ],
+  "aboutFeature": [
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/b1c39acf-72b5-4b36-b1c1-19a0f16ec17a/_DSC9687-copy.jpg",
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/cda55cdb-f75d-4069-b52b-2ef8da42da7f/_DSC9512-copy.jpg",
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/dea45b86-a731-4031-ab7f-97b1b0ef4aaa/_DSC9781-copy.jpg"
+  ],
+  "favouritesHero": [
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/8feb45ba-dac2-417e-9575-c1977c323868/_DSC6586-copy.jpg",
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/aecc2289-b88c-4237-81a2-480391167031/_DSC4207-copy.jpg",
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/6bebd1c7-9360-40e9-ab82-91df4ad61d87/_DSC8374-censored.jpg"
+  ],
+  "journal": [
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/0880df2d-3552-4896-a01e-c4cee47c0b14/_DSC9200-copy.jpg",
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/5123b6bb-49ba-49d0-a517-bd6b0f78f568/_DSC7850-censored.jpg",
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/2380b139-2528-4e3f-993b-10b08b4d8675/_DSC8453-copy.jpg"
+  ],
+  "press": [
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/2b883ed8-ef4a-42f8-b957-35734cdacf80/_DSC8677-copy.jpg",
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/ede1df29-536a-4398-8511-98d26c3187b8/_DSC8011-copy.jpg",
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/2ca283eb-d85a-4d40-9c6e-53b38d339d81/_DSC8859-copy.jpg"
+  ],
+  "galleryProfessional": [
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/79b7180c-8aeb-4491-9a59-58bff4d2d69e/processed_I62A3592+copy.jpeg",
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/07dae98f-dd47-4faa-b37b-cd2624955ae0/processed__DSC9066.jpeg",
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/aa8270ef-b44f-4140-8de2-7a539c3166ed/processed_REO_0304+copy.jpeg"
+  ],
+  "galleryCandid": [
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/9b5f9b93-122a-428f-bf1f-cf697df4c4e1/photo_2026-02-28+00.40.18.jpeg",
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/d97fc01e-c8ab-47c0-b6a2-e8aaf2f98534/photo_2026-02-28+00.38.47.jpeg",
+    "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/8e7f0798-c0a2-4b0b-81f1-159427df66da/photo_2026-02-28+00.38.36.jpeg"
+  ],
   "dateIdeas": [
     "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/025d09c5-6c39-4433-86c0-cab592ad94d3/_DSC4132-copy.jpg",
     "https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/29036824-e479-4f87-a291-97cf27a6adfc/_DSC5670-copy.jpg",

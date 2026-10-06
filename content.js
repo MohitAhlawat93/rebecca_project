@@ -297,14 +297,62 @@ function renderFavourites(){
   });
 }
 
+function rotatingImagesMarkup(images,role,alt){
+  return images.map((url,index)=>'<img data-rotating-image class="page-photo-slide'+(index===0?' is-active':'')+'" src="'+esc(imageVariant(url,index===0?1000:750))+'" srcset="'+esc(imageSrcset(url,[500,750,1000,1500]))+'" sizes="100vw" alt="'+(index===0?esc(alt):'')+'" loading="'+(index===0?'eager':'lazy')+'" decoding="async" data-image-role="'+esc(role)+'">').join('');
+}
+
+function renderPagePhotoHeroes(){
+  const raw=(window.location.pathname.replace(/\/$/,'')||'/');
+  const path=raw.replace(/^\/(zh|hi|fr|es)(?=\/|$)/,'')||'/';
+  const sets={
+    '/favourites':{key:'favouritesHero',role:'favourites-hero',alt:'Rebecca editorial portrait for Food & Favourites'},
+    '/journal':{key:'journal',role:'journal-hero',alt:'Rebecca editorial portrait for the Journal'},
+    '/press':{key:'press',role:'press-hero',alt:'Rebecca editorial portrait for Press and appearances'}
+  };
+  const cfg=sets[path],hero=document.querySelector('.page-hero');
+  if(!cfg||!hero||hero.querySelector('[data-page-photo-hero]'))return;
+  const images=REBECCA_IMAGES.curated[cfg.key]||[];
+  if(images.length<2)return;
+  hero.classList.add('page-hero-photo');
+  hero.insertAdjacentHTML('afterbegin','<div class="page-photo-rotator" data-page-photo-hero data-image-rotator>'+rotatingImagesMarkup(images,cfg.role,cfg.alt)+'</div>');
+}
+
+function renderPageEditorialRotators(){
+  const raw=(window.location.pathname.replace(/\/$/,'')||'/');
+  const path=raw.replace(/^\/(zh|hi|fr|es)(?=\/|$)/,'')||'/';
+  const key=path==='/about'?'aboutFeature':path.slice(1);
+  const images=REBECCA_IMAGES.curated[key]||[];
+  if(images.length<2)return;
+  document.querySelectorAll('.page-editorial-shot').forEach((figure)=>{
+    if(figure.dataset.imageRotatorReady)return;
+    figure.dataset.imageRotatorReady='true';
+    figure.setAttribute('data-image-rotator','');
+    figure.innerHTML=rotatingImagesMarkup(images,'page-editorial','Rebecca editorial portrait');
+  });
+}
+
+function renderGalleryCardRotators(){
+  const raw=(window.location.pathname.replace(/\/$/,'')||'/');
+  const path=raw.replace(/^\/(zh|hi|fr|es)(?=\/|$)/,'')||'/';
+  if(path!=='/gallery')return;
+  [
+    {selector:'.archive-link-panel.professional',key:'galleryProfessional',alt:'Rebecca professional gallery preview'},
+    {selector:'.archive-link-panel.candid',key:'galleryCandid',alt:'Rebecca candid gallery preview'}
+  ].forEach(({selector,key,alt})=>{
+    const card=document.querySelector(selector),images=REBECCA_IMAGES.curated[key]||[];
+    if(!card||images.length<2||card.querySelector('[data-gallery-card-rotator]'))return;
+    card.insertAdjacentHTML('afterbegin','<span class="archive-card-rotator" data-gallery-card-rotator data-image-rotator>'+rotatingImagesMarkup(images,'gallery-choice',alt)+'</span>');
+  });
+}
+
 function renderEditorialBreaks(){
   const config={
-    '/about':{key:'about',kicker:'A pause',title:'Luxury is ease, not theatre.',body:'The best meetings feel unforced: enough time, somewhere beautiful, and no need to perform.',anchor:'[data-profile-interview]',placement:'after',rotate:false},
-    '/reviews':{key:'reviews',kicker:'Since 2015',title:'A reputation built slowly.',body:'Trust is more convincing when it accumulates over years rather than arriving as a marketing claim.',anchor:'[data-reputation-reviews]',placement:'before',rotate:false},
+    '/about':{key:'about',kicker:'A pause',title:'Curiosity makes better company.',body:'A beautiful room is a bonus. A conversation that keeps wandering is what makes an evening memorable.',anchor:'[data-profile-interview]',placement:'after',rotate:true},
+    '/reviews':{key:'reviews',kicker:'Since 2015',title:'A reputation built slowly.',body:'Trust is more convincing when it accumulates over years rather than arriving as a marketing claim.',anchor:'[data-reputation-reviews]',placement:'before',rotate:true},
     '/travel':{key:'travel',kicker:'Somewhere else',title:'Bring me somewhere worth staying.',body:'A different city changes the rhythm. The invitation matters more when the destination has a point of view.',anchor:'[data-fmty-grid]',placement:'before',rotate:true},
     '/favourites':{key:'favourites',kicker:'Taste',title:'Good taste is part of the conversation.',body:'The table, the bottle, the room and the small details are all part of how a date feels.',anchor:'[data-favourites-things]',placement:'before',rotate:true},
     '/date-ideas':{key:'dateIdeas',kicker:'After dinner',title:'Make dinner the beginning.',body:'A good date has texture: something to taste, somewhere to wander, something neither of us needs to rush.',anchor:'[data-wishlist-categories]',placement:'before',rotate:true},
-    '/etiquette':{key:'etiquette',kicker:'Discretion',title:'Privacy is part of the luxury.',body:'Clear expectations make everything else easier, warmer and considerably more relaxed.',anchor:'[data-etiquette-more]',placement:'before',rotate:false}
+    '/etiquette':{key:'etiquette',kicker:'Discretion',title:'Privacy is part of the luxury.',body:'Clear expectations make everything else easier, warmer and considerably more relaxed.',anchor:'[data-etiquette-more]',placement:'before',rotate:true}
   };
   const raw=(window.location.pathname.replace(/\/$/,'')||'/');
   const path=raw.replace(/^\/(zh|hi|fr|es)(?=\/|$)/,'')||'/';
@@ -315,8 +363,8 @@ function renderEditorialBreaks(){
   const images=(REBECCA_IMAGES.curated[item.key]||REBECCA_IMAGES.curated.hero||[]).slice(0,item.rotate?3:1);
   const el=document.createElement('section');
   el.className='editorial-motion-break';el.dataset.editorialBreak=item.key;el.setAttribute('aria-label','Rebecca editorial interlude');
-  const media=images.map((url,index)=>`<img class="editorial-motion-slide${index===0?' is-active':''}" src="${esc(imageVariant(url,1000))}" srcset="${esc(imageSrcset(url,[500,750,1000,1500]))}" sizes="100vw" alt="Rebecca editorial portrait" loading="lazy" decoding="async" data-image-role="editorial-motion">`).join('');
-  el.innerHTML=`<div class="editorial-motion-media${item.rotate?' is-rotating':''}" ${item.rotate?'data-editorial-rotator':''} data-parallax>${media}</div><div class="editorial-motion-copy" data-reveal><p class="page-kicker">${esc(item.kicker)}</p><h2>${esc(item.title)}</h2><p>${esc(item.body)}</p></div>`;
+  const media=images.map((url,index)=>`<img data-rotating-image class="editorial-motion-slide${index===0?' is-active':''}" src="${esc(imageVariant(url,1000))}" srcset="${esc(imageSrcset(url,[500,750,1000,1500]))}" sizes="100vw" alt="Rebecca editorial portrait" loading="lazy" decoding="async" data-image-role="editorial-motion">`).join('');
+  el.innerHTML=`<div class="editorial-motion-media${item.rotate?' is-rotating':''}" ${item.rotate?'data-image-rotator data-editorial-rotator':''} data-parallax>${media}</div><div class="editorial-motion-copy" data-reveal><p class="page-kicker">${esc(item.kicker)}</p><h2>${esc(item.title)}</h2><p>${esc(item.body)}</p></div>`;
   if(item.placement==='after')section.insertAdjacentElement('afterend',el);else section.insertAdjacentElement('beforebegin',el);
 }
 
@@ -352,6 +400,9 @@ renderReputation();
 renderDateIdeas();
 renderAuthority();
 renderFavourites();
+renderPagePhotoHeroes();
+renderPageEditorialRotators();
+renderGalleryCardRotators();
 renderEditorialBreaks();
 renderSingapore();
 renderTravel();

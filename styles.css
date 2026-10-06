@@ -703,3 +703,73 @@ body.gallery-lightbox-open{overflow:hidden}
   .favourites-page .page-hero::before{background-position:58% 28%}
   .favourites-page .page-hero::after{background:linear-gradient(0deg,rgba(18,14,14,.84),rgba(18,14,14,.14) 74%)}
 }
+
+
+/* Phase 7H.2 — rotating editorial system + global scroll rail */
+.page-hero-photo{position:relative;isolation:isolate;overflow:hidden;color:#fffaf4;border-bottom:0;background:#302725}
+.page-hero-photo::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(18,14,14,.82),rgba(18,14,14,.36) 58%,rgba(18,14,14,.12))}
+.page-hero-photo .page-kicker{color:#d5dfd0}
+.page-hero-photo .page-hero-copy{color:rgba(255,250,244,.86)}
+.page-photo-rotator,.authority-card-rotator,.archive-card-rotator{position:absolute;inset:0;overflow:hidden}
+.page-photo-rotator{z-index:-2}
+.authority-card-rotator,.archive-card-rotator{z-index:-2}
+.page-photo-slide,.page-editorial-shot [data-rotating-image],.authority-preview-image,.archive-card-rotator [data-rotating-image]{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.018);
+  transition:opacity .8s ease,transform 3.2s ease
+}
+.page-photo-slide.is-active,.page-editorial-shot [data-rotating-image].is-active,.authority-preview-image.is-active,.archive-card-rotator [data-rotating-image].is-active{
+  opacity:1;transform:scale(1)
+}
+.page-editorial-shot{position:relative;overflow:hidden;background:#332a27}
+.page-editorial-shot [data-rotating-image]{object-position:50% 34%}
+.authority-preview-image{z-index:auto}
+.authority-card-rotator{pointer-events:none}
+.archive-link-panel::before{display:none}
+.archive-card-rotator{pointer-events:none}
+.archive-card-rotator::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(17,13,13,.86),rgba(17,13,13,.16) 74%)}
+.archive-link-panel::after{display:none}
+.archive-link-panel>span:not(.archive-card-rotator),.archive-link-panel strong,.archive-link-panel p,.archive-link-panel em{position:relative;z-index:1}
+.favourites-page .page-hero::before{background-image:none!important}
+.favourites-page .page-hero.page-hero-photo{background:#302725}
+.page-hero-photo h1,.page-hero-photo>div:not(.page-photo-rotator),.page-hero-photo>.page-hero-copy{position:relative;z-index:1}
+
+.page-scroll-rail{
+  position:fixed;top:112px;right:12px;bottom:92px;z-index:72;width:38px;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  opacity:0;pointer-events:none;transition:opacity .25s ease
+}
+.page-scroll-rail.is-active{opacity:1}
+.page-scroll-track{
+  position:absolute;top:0;bottom:52px;left:50%;width:2px;transform:translateX(-50%);
+  background:rgba(25,25,24,.12);overflow:hidden;border-radius:99px
+}
+.page-scroll-track i{
+  display:block;width:100%;height:0;background:var(--wine);border-radius:99px;
+  transition:height .12s linear
+}
+.page-scroll-rail button{
+  width:38px;height:38px;border-radius:50%;border:1px solid rgba(25,25,24,.16);
+  background:rgba(245,239,231,.92);color:var(--ink);font:400 20px/1 var(--sans);
+  box-shadow:0 8px 24px rgba(25,25,24,.08);backdrop-filter:blur(12px);
+  cursor:pointer;pointer-events:auto;opacity:.45;transform:translateY(3px);
+  transition:opacity .2s ease,transform .2s ease,background .2s ease,color .2s ease
+}
+.page-scroll-rail.has-scrolled button{opacity:1;transform:none}
+.page-scroll-rail button:hover{background:var(--wine);color:#fffaf4;border-color:var(--wine)}
+body.concierge-open .page-scroll-rail,body.gallery-lightbox-open .page-scroll-rail{opacity:0;pointer-events:none}
+
+@media(max-width:900px){
+  .page-scroll-rail{right:7px;top:98px;bottom:78px;width:32px}
+  .page-scroll-rail button{width:32px;height:32px;font-size:17px}
+  .page-scroll-track{bottom:44px}
+}
+@media(max-width:640px){
+  .page-hero-photo{min-height:580px;grid-template-columns:1fr;align-content:end;gap:26px}
+  .page-hero-photo::after{background:linear-gradient(0deg,rgba(18,14,14,.86),rgba(18,14,14,.16) 75%)}
+  .page-photo-slide{object-position:58% 30%}
+  .page-scroll-rail{right:5px;top:86px;bottom:70px}
+}
+@media(prefers-reduced-motion:reduce){
+  .page-photo-slide,.page-editorial-shot [data-rotating-image],.authority-preview-image,.archive-card-rotator [data-rotating-image]{transition:none!important;transform:none!important}
+  .page-scroll-track i{transition:none}
+}
