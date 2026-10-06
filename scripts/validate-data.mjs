@@ -64,7 +64,7 @@ const requiredBindings={
   'about.html':['data-profile-about-facts','data-profile-philosophy','data-profile-interview','data-profile-fragments','data-profile-faq'],
   'reviews.html':['data-reputation-proof','data-reputation-reviews'],
   'journal.html':['data-journal-entries'],
-  'press.html':['data-press-appearances','data-external-profiles'],
+  'press.html':['data-press-appearances'],
   'favourites.html':['data-favourites-table','data-favourites-things','data-favourites-interests'],
   'date-ideas.html':['data-date-categories','data-wishlist-categories','data-wishlist-details','data-wishlist-links'],
   'rates.html':['data-singapore-rates','data-singapore-terms','data-asia-promo'],
@@ -72,6 +72,9 @@ const requiredBindings={
   'etiquette.html':['data-screening-policy','data-deposit-grid','data-cancellation-policy','data-boundaries-policy','data-etiquette-more'],
   'contact.html':['data-contact-channels','data-duration-options','data-screening-options']
 };
+const pressHtml=readFileSync(new URL('../press.html',import.meta.url),'utf8');
+assert(!pressHtml.includes('data-external-profiles'),'Press external profiles must stay hidden from the public page');
+
 for(const [file,bindings] of Object.entries(requiredBindings)){
   const html=readFileSync(new URL('../'+file,import.meta.url),'utf8');
   for(const binding of bindings) assert(html.includes(binding),file+' is missing '+binding);
