@@ -1,7 +1,25 @@
 import fs from 'node:fs';
 import { REBECCA_IMAGES, imageVariant, imageSrcset } from '../data/rebecca-images.js';
-function figure(url,index,role,sizes){return `<figure><img src="${imageVariant(url,1000)}" alt="Rebecca ${role==='archive-professional'?'professional portrait':'candid photograph'} ${index+1}" loading="lazy" decoding="async" srcset="${imageSrcset(url)}" sizes="${sizes}" data-image-role="${role}"></figure>`;}
-function replaceGrid(file,className,images,role,sizes){let html=fs.readFileSync(file,'utf8');const at=html.indexOf(`<div class="${className}`);if(at<0)throw new Error(`${file}: grid not found`);const open=html.indexOf('>',at)+1,close=html.indexOf('</div>',open);html=html.slice(0,at)+`<div class="${className}" data-image-library="${role}">`+images.map((u,i)=>figure(u,i,role,sizes)).join('')+'</div>'+html.slice(close+6);fs.writeFileSync(file,html);}
+
+function figure(url,index,role,sizes){
+  return `<figure><img src="${imageVariant(url,1000)}" alt="Rebecca ${role==='archive-professional'?'professional portrait':'candid photograph'} ${index+1}" loading="lazy" decoding="async" srcset="${imageSrcset(url)}" sizes="${sizes}" data-image-role="${role}"></figure>`;
+}
+function replaceGrid(file,className,images,role,sizes){
+  let html=fs.readFileSync(file,'utf8');
+  const at=html.indexOf(`<div class="${className}`);
+  if(at<0)throw new Error(`${file}: grid not found`);
+  const open=html.indexOf('>',at)+1;
+  const close=html.indexOf('</div>',open);
+  html=html.slice(0,at)+`<div class="${className}" data-image-library="${role}">`+images.map((u,i)=>figure(u,i,role,sizes)).join('')+'</div>'+html.slice(close+6);
+  fs.writeFileSync(file,html);
+}
 replaceGrid('professional.html','archive-gallery-grid',REBECCA_IMAGES.professional,'archive-professional','(max-width: 640px) 50vw, (max-width: 900px) 50vw, 33vw');
 replaceGrid('selfies-of-risquerebecca.html','selfie-archive-grid',REBECCA_IMAGES.candid,'archive-candid','(max-width: 640px) 50vw, (max-width: 900px) 33vw, 25vw');
-for(const file of ['gallery.html','zh/gallery.html','hi/gallery.html','fr/gallery.html','es/gallery.html']){if(!fs.existsSync(file))continue;let html=fs.readFileSync(file,'utf8');html=html.replace(/The complete professional archive — \\d+ public photographs/,`The complete professional archive — ${REBECCA_IMAGES.professional.length} public photographs`);html=html.replace(/The complete candid archive — \\d+ public photographs/,`The complete candid archive — ${REBECCA_IMAGES.candid.length} public photographs`);fs.writeFileSync(file,html);}
+
+for(const file of ['gallery.html','zh/gallery.html','hi/gallery.html','fr/gallery.html','es/gallery.html']){
+  if(!fs.existsSync(file))continue;
+  let html=fs.readFileSync(file,'utf8');
+  html=html.replace(/The complete professional archive — \d+ public photographs/,`The complete professional archive — ${REBECCA_IMAGES.professional.length} public photographs`);
+  html=html.replace(/The complete candid archive — \d+ public photographs/,`The complete candid archive — ${REBECCA_IMAGES.candid.length} public photographs`);
+  fs.writeFileSync(file,html);
+}
