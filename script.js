@@ -2,17 +2,42 @@
   const header=document.querySelector('[data-header]');
   const onScroll=()=>header?.classList.toggle('is-scrolled',window.scrollY>24);
   onScroll(); window.addEventListener('scroll',onScroll,{passive:true});
-  const currentPath=(window.location.pathname.replace(/\/$/,'')||'/');
+  const rawPath=(window.location.pathname.replace(/\/$/,'')||'/');
+  const LOCALE_PREFIXES={zh:'zh-CN',hi:'hi',fr:'fr',es:'es'};
+  const LOCALE_SLUGS={'zh-CN':'zh',hi:'hi',fr:'fr',es:'es'};
+  const localizedMatch=rawPath.match(/^\/(zh|hi|fr|es)(?:\/(.*))?$/);
+  const routeLocale=localizedMatch?LOCALE_PREFIXES[localizedMatch[1]]:null;
+  const currentPath=localizedMatch?('/'+(localizedMatch[2]||'')).replace(/\/$/,'')||'/':rawPath;
+  const SEO_LOCALIZED_PATHS=new Set(['/','/about','/rates','/travel','/date-ideas','/favourites','/gallery','/etiquette','/reviews','/journal','/press','/contact']);
 
   const SUPPORTED_LANGUAGES={
-    en:{label:'EN',name:'English',htmlLang:'en'},
-    'zh-CN':{label:'中文',name:'简体中文',htmlLang:'zh-CN'},
-    hi:{label:'हिंदी',name:'हिंदी',htmlLang:'hi'},
-    fr:{label:'FR',name:'Français',htmlLang:'fr'},
-    es:{label:'ES',name:'Español',htmlLang:'es'}
+    en:{label:'EN · English',name:'English',htmlLang:'en'},
+    'zh-CN':{label:'中文 · 简体中文',name:'简体中文',htmlLang:'zh-CN'},
+    hi:{label:'HI · हिंदी',name:'हिंदी',htmlLang:'hi'},
+    fr:{label:'FR · Français',name:'Français',htmlLang:'fr'},
+    es:{label:'ES · Español',name:'Español',htmlLang:'es'}
   };
+  const queryLanguage=new URLSearchParams(window.location.search).get('lang');
   const savedLanguage=(()=>{try{return localStorage.getItem('rr-language')||'en'}catch{return 'en'}})();
-  let preferredLanguage=SUPPORTED_LANGUAGES[savedLanguage]?savedLanguage:'en';
+  let preferredLanguage=routeLocale||(SUPPORTED_LANGUAGES[queryLanguage]?queryLanguage:null)||(SUPPORTED_LANGUAGES[savedLanguage]?savedLanguage:'en');
+  const basePathOf=(pathname)=>{
+    const cleaned=(pathname.replace(/\/$/,'')||'/');
+    const match=cleaned.match(/^\/(zh|hi|fr|es)(?:\/(.*))?$/);
+    return match?('/'+(match[2]||'')).replace(/\/$/,'')||'/':cleaned;
+  };
+  const localizedHref=(href,language=preferredLanguage)=>{
+    if(!href||!href.startsWith('/')) return href;
+    const url=new URL(href,window.location.origin);
+    const base=basePathOf(url.pathname);
+    if(language==='en') return base+(url.search||'')+(url.hash||'');
+    if(SEO_LOCALIZED_PATHS.has(base)){
+      const slug=LOCALE_SLUGS[language];
+      return `/${slug}${base==='/'?'/':base}${url.search||''}${url.hash||''}`;
+    }
+    const params=new URLSearchParams(url.search);
+    params.set('lang',language);
+    return base+'?'+params.toString()+(url.hash||'');
+  };
 
   const primaryNavigation=[
     ['/about','About'],
@@ -39,7 +64,7 @@
     ['/press','Press'],
     ['/contact','Contact']
   ];
-  const linkMarkup=(items)=>items.map(([href,label])=>`<a href="${href}">${label}</a>`).join('');
+  const linkMarkup=(items)=>items.map(([href,label])=>`<a href="${localizedHref(href)}">${label}</a>`).join('');
   const desktopNav=document.querySelector('.desktop-nav');
   if(desktopNav){
     desktopNav.innerHTML=linkMarkup(primaryNavigation)+`<details class="nav-more"><summary>More</summary><div class="nav-more-menu">${linkMarkup(moreNavigation)}</div></details>`;
@@ -58,12 +83,20 @@
     if(selector) selector.value=preferredLanguage;
   }
   document.querySelectorAll('.desktop-nav a,.mobile-menu a,.footer-links a').forEach((link)=>{
-    const href=(new URL(link.href,window.location.origin)).pathname.replace(/\/$/,'')||'/';
+    const href=basePathOf((new URL(link.href,window.location.origin)).pathname);
     if(href===currentPath) link.setAttribute('aria-current','page');
   });
   document.querySelectorAll('.nav-more').forEach((menu)=>{
     if(menu.querySelector('a[aria-current="page"]')) menu.classList.add('has-current');
   });
+  const rewriteInternalLinks=()=>{
+    document.querySelectorAll('a[href^="/"]').forEach((link)=>{
+      const raw=link.getAttribute('href');
+      if(!raw||raw.startsWith('/api/')) return;
+      link.setAttribute('href',localizedHref(raw));
+    });
+  };
+  rewriteInternalLinks();
 
   const menuToggle=document.querySelector('[data-menu-toggle]');
   const mobileMenu=document.querySelector('[data-mobile-menu]');
@@ -71,6 +104,21 @@
   menuToggle?.addEventListener('click',()=>setMenu(mobileMenu?.hidden??true));
   mobileMenu?.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>setMenu(false)));
   document.addEventListener('keydown',(event)=>{if(event.key==='Escape'){setMenu(false);if(!document.querySelector('[data-concierge-panel]')?.hidden)setConcierge(false);}});
+
+  const heroRotator=document.querySelector('[data-hero-rotator]');
+  if(heroRotator&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    const slides=[...heroRotator.querySelectorAll('.hero-slide')];
+    const images=[
+      {base:'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/65d6926c-8342-4873-9532-2d809b0dccc1/processed__DSC9552-censored.jpeg',alt:'Rebecca in an editorial portrait'},
+      {base:'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/43fe8123-bcbe-4a80-88f5-a1f1a063a5fa/_DSC9244-copy.jpg',alt:'Rebecca editorial portrait'},
+      {base:'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/c4bcb8eb-8070-4c6e-95b7-98767443e03d/_DSC7015-copy.jpg',alt:'Rebecca lifestyle portrait'},
+      {base:'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/309ccac6-1cbe-4065-bc1e-0d139478d446/processed__DSC7889.jpeg',alt:'Rebecca portrait'}
+    ];
+    const setImage=(img,item)=>{img.src=item.base+'?format=1500w';img.srcset=[750,1000,1500,2500].map((w)=>item.base+'?format='+w+'w '+w+'w').join(', ');img.sizes='(max-width: 760px) 100vw, 50vw';img.alt=item.alt};
+    let activeSlide=0,imageIndex=0,rotating=false;
+    const rotate=async()=>{if(rotating||document.hidden)return;rotating=true;const nextImage=(imageIndex+1)%images.length,nextSlide=1-activeSlide,incoming=slides[nextSlide],outgoing=slides[activeSlide];if(!incoming||!outgoing){rotating=false;return}setImage(incoming,images[nextImage]);try{await incoming.decode?.()}catch{}incoming.classList.add('is-active');outgoing.classList.remove('is-active');imageIndex=nextImage;activeSlide=nextSlide;setTimeout(()=>{rotating=false},1300)};
+    setInterval(rotate,9000);
+  }
 
   const reviews=[...document.querySelectorAll('[data-review]')],counter=document.querySelector('[data-review-count]'); let current=0;
   const showReview=(i)=>{if(!reviews.length)return;current=(i+reviews.length)%reviews.length;reviews.forEach((r,n)=>{r.hidden=n!==current;r.classList.toggle('is-active',n===current)});if(counter)counter.textContent=`${String(current+1).padStart(2,'0')} / ${String(reviews.length).padStart(2,'0')}`;};
@@ -92,12 +140,12 @@
   };
   const conciergeConfig=conciergePageConfig[currentPath]||{intro:'Ask me about Rebecca’s public rates, travel, etiquette or how to enquire.',prompts:[['Singapore rates',"What are Rebecca's Singapore rates?"],['Screening','How does screening work?'],['Travel','Can Rebecca travel to me?']]};
   document.body.insertAdjacentHTML('beforeend',`
-    <button class="concierge-launcher" type="button" data-open-concierge aria-label="Open Rebecca's concierge" aria-expanded="false" aria-controls="rebecca-concierge"><span class="spark" aria-hidden="true">✦</span><span>Private concierge</span></button>
+    <button class="concierge-launcher" type="button" data-open-concierge aria-label="Open Rebecca's Desk" aria-expanded="false" aria-controls="rebecca-concierge"><span class="spark" aria-hidden="true">✦</span><span>Rebecca’s Desk</span></button>
     <aside class="concierge-panel" id="rebecca-concierge" data-concierge-panel hidden role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="rebecca-concierge-title">
-      <div class="concierge-panel-head"><div><strong id="rebecca-concierge-title">Rebecca’s Private Concierge</strong><small>Plans, rates & practicalities.</small></div><button class="concierge-close" type="button" data-close-concierge aria-label="Close concierge">×</button></div>
-      <div class="concierge-thread" data-concierge-thread aria-live="polite"><div class="chat-message assistant"><p>Hi ✦ I’m Rebecca’s concierge.</p><p>${escapeHtml(conciergeConfig.intro)}</p></div></div>
+      <div class="concierge-panel-head"><div><strong id="rebecca-concierge-title">Rebecca’s Desk</strong><small>Plans, rates & practicalities.</small></div><button class="concierge-close" type="button" data-close-concierge aria-label="Close Rebecca's Desk">×</button></div>
+      <div class="concierge-thread" data-concierge-thread aria-live="polite"><div class="chat-message assistant"><p>Hi ✦ I’m Rebecca’s Desk assistant.</p><p>${escapeHtml(conciergeConfig.intro)}</p></div></div>
       <div class="concierge-chips" data-concierge-chips></div>
-      <form class="concierge-form" data-concierge-form><input type="text" maxlength="600" autocomplete="off" placeholder="Ask something discreetly…" aria-label="Message Rebecca's concierge" required><button class="concierge-send" type="submit" aria-label="Send">↗</button></form>
+      <form class="concierge-form" data-concierge-form><input type="text" maxlength="600" autocomplete="off" placeholder="Ask something discreetly…" aria-label="Message Rebecca's Desk" required><button class="concierge-send" type="submit" aria-label="Send">↗</button></form>
       <p class="concierge-disclaimer">Please don’t send ID documents, employer details or other sensitive screening information here. Use Rebecca’s official channels for screening.</p>
     </aside>`);
 
@@ -157,30 +205,24 @@
     });
     if(wrap.childElementCount){thread.appendChild(wrap);thread.scrollTop=thread.scrollHeight}
   };
-  const I18N_VERSION='7F1';
+  const I18N_VERSION='7G1';
   const originalTextNodes=new WeakMap();
   const originalAttributes=new WeakMap();
 
   async function requestTranslations(texts,targetLanguage){
     const source=texts.map((value)=>String(value??''));
     if(!source.length) return [];
-    const translated=[];
-    for(let i=0;i<source.length;i+=60){
-      const batch=source.slice(i,i+60);
+    const chunks=[];
+    for(let i=0;i<source.length;i+=42) chunks.push(source.slice(i,i+42));
+    const results=await Promise.all(chunks.map(async(batch)=>{
       try{
-        const response=await fetch('/api/translate',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({language:targetLanguage,texts:batch})
-        });
+        const response=await fetch('/api/translate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({language:targetLanguage,texts:batch})});
         const payload=await response.json();
         if(!response.ok||!Array.isArray(payload?.translations)||payload.translations.length!==batch.length) throw new Error('translation unavailable');
-        translated.push(...payload.translations);
-      }catch{
-        translated.push(...batch);
-      }
-    }
-    return translated;
+        return payload.translations;
+      }catch{return batch;}
+    }));
+    return results.flat();
   }
 
   function collectTranslatablePageContent(){
@@ -190,6 +232,7 @@
         const parent=node.parentElement;
         if(!parent) return NodeFilter.FILTER_REJECT;
         if(parent.closest('script,style,noscript,select,option,.language-picker,.chat-message.user')) return NodeFilter.FILTER_REJECT;
+        if(routeLocale===preferredLanguage&&parent.closest('[data-i18n-static]')) return NodeFilter.FILTER_REJECT;
         const value=(originalTextNodes.get(node)??node.nodeValue??'').trim();
         if(value.length<2||!/[A-Za-zÀ-ÿ\u0400-\u04FF\u0900-\u097F\u4E00-\u9FFF]/.test(value)) return NodeFilter.FILTER_REJECT;
         if(!originalTextNodes.has(node)) originalTextNodes.set(node,node.nodeValue||'');
@@ -226,44 +269,38 @@
     if(selector) selector.value=language;
     const picker=selector?.closest('.language-picker');
     picker?.classList.add('is-loading');
-
     const records=collectTranslatablePageContent();
     if(language==='en'){
-      records.forEach((record)=>{
-        if(record.type==='text') record.node.nodeValue=record.raw;
-        else record.element.setAttribute(record.attr,record.raw);
-      });
-      picker?.classList.remove('is-loading');
-      return;
+      records.forEach((record)=>{if(record.type==='text')record.node.nodeValue=record.raw;else record.element.setAttribute(record.attr,record.raw);});
+      picker?.classList.remove('is-loading');return;
     }
-
     const unique=[...new Set(records.map((record)=>record.source))];
-    let translations=null;
-    const cacheKey=`rr-i18n:${I18N_VERSION}:${language}:${currentPath}`;
-    try{
-      const cached=JSON.parse(sessionStorage.getItem(cacheKey)||'null');
-      if(cached&&JSON.stringify(cached.source)===JSON.stringify(unique)&&Array.isArray(cached.translations)) translations=cached.translations;
-    }catch{}
-    if(!translations){
-      translations=await requestTranslations(unique,language);
-      try{sessionStorage.setItem(cacheKey,JSON.stringify({source:unique,translations}))}catch{}
-    }
-    const map=new Map(unique.map((source,index)=>[source,translations[index]||source]));
-    records.forEach((record)=>{
-      const translated=map.get(record.source)||record.source;
-      if(record.type==='text'){
-        const leading=record.raw.match(/^\s*/)?.[0]||'';
-        const trailing=record.raw.match(/\s*$/)?.[0]||'';
-        record.node.nodeValue=leading+translated+trailing;
-      }else{
-        record.element.setAttribute(record.attr,translated);
-      }
+    const cacheKey=`rr-i18n:${I18N_VERSION}:${language}`;
+    let cache={};try{cache=JSON.parse(localStorage.getItem(cacheKey)||'{}')||{}}catch{}
+    const applyMap=()=>records.forEach((record)=>{
+      const translated=cache[record.source]||record.source;
+      if(record.type==='text'){const leading=record.raw.match(/^\s*/)?.[0]||'';const trailing=record.raw.match(/\s*$/)?.[0]||'';record.node.nodeValue=leading+translated+trailing;}
+      else record.element.setAttribute(record.attr,translated);
     });
+    applyMap();
+    const missing=unique.filter((source)=>!cache[source]);
+    if(missing.length){
+      const translated=await requestTranslations(missing,language);
+      missing.forEach((source,index)=>{cache[source]=translated[index]||source;});
+      try{localStorage.setItem(cacheKey,JSON.stringify(cache))}catch{}
+      applyMap();
+    }
     picker?.classList.remove('is-loading');
   }
 
-  document.querySelector('[data-language-select]')?.addEventListener('change',(event)=>applyLanguage(event.target.value));
-  if(preferredLanguage!=='en') setTimeout(()=>applyLanguage(preferredLanguage),80);
+  document.querySelector('[data-language-select]')?.addEventListener('change',(event)=>{
+    const language=event.target.value;
+    try{localStorage.setItem('rr-language',language)}catch{}
+    if(SEO_LOCALIZED_PATHS.has(currentPath)){window.location.href=localizedHref(currentPath,language);return;}
+    applyLanguage(language);
+  });
+  if(!routeLocale&&preferredLanguage!=='en'&&SEO_LOCALIZED_PATHS.has(currentPath)) window.location.replace(localizedHref(currentPath,preferredLanguage));
+  else if(preferredLanguage!=='en') setTimeout(()=>applyLanguage(preferredLanguage),35);
 
   async function localizeConciergePayload(data){
     const answer=String(data?.answer||'');
@@ -311,6 +348,30 @@
     }
   }
   form?.addEventListener('submit',e=>{e.preventDefault();if(input)askConcierge(input.value)});
+
+  async function hydrateNewsletter(){
+    const forms=[...document.querySelectorAll('[data-newsletter-form]')];if(!forms.length)return;
+    let configured=false;try{const response=await fetch('/api/newsletter',{headers:{Accept:'application/json'}});const payload=await response.json();configured=Boolean(payload?.configured)}catch{}
+    forms.forEach((newsletterForm)=>{
+      const status=newsletterForm.querySelector('[data-newsletter-status]'),button=newsletterForm.querySelector('button[type="submit"]');
+      newsletterForm.dataset.configured=String(configured);
+      if(!configured){if(button){button.disabled=true;button.textContent='Email list coming soon'}if(status)status.textContent='Provider connection is ready; account details still need to be added. Rebecca Afterhours remains available below.'}
+      else{if(button){button.disabled=false;button.textContent='Join updates'}if(status)status.textContent='Low-volume updates. You can unsubscribe through the newsletter provider at any time.'}
+    });
+  }
+  setTimeout(hydrateNewsletter,0);
+  document.addEventListener('submit',async(event)=>{
+    const newsletterForm=event.target.closest?.('[data-newsletter-form]');if(!newsletterForm)return;event.preventDefault();
+    const status=newsletterForm.querySelector('[data-newsletter-status]'),button=newsletterForm.querySelector('button[type="submit"]');
+    if(newsletterForm.dataset.configured!=='true'){if(status)status.textContent='The email-list provider is not connected yet. Please use Rebecca Afterhours for now.';return}
+    const formData=new FormData(newsletterForm);if(button)button.disabled=true;if(status)status.textContent='Joining…';
+    try{
+      const response=await fetch('/api/newsletter',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({firstName:formData.get('firstName'),lastName:formData.get('lastName'),email:formData.get('email'),locale:preferredLanguage,sourcePath:window.location.pathname})});
+      const payload=await response.json();if(!response.ok||!payload?.ok)throw new Error(payload?.error||payload?.message||'Unable to join');
+      newsletterForm.reset();if(status)status.textContent=payload.message||'You’re on the list.';
+    }catch(error){if(status)status.textContent=error.message||'The email list is temporarily unavailable.'}
+    finally{if(button)button.disabled=false}
+  });
   document.querySelectorAll('[data-chat-prompt]').forEach(b=>b.addEventListener('click',()=>{const prompt=b.getAttribute('data-chat-prompt')||'';askConcierge(prompt,b.textContent||prompt)}));
 
 

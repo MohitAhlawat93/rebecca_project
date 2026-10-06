@@ -98,7 +98,7 @@ function directAnswerFor(message=''){
     return `Rebecca’s published Singapore terms have a ${sg.terms.couples.minHours}-hour minimum for couples and add SGD ${sg.terms.couples.surcharge.toLocaleString('en-US')} to the standard rate.`;
   }
   if(/phone call|call before|20.?minute call|call her|speak.{0,12}phone|chat.{0,12}phone/.test(q)){
-    return `A ${sg.terms.phoneCall.minutes}-minute phone call is SGD ${sg.terms.phoneCall.fee.toLocaleString('en-US')} and screening is required.`;
+    return `A ${sg.terms.phoneCall.minutes}-minute phone call is SGD ${sg.terms.phoneCall.fee.toLocaleString('en-US')} and screening is required.${sg.terms.phoneCall.creditTowardBooking?' The amount can be credited toward the booking.':''}`;
   }
   if(/deposit/.test(q)){
     return `Deposits are required for confirmed dates: ${policies.deposits.map((item)=>`${item.label} ${item.value}`).join(', ')}. Rebecca asks for the deposit ${policies.depositTiming}.`;
