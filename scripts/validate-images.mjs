@@ -65,4 +65,11 @@ for(const key of ['favouritesHero','journal','press','aboutFeature','galleryProf
 if(!content72.includes("renderPagePhotoHeroes()"))fail('Journal/Press/Favourites photo heroes missing');
 if(!styles72.includes(".page-scroll-rail"))fail('scroll rail styles missing');
 if(!styles72.includes(".page-hero-photo"))fail('rotating page hero styles missing');
-if(!process.exitCode)console.log(`Rebecca image validation passed: ${total} static responsive image elements, 3-second rotating editorial photography, global scroll rail, and 163 normalized archive images.`);
+// Phase 7H.3 press and responsive parity checks
+for(const file of ['press.html','zh/press.html','hi/press.html','fr/press.html','es/press.html']){
+  const pressHtml=fs.readFileSync(file,'utf8');
+  if(pressHtml.includes('data-external-profiles')||pressHtml.includes('A few useful public links.')||pressHtml.includes('>Elsewhere<'))fail(file+': unwanted public-links block still present');
+}
+if(fs.readFileSync('content.js','utf8').includes("querySelectorAll('[data-external-profiles]')"))fail('external profile renderer still present');
+if(!fs.readFileSync('styles.css','utf8').includes('Phase 7H.3 — responsive parity'))fail('responsive parity styles missing');
+if(!process.exitCode)console.log(`Rebecca image validation passed: ${total} static responsive image elements, clean Press coverage, responsive parity, and 163 normalized archive images.`);
