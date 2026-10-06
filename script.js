@@ -147,8 +147,23 @@
     const setImage=(img,item)=>{img.src=item.base+'?format=1500w';img.srcset=[750,1000,1500,2500].map((w)=>item.base+'?format='+w+'w '+w+'w').join(', ');img.sizes='(max-width: 760px) 100vw, 50vw';img.alt=item.alt};
     let activeSlide=0,imageIndex=0,rotating=false;
     const rotate=async()=>{if(rotating||document.hidden)return;rotating=true;const nextImage=(imageIndex+1)%images.length,nextSlide=1-activeSlide,incoming=slides[nextSlide],outgoing=slides[activeSlide];if(!incoming||!outgoing){rotating=false;return}setImage(incoming,images[nextImage]);try{await incoming.decode?.()}catch{}incoming.classList.add('is-active');outgoing.classList.remove('is-active');imageIndex=nextImage;activeSlide=nextSlide;setTimeout(()=>{rotating=false},1300)};
-    setInterval(rotate,9000);
+    setInterval(rotate,3000);
   }
+
+  // Phase 7H.2 global scroll rail + elegant back-to-top control.
+  document.body.insertAdjacentHTML('beforeend','<aside class="page-scroll-rail" data-scroll-rail aria-hidden="true"><span class="page-scroll-track"><i data-scroll-progress></i></span><button type="button" data-scroll-top aria-label="Back to top">↑</button></aside>');
+  const scrollRail=document.querySelector('[data-scroll-rail]'),scrollFill=document.querySelector('[data-scroll-progress]'),scrollTopButton=document.querySelector('[data-scroll-top]');
+  const updateScrollRail=()=>{
+    const max=Math.max(0,document.documentElement.scrollHeight-innerHeight);
+    const ratio=max?Math.min(1,Math.max(0,scrollY/max)):0;
+    if(scrollFill)scrollFill.style.height=Math.round(ratio*100)+'%';
+    scrollRail?.classList.toggle('is-active',max>320);
+    scrollRail?.classList.toggle('has-scrolled',scrollY>260);
+  };
+  updateScrollRail();
+  addEventListener('scroll',updateScrollRail,{passive:true});
+  addEventListener('resize',updateScrollRail,{passive:true});
+  scrollTopButton?.addEventListener('click',()=>scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}));
 
   const reviews=[...document.querySelectorAll('[data-review]')],counter=document.querySelector('[data-review-count]'); let current=0;
   const showReview=(i)=>{if(!reviews.length)return;current=(i+reviews.length)%reviews.length;reviews.forEach((r,n)=>{r.hidden=n!==current;r.classList.toggle('is-active',n===current)});if(counter)counter.textContent=`${String(current+1).padStart(2,'0')} / ${String(reviews.length).padStart(2,'0')}`;};
@@ -484,10 +499,20 @@
       revealItems.forEach((el)=>observer.observe(el));
     }else revealItems.forEach((el)=>el.classList.add('is-visible'));
     if(reducedMotion)return;
-    document.querySelectorAll('[data-editorial-rotator]').forEach((rotator)=>{
-      if(rotator.dataset.rotationReady)return;rotator.dataset.rotationReady='true';
-      const slides=[...rotator.querySelectorAll('.editorial-motion-slide')];if(slides.length<2)return;let active=0;
-      setInterval(()=>{if(document.hidden)return;slides[active].classList.remove('is-active');active=(active+1)%slides.length;slides[active].classList.add('is-active');},10500);
+    document.querySelectorAll('[data-image-rotator]').forEach((rotator)=>{
+      if(rotator.dataset.rotationReady)return;
+      rotator.dataset.rotationReady='true';
+      const slides=[...rotator.querySelectorAll('[data-rotating-image]')];
+      if(slides.length<2)return;
+      let active=Math.max(0,slides.findIndex((slide)=>slide.classList.contains('is-active')));
+      setInterval(async()=>{
+        if(document.hidden)return;
+        const next=(active+1)%slides.length,incoming=slides[next];
+        try{if(!incoming.complete)await incoming.decode?.();}catch{}
+        slides[active].classList.remove('is-active');
+        incoming.classList.add('is-active');
+        active=next;
+      },3000);
     });
     if(!window.__rrParallaxBound&&window.matchMedia('(min-width: 900px)').matches){
       const parallax=[...document.querySelectorAll('[data-parallax]')];
