@@ -21,18 +21,27 @@
   document.querySelector('[data-review-next]')?.addEventListener('click',()=>showReview(current+1)); showReview(0);
 
   const escapeHtml=(text)=>{const d=document.createElement('div');d.textContent=text;return d.innerHTML};
+  const conciergePageConfig={
+    '/rates':{intro:'Tell me the city and duration you have in mind.',prompts:[['Choose a duration','Help me choose a duration for a first meeting.'],['Couples','What are the published terms for couples?'],['Singapore rates',"What are Rebecca's Singapore rates?"]]},
+    '/travel':{intro:'Tell me your city and approximate dates. I’ll match the public travel guidance.',prompts:[['Plan my city','I want Rebecca to visit my city. What details do you need?'],['India','What are Rebecca’s India rates?'],['FMTY','Explain Rebecca’s fly-me-to-you minimums.']]},
+    '/date-ideas':{intro:'Tell me the mood you want and I’ll use Rebecca’s public preferences.',prompts:[['Food-focused','Suggest a food-focused date using Rebecca’s public preferences.'],['Relaxed','Suggest a relaxed date using Rebecca’s public preferences.'],['Playful','Suggest a playful date using Rebecca’s public preferences.']]},
+    '/etiquette':{intro:'I can make the practical rules easier to understand.',prompts:[['Screening','Explain screening simply.'],['Deposits','Explain Rebecca’s deposits.'],['Cancellations','Explain Rebecca’s cancellation policy.']]},
+    '/contact':{intro:'I can help turn your details into a complete enquiry.',prompts:[['Draft enquiry','Help me draft a complete enquiry.'],['What to include','What should I include in my enquiry?'],['Screening','How does screening work?']]}
+  };
+  const conciergeConfig=conciergePageConfig[currentPath]||{intro:'Ask me about Rebecca’s public rates, travel, etiquette or how to enquire.',prompts:[['Singapore rates',"What are Rebecca's Singapore rates?"],['Screening','How does screening work?'],['Travel','Can Rebecca travel to me?']]};
   document.body.insertAdjacentHTML('beforeend',`
     <button class="concierge-launcher" type="button" data-open-concierge aria-label="Open Rebecca's concierge" aria-expanded="false" aria-controls="rebecca-concierge"><span class="spark" aria-hidden="true">✦</span><span>Ask the concierge</span></button>
     <aside class="concierge-panel" id="rebecca-concierge" data-concierge-panel hidden role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="rebecca-concierge-title">
       <div class="concierge-panel-head"><div><strong id="rebecca-concierge-title">Rebecca’s Concierge</strong><small>A little help, discreetly.</small></div><button class="concierge-close" type="button" data-close-concierge aria-label="Close concierge">×</button></div>
-      <div class="concierge-thread" data-concierge-thread aria-live="polite"><div class="chat-message assistant"><p>Hi ✦ I’m Rebecca’s concierge.</p><p>Ask me anything about her, or just say hello.</p></div></div>
-      <div class="concierge-chips"><button class="concierge-chip" type="button" data-chat-prompt="What are Rebecca's Singapore rates?">Singapore rates</button><button class="concierge-chip" type="button" data-chat-prompt="How does screening work?">Screening</button><button class="concierge-chip" type="button" data-chat-prompt="Can Rebecca travel to me?">Travel</button></div>
+      <div class="concierge-thread" data-concierge-thread aria-live="polite"><div class="chat-message assistant"><p>Hi ✦ I’m Rebecca’s concierge.</p><p>${escapeHtml(conciergeConfig.intro)}</p></div></div>
+      <div class="concierge-chips" data-concierge-chips></div>
       <form class="concierge-form" data-concierge-form><input type="text" maxlength="600" autocomplete="off" placeholder="Ask something discreetly…" aria-label="Message Rebecca's concierge" required><button class="concierge-send" type="submit" aria-label="Send">↗</button></form>
       <p class="concierge-disclaimer">Please don’t send ID documents, employer details or other sensitive screening information here. Use Rebecca’s official channels for screening.</p>
     </aside>`);
 
-  const panel=document.querySelector('[data-concierge-panel]'),thread=document.querySelector('[data-concierge-thread]'),form=document.querySelector('[data-concierge-form]'),input=form?.querySelector('input'),send=form?.querySelector('[type="submit"]');let conciergeReturnFocus=null;
-  const setConcierge=(open)=>{if(!panel)return;const launcher=document.querySelector('.concierge-launcher');if(open)conciergeReturnFocus=document.activeElement;panel.hidden=!open;panel.setAttribute('aria-hidden',String(!open));launcher?.toggleAttribute('hidden',open);launcher?.setAttribute('aria-expanded',String(open));document.body.classList.toggle('concierge-open',open);if(open)setTimeout(()=>input?.focus(),60);else if(conciergeReturnFocus instanceof HTMLElement)conciergeReturnFocus.focus()};
+  const panel=document.querySelector('[data-concierge-panel]'),thread=document.querySelector('[data-concierge-thread]'),form=document.querySelector('[data-concierge-form]'),input=form?.querySelector('input'),send=form?.querySelector('[type="submit"]'),chips=document.querySelector('[data-concierge-chips]');let conciergeReturnFocus=null;
+  conciergeConfig.prompts.forEach(([label,prompt])=>{const button=document.createElement('button');button.className='concierge-chip';button.type='button';button.textContent=label;button.setAttribute('data-chat-prompt',prompt);chips?.appendChild(button);});
+  const setConcierge=(open)=>{if(!panel)return;const launcher=document.querySelector('.concierge-launcher');if(open)conciergeReturnFocus=document.activeElement;panel.hidden=!open;panel.setAttribute('aria-hidden',String(!open));launcher?.toggleAttribute('hidden',open);launcher?.setAttribute('aria-expanded',String(open));document.body.classList.toggle('concierge-open',open);if(open&&!window.matchMedia('(max-width: 640px)').matches)setTimeout(()=>input?.focus(),60);else if(!open&&conciergeReturnFocus instanceof HTMLElement)conciergeReturnFocus.focus()};
   document.querySelectorAll('[data-open-concierge]').forEach(b=>b.addEventListener('click',()=>setConcierge(true)));
   document.querySelector('[data-close-concierge]')?.addEventListener('click',()=>setConcierge(false));
   panel?.addEventListener('keydown',(event)=>{if(event.key!=='Tab')return;const focusable=[...panel.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')];if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}});
@@ -66,7 +75,44 @@
   };
   const addMessage=(role,text,extra='')=>{if(!thread)return null;const el=document.createElement('div');el.className=`chat-message ${role} ${extra}`.trim();el.innerHTML=formatChatText(text);thread.appendChild(el);thread.scrollTop=thread.scrollHeight;return el};
   const remember=(role,content)=>{chatHistory.push({role,content:String(content).slice(0,800)});if(chatHistory.length>8)chatHistory.splice(0,chatHistory.length-8);};
-  async function askConcierge(message){const q=message.trim();if(!q)return;addMessage('user',q);remember('user',q);const pending=addMessage('assistant','Just a moment ✦','pending');if(input)input.disabled=true;if(send)send.disabled=true;try{const r=await fetch('/api/concierge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q,history:chatHistory.slice(0,-1)})});const data=await r.json();if(!r.ok)throw new Error(data?.error||'Concierge unavailable');pending?.remove();addMessage('assistant',data.answer);remember('assistant',data.answer);if(data.suggestion?.path){const link=document.createElement('a');link.className='chat-suggestion';link.href=data.suggestion.path;link.textContent=data.suggestion.label+' →';thread?.appendChild(link);if(thread)thread.scrollTop=thread.scrollHeight}}catch{pending?.remove();const message='I’m having a little trouble right now. Try again in a moment, or use Rebecca’s official contact page.';addMessage('assistant',message,'error');remember('assistant',message)}finally{if(send)send.disabled=false;if(input){input.disabled=false;input.value='';input.focus()}}}
+  const safeActionHref=(href='')=>/^\/(?!\/)|^https:\/\/(?:wa\.me|t\.me)\/|^mailto:/i.test(href)?href:'';
+  const renderChatActions=(actions=[])=>{
+    if(!thread||!Array.isArray(actions)||!actions.length)return;
+    const wrap=document.createElement('div');wrap.className='chat-actions';
+    actions.slice(0,4).forEach((action)=>{
+      if(action?.type==='prompt'&&action.prompt){
+        const button=document.createElement('button');button.type='button';button.className='chat-action';button.textContent=action.label||'Continue';button.addEventListener('click',()=>askConcierge(action.prompt));wrap.appendChild(button);return;
+      }
+      if(action?.type==='copy'&&action.text){
+        const button=document.createElement('button');button.type='button';button.className='chat-action';button.textContent=action.label||'Copy';button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(action.text);button.textContent='Copied ✓'}catch{button.textContent='Copy unavailable'}});wrap.appendChild(button);return;
+      }
+      if(action?.type==='link'&&action.href){
+        const href=safeActionHref(action.href);if(!href)return;
+        const link=document.createElement('a');link.className='chat-action';link.href=href;link.textContent=(action.label||'Open')+' →';
+        if(action.external&&/^https:/i.test(href)){link.target='_blank';link.rel='noopener noreferrer'}
+        wrap.appendChild(link);
+      }
+    });
+    if(wrap.childElementCount){thread.appendChild(wrap);thread.scrollTop=thread.scrollHeight}
+  };
+  async function askConcierge(message){
+    const q=message.trim();if(!q)return;
+    addMessage('user',q);remember('user',q);
+    const pending=addMessage('assistant','Just a moment ✦','pending');
+    if(input)input.disabled=true;if(send)send.disabled=true;
+    try{
+      const r=await fetch('/api/concierge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q,history:chatHistory.slice(0,-1),page:currentPath})});
+      const data=await r.json();if(!r.ok)throw new Error(data?.error||'Concierge unavailable');
+      pending?.remove();addMessage('assistant',data.answer);remember('assistant',data.answer);
+      renderChatActions(data.actions);
+      if(data.suggestion?.path){const link=document.createElement('a');link.className='chat-suggestion';link.href=data.suggestion.path;link.textContent=data.suggestion.label+' →';thread?.appendChild(link);if(thread)thread.scrollTop=thread.scrollHeight}
+    }catch{
+      pending?.remove();const message='I’m having a little trouble right now. Try again in a moment, or use Rebecca’s official contact page.';addMessage('assistant',message,'error');remember('assistant',message)
+    }finally{
+      if(send)send.disabled=false;
+      if(input){input.disabled=false;input.value='';if(!window.matchMedia('(max-width: 640px)').matches)input.focus()}
+    }
+  }
   form?.addEventListener('submit',e=>{e.preventDefault();if(input)askConcierge(input.value)});
   document.querySelectorAll('[data-chat-prompt]').forEach(b=>b.addEventListener('click',()=>askConcierge(b.getAttribute('data-chat-prompt')||'')));
 
