@@ -6,7 +6,7 @@ import { REBECCA_IMAGES } from './rebecca-images.js';
 
 export const REBECCA_DATA = {
   meta: {
-    dataVersion: '2026-10-06.7H-rc',
+    dataVersion: '2026-10-06.7H',
     lastVerified: '2026-10-06',
     originalPublicSite: 'https://www.risquerebecca.com/',
     reviewDomain: 'https://rebeccaproject.vercel.app'
