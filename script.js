@@ -14,14 +14,21 @@
   if(currentPath==='/gallery'){
     const panels=[...document.querySelectorAll('.archive-link-panel')];
     const galleryCopy=[
-      {label:'Professional gallery',title:'Editorial portraits & polished shoots',body:'Styled portraits, commissioned shoots and Rebecca’s more polished portfolio photography.',cta:'Browse professional gallery',href:'/professional'},
-      {label:'Candid gallery',title:'Selfies, travel & everyday moments',body:'Less-produced photographs, selfies and candid moments from Rebecca’s public collection.',cta:'Browse candid gallery',href:'/selfies-of-risquerebecca'}
+      {label:'Professional gallery',title:'Editorial portraits & polished shoots',body:'Styled portraits, commissioned shoots and Rebecca’s more polished portfolio photography.',cta:'Browse professional gallery',href:'/professional',alt:'Rebecca professional gallery preview',images:[
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/79b7180c-8aeb-4491-9a59-58bff4d2d69e/processed_I62A3592+copy.jpeg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/07dae98f-dd47-4faa-b37b-cd2624955ae0/processed__DSC9066.jpeg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/aa8270ef-b44f-4140-8de2-7a539c3166ed/processed_REO_0304+copy.jpeg']},
+      {label:'Candid gallery',title:'Selfies, travel & everyday moments',body:'Less-produced photographs, selfies and candid moments from Rebecca’s public collection.',cta:'Browse candid gallery',href:'/selfies-of-risquerebecca',alt:'Rebecca candid gallery preview',images:[
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/9b5f9b93-122a-428f-bf1f-cf697df4c4e1/photo_2026-02-28+00.40.18.jpeg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/d97fc01e-c8ab-47c0-b6a2-e8aaf2f98534/photo_2026-02-28+00.38.47.jpeg',
+        'https://images.squarespace-cdn.com/content/v1/68806c9f433a21762c9e1a86/8e7f0798-c0a2-4b0b-81f1-159427df66da/photo_2026-02-28+00.38.36.jpeg']}
     ];
     panels.slice(0,2).forEach((panel,index)=>{
       const item=galleryCopy[index]; if(!item)return;
       panel.classList.add(index===0?'professional':'candid');
       panel.href=item.href;
-      panel.innerHTML=`<span>${item.label}</span><strong>${item.title}</strong><p>${item.body}</p><em>${item.cta} <b aria-hidden="true">→</b></em>`;
+      const media=item.images.map((image,imageIndex)=>`<img data-rotating-image class="page-photo-slide${imageIndex===0?' is-active':''}" src="${image}?format=${imageIndex===0?'750':'500'}w" alt="${imageIndex===0?item.alt:''}" loading="lazy" decoding="async" srcset="${image}?format=500w 500w, ${image}?format=750w 750w, ${image}?format=1000w 1000w" sizes="(max-width: 640px) 100vw, 50vw">`).join('');
+      panel.innerHTML=`<span class="archive-card-rotator" data-image-rotator>${media}</span><span>${item.label}</span><strong>${item.title}</strong><p>${item.body}</p><em>${item.cta} <b aria-hidden="true">→</b></em>`;
     });
   }
 
