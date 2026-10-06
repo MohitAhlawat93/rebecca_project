@@ -242,9 +242,6 @@ function renderAuthority(){
   document.querySelectorAll('[data-press-appearances]').forEach((el)=>{
     el.innerHTML=REBECCA_DATA.press.appearances.map((item)=>`<article class="authority-card"><span>${esc(item.outlet)} · ${esc(item.year)}</span><h3>${esc(item.title)}</h3><p>${esc(item.note)}</p><a class="inline-link" href="${esc(item.url)}" target="_blank" rel="noreferrer">Read source <span aria-hidden="true">↗</span></a></article>`).join('');
   });
-  document.querySelectorAll('[data-external-profiles]').forEach((el)=>{
-    el.innerHTML=REBECCA_DATA.press.externalProfiles.map((item)=>`<a class="authority-link" href="${esc(item.url)}" target="_blank" rel="noreferrer">${esc(item.label)} <span aria-hidden="true">↗</span></a>`).join('');
-  });
   document.querySelectorAll('[data-journal-entries]').forEach((el)=>{
     el.innerHTML=REBECCA_DATA.journal.entries.map((item)=>`<article class="journal-card"><span>${esc(item.outlet)} · ${esc(item.year)}</span><h3>${esc(item.title)}</h3><p>${esc(item.note)}</p><a class="inline-link" href="${esc(item.url)}" target="_blank" rel="noreferrer">Read the original <span aria-hidden="true">↗</span></a></article>`).join('');
   });
