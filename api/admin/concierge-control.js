@@ -7,6 +7,7 @@ import {
   restoreConciergeHistoryVersion,
   saveConciergeDraft
 } from '../../lib/concierge-control-store.js';
+import { recordSystemEvent, safeCaptureRecoverySnapshot } from '../../lib/system-store.js';
 
 function noCache(res){
   res.setHeader('Cache-Control','private, no-store, max-age=0');
@@ -43,7 +44,19 @@ export default async function handler(req,res){
 
     if(req.method==='POST'){
       const body=bodyOf(req);
-      if(body.action==='publish') return res.status(200).json(shape(await publishConciergeDraft('Rebecca Concierge Control')));
+      if(body.action==='publish'){
+        await safeCaptureRecoverySnapshot('Before Concierge publish','AI Control');
+        const state=await publishConciergeDraft('Rebecca Concierge Control');
+        try{
+          await recordSystemEvent({
+            area:'Concierge',
+            type:'publish',
+            summary:'Concierge Draft was published to visitors.',
+            source:'AI Control'
+          });
+        }catch{}
+        return res.status(200).json(shape(state));
+      }
       if(body.action==='discard') return res.status(200).json(shape(await discardConciergeDraft('Rebecca Concierge Control')));
       if(body.action==='restore'){
         return res.status(200).json(shape(await restoreConciergeHistoryVersion(body.version,'Rebecca Concierge Control')));
