@@ -111,3 +111,31 @@ npm run vercel-build
 GitHub CI runs both the source validation and the future Vercel build command. This lets us verify the generated crawlable HTML without consuming a Vercel preview deployment.
 
 For future clients, keep the prerender engine shared and change the client config: page inventory, approved languages, required crawlable bindings, market/domain settings and renderer entry point.
+
+## SEARCH-02 — semantic geo authority and curated micro-hubs
+
+SEARCH-02 adds a reusable geo-authority layer for sites that genuinely benefit from location content.
+
+Shared pieces:
+
+- `lib/geo-authority-engine.mjs` — rendering, BreadcrumbList/Place/WebPage schema and duplicate-content checks.
+- `scripts/generate-geo-hubs.mjs` — deterministic build generation.
+- `scripts/validate-geo-hubs.mjs` — quality gates.
+- `seo/geo-hubs.config.example.mjs` — reusable client/country template.
+
+Rebecca-specific configuration lives only in `seo/geo-hubs.config.mjs`.
+
+The first launch cluster is deliberately small:
+
+```text
+/singapore
+  ├── /singapore/marina-bay
+  ├── /singapore/orchard-road
+  └── /singapore/sentosa
+```
+
+The validator prevents this layer from turning into low-value programmatic SEO. It checks page uniqueness, minimum editorial depth, source evidence, duplicate titles/slugs and pairwise content similarity. The configured launch limit prevents silently generating dozens of neighbourhood pages.
+
+A new client can reuse the same engine with a different country/city, source set, page hierarchy and neighbourhood configuration. Geo pages are generated before the general SEO render, so canonical URLs, robots rules and sitemap membership still flow through SEARCH-00.
+
+The location pages are editorial guides, not a substitute for live venue information. Facts should be checked against authoritative local sources and changing venue details should be verified directly.
