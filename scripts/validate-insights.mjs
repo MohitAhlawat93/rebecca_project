@@ -25,4 +25,4 @@ assert.ok(Array.isArray(fallback.recurringQuestions));
 assert.ok(Array.isArray(fallback.upcoming));
 assert.ok(Array.isArray(fallback.recentActivity));
 
-console.log('RC-10 Insights validation passed.');
+console.log('RC-10 Owner Insights validation passed.');
