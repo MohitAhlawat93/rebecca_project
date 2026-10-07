@@ -17,6 +17,9 @@ assert.equal(shouldCaptureNeedsRebeccaQuestion('What is her current hotel addres
 assert.equal(shouldCaptureNeedsRebeccaQuestion('Can I send my passport document?'), false);
 assert.equal(shouldCaptureNeedsRebeccaQuestion('My bank account details are ready'), false);
 
+const originalGroqKey = process.env.GROQ_API_KEY;
+delete process.env.GROQ_API_KEY;
+
 const unknown = await generateConciergeAnswer({
   message: 'Does Rebecca have a public opinion about astronomy clubs?',
   history: [],
@@ -36,6 +39,8 @@ const known = await generateConciergeAnswer({
   control: buildDefaultConciergeControl()
 });
 assert.equal(known.needsRebecca, false);
+if (typeof originalGroqKey === 'undefined') delete process.env.GROQ_API_KEY;
+else process.env.GROQ_API_KEY = originalGroqKey;
 
 const api = fs.readFileSync(new URL('../api/concierge.js', import.meta.url), 'utf8');
 const admin = fs.readFileSync(new URL('../admin.html', import.meta.url), 'utf8');
