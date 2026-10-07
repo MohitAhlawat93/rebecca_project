@@ -7,6 +7,7 @@ import {
   saveVisualEditorDraft
 } from '../../lib/admin-store.js';
 import { REBECCA_DATA } from '../../data/rebecca-data.js';
+import { recordSystemEvent, safeCaptureRecoverySnapshot } from '../../lib/system-store.js';
 
 function noCache(res) {
   res.setHeader('Cache-Control', 'private, no-store, max-age=0');
@@ -52,9 +53,17 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       const body = bodyOf(req);
       if (body.action === 'publish') {
-        return res.status(200).json(
-          responseShape(await publishVisualEditorDraft('Rebecca Visual Editor'))
-        );
+        await safeCaptureRecoverySnapshot('Before Visual Editor publish','Visual Editor');
+        const state = await publishVisualEditorDraft('Rebecca Visual Editor');
+        try {
+          await recordSystemEvent({
+            area:'Website',
+            type:'publish',
+            summary:'Visual Editor Draft was published to the live website and concierge data.',
+            source:'Visual Editor'
+          });
+        } catch {}
+        return res.status(200).json(responseShape(state));
       }
       if (body.action === 'discard') {
         return res.status(200).json(
