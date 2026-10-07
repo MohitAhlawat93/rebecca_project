@@ -198,12 +198,11 @@ function match(text, regex) {
 }
 
 function metaContent(html, name) {
-  const escaped = String(name).replace(/[.*+?^$()|[\]\\]/g, '\\$&');
   return match(
     html,
     new RegExp(
-      '<meta\\s+name=["\\']' + escaped +
-      '["\\'][^>]*content=["\\']([^"\\']+)["\\'][^>]*>',
+      "<meta\\s+name=[\"']" + String(name) +
+      "[\"'][^>]*content=[\"']([^\"']+)[\"'][^>]*>",
       'i'
     )
   );
