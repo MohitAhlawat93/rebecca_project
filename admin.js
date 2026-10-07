@@ -16,6 +16,11 @@ const mediaFileInput = document.querySelector('[data-media-file]');
 const mediaChoosePhoto = document.querySelector('[data-media-choose-photo]');
 const mediaUploadButton = document.querySelector('[data-media-upload-button]');
 const mediaUploadStatus = document.querySelector('[data-media-upload-status]');
+const mediaScheduleButton = document.querySelector('[data-media-schedule]');
+const mediaSchedulePublishInput = document.querySelector('[data-media-schedule-publish]');
+const mediaScheduleExpireInput = document.querySelector('[data-media-schedule-expire]');
+const mediaScheduleCancelButton = document.querySelector('[data-media-cancel-schedule]');
+const mediaSchedulePreviewButton = document.querySelector('[data-media-preview-scheduled]');
 
 let quickState = null;
 let scheduleState = null;
@@ -29,6 +34,8 @@ let mediaHistory = [];
 let mediaPersistent = false;
 let mediaDirty = false;
 let mediaDraftAhead = false;
+let mediaSchedule = null;
+let mediaSchedulePhase = 'none';
 let mediaLoaded = false;
 let activeMediaPlacement = 'hero';
 
@@ -83,6 +90,38 @@ function friendlyDateKey(value) {
     year: 'numeric',
     timeZone: 'UTC'
   }).format(new Date(Date.UTC(year, month - 1, day)));
+}
+
+function friendlySingaporeDateTime(value) {
+  if (!value) return '—';
+  const normalized = String(value).includes('T') && !/[zZ]|[+-]\d\d:\d\d$/.test(String(value))
+    ? String(value) + ':00+08:00'
+    : value;
+  const date = new Date(normalized);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat('en', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'Asia/Singapore',
+    timeZoneName: 'short'
+  }).format(date);
+}
+
+function singaporeNowLocalInput() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Singapore',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  }).formatToParts(new Date());
+  const part = (type) => parts.find((item) => item.type === type)?.value || '';
+  return `${part('year')}-${part('month')}-${part('day')}T${part('hour')}:${part('minute')}`;
 }
 
 function availabilityExpirySummary() {
@@ -394,12 +433,27 @@ function mediaPreviewPath() {
   return paths[activeMediaPlacement] || '/';
 }
 
+function mediaScheduleBlocksManualPublish() {
+  return mediaSchedulePhase === 'pending' || mediaSchedulePhase === 'active';
+}
+
 function setMediaDirty(value = true) {
   mediaDirty = value;
   const canSave = mediaPersistent && mediaDirty;
   if (mediaSaveButton) mediaSaveButton.disabled = !canSave;
-  if (mediaPublishButton) mediaPublishButton.disabled = !mediaPersistent || !(mediaDirty || mediaDraftAhead);
+  if (mediaPublishButton) {
+    mediaPublishButton.disabled = !mediaPersistent
+      || !(mediaDirty || mediaDraftAhead)
+      || mediaScheduleBlocksManualPublish();
+  }
+  if (mediaScheduleButton) {
+    mediaScheduleButton.disabled = !mediaPersistent
+      || mediaDirty
+      || !mediaDraftAhead
+      || mediaScheduleBlocksManualPublish();
+  }
   renderMediaStatus();
+  renderMediaSchedule();
 }
 
 function renderMediaStatus(meta = {}) {
@@ -424,7 +478,77 @@ function renderMediaStatus(meta = {}) {
   );
 
   if (mediaSaveButton) mediaSaveButton.disabled = !mediaPersistent || !mediaDirty;
-  if (mediaPublishButton) mediaPublishButton.disabled = !mediaPersistent || !(mediaDirty || mediaDraftAhead);
+  if (mediaPublishButton) {
+    mediaPublishButton.disabled = !mediaPersistent
+      || !(mediaDirty || mediaDraftAhead)
+      || mediaScheduleBlocksManualPublish();
+  }
+}
+
+function renderMediaSchedule() {
+  const phase = mediaSchedulePhase || 'none';
+  const phaseLabel = {
+    none: 'Not scheduled',
+    pending: 'Scheduled',
+    active: 'Live now',
+    expired: 'Finished'
+  }[phase] || 'Not scheduled';
+
+  const pill = document.querySelector('[data-media-schedule-phase]');
+  if (pill) {
+    pill.textContent = phaseLabel;
+    pill.className = 'rc-lifecycle-pill ' + (
+      phase === 'pending' ? 'is-upcoming'
+        : phase === 'active' ? 'is-current'
+          : phase === 'expired' ? 'is-past'
+            : 'is-manual'
+    );
+  }
+
+  if (mediaSchedulePublishInput) {
+    mediaSchedulePublishInput.min = singaporeNowLocalInput();
+    mediaSchedulePublishInput.disabled = mediaScheduleBlocksManualPublish();
+    if (mediaSchedule?.publishLocal) mediaSchedulePublishInput.value = mediaSchedule.publishLocal;
+    else if (!mediaScheduleBlocksManualPublish() && phase !== 'expired') mediaSchedulePublishInput.value = '';
+  }
+
+  if (mediaScheduleExpireInput) {
+    mediaScheduleExpireInput.min = mediaSchedulePublishInput?.value || singaporeNowLocalInput();
+    mediaScheduleExpireInput.disabled = mediaScheduleBlocksManualPublish();
+    if (mediaSchedule?.expireLocal) mediaScheduleExpireInput.value = mediaSchedule.expireLocal;
+    else if (!mediaScheduleBlocksManualPublish() && phase !== 'expired') mediaScheduleExpireInput.value = '';
+  }
+
+  let summary = mediaDirty
+    ? 'Save the Draft before scheduling it.'
+    : mediaDraftAhead
+      ? 'Choose a future Singapore time. Expiry is optional.'
+      : 'Create a Draft that differs from the live website before scheduling it.';
+
+  if (mediaSchedule) {
+    if (phase === 'pending') {
+      summary = 'Locked snapshot publishes ' + friendlySingaporeDateTime(mediaSchedule.publishLocal)
+        + (mediaSchedule.expireLocal
+          ? ' and reverts to the previous live version ' + friendlySingaporeDateTime(mediaSchedule.expireLocal) + '.'
+          : '. It stays live until you publish something else.');
+    } else if (phase === 'active') {
+      summary = 'The scheduled snapshot is live now.'
+        + (mediaSchedule.expireLocal
+          ? ' It automatically reverts ' + friendlySingaporeDateTime(mediaSchedule.expireLocal) + '.'
+          : ' It remains live until you publish something else.');
+    } else if (phase === 'expired') {
+      summary = 'This schedule has finished and the previous live version is being shown again. Clear the schedule when you no longer need its record.';
+    }
+  }
+
+  setText('[data-media-schedule-summary]', summary);
+
+  if (mediaSchedulePreviewButton) mediaSchedulePreviewButton.hidden = !mediaSchedule;
+  if (mediaScheduleCancelButton) mediaScheduleCancelButton.hidden = !mediaSchedule;
+  if (mediaScheduleButton) {
+    mediaScheduleButton.hidden = mediaScheduleBlocksManualPublish();
+    mediaScheduleButton.disabled = !mediaPersistent || mediaDirty || !mediaDraftAhead || mediaScheduleBlocksManualPublish();
+  }
 }
 
 function renderMediaPlacementSelect() {
@@ -522,6 +646,7 @@ function renderMedia() {
   renderMediaGrid();
   renderMediaHistory();
   renderMediaStatus();
+  renderMediaSchedule();
 }
 
 async function loadMedia() {
@@ -543,6 +668,8 @@ async function loadMedia() {
     mediaPublished = data.published;
     mediaPlacements = data.placements || [];
     mediaHistory = data.history || [];
+    mediaSchedule = data.schedule || null;
+    mediaSchedulePhase = data.schedulePhase || 'none';
     mediaPersistent = Boolean(data.persistent && data.configured);
     mediaDraftAhead = Boolean(data.hasDraftChanges);
     mediaDirty = false;
@@ -581,6 +708,8 @@ async function saveMediaDraft({ quiet = false } = {}) {
     mediaState = data.draft;
     mediaPublished = data.published;
     mediaHistory = data.history || [];
+    mediaSchedule = data.schedule || null;
+    mediaSchedulePhase = data.schedulePhase || mediaSchedulePhase;
     mediaDraftAhead = Boolean(data.hasDraftChanges);
     mediaDirty = false;
     window.__rcMediaPublishedVersion = data.publishedVersion || 0;
@@ -632,6 +761,8 @@ async function publishMedia() {
     mediaState = data.draft;
     mediaPublished = data.published;
     mediaHistory = data.history || [];
+    mediaSchedule = data.schedule || null;
+    mediaSchedulePhase = data.schedulePhase || 'none';
     mediaDraftAhead = Boolean(data.hasDraftChanges);
     mediaDirty = false;
     window.__rcMediaPublishedVersion = data.publishedVersion || 0;
@@ -642,6 +773,98 @@ async function publishMedia() {
     setText('[data-media-draft-detail]', error?.message || 'The live website was not changed.');
   } finally {
     mediaPublishButton.textContent = 'Publish to website';
+    setMediaDirty(mediaDirty);
+  }
+}
+
+async function previewScheduledMedia() {
+  if (!mediaSchedule) return;
+  const join = mediaPreviewPath().includes('?') ? '&' : '?';
+  window.open(mediaPreviewPath() + join + 'rc_preview=scheduled', '_blank', 'noopener');
+}
+
+async function scheduleMediaPublish() {
+  if (!mediaPersistent || mediaDirty || !mediaDraftAhead || mediaScheduleBlocksManualPublish()) return;
+  const publishLocal = mediaSchedulePublishInput?.value || '';
+  const expireLocal = mediaScheduleExpireInput?.value || '';
+
+  if (!publishLocal) {
+    setText('[data-media-schedule-summary]', 'Choose a future Singapore publish date and time.');
+    return;
+  }
+
+  const message = expireLocal
+    ? 'Schedule this saved media Draft for ' + friendlySingaporeDateTime(publishLocal)
+      + ' and automatically revert ' + friendlySingaporeDateTime(expireLocal) + '?'
+    : 'Schedule this saved media Draft for ' + friendlySingaporeDateTime(publishLocal) + '?';
+  if (!window.confirm(message)) return;
+
+  mediaScheduleButton.disabled = true;
+  mediaScheduleButton.textContent = 'Scheduling…';
+
+  try {
+    const response = await fetch('/api/admin/media', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        action: 'schedule',
+        publishLocal,
+        expireLocal: expireLocal || null
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Could not schedule this media Draft.');
+
+    mediaState = data.draft;
+    mediaPublished = data.published;
+    mediaHistory = data.history || [];
+    mediaSchedule = data.schedule || null;
+    mediaSchedulePhase = data.schedulePhase || 'pending';
+    mediaDraftAhead = Boolean(data.hasDraftChanges);
+    mediaDirty = false;
+    renderMedia();
+  } catch (error) {
+    setText('[data-media-schedule-summary]', error?.message || 'Nothing was scheduled.');
+  } finally {
+    mediaScheduleButton.textContent = 'Schedule saved draft';
+    setMediaDirty(mediaDirty);
+  }
+}
+
+async function cancelScheduledMedia() {
+  if (!mediaSchedule) return;
+  const warning = mediaSchedulePhase === 'active'
+    ? 'Cancel this active schedule? The website will immediately return to the version that was live before the schedule started.'
+    : 'Cancel this scheduled publish? The live website will stay unchanged.';
+  if (!window.confirm(warning)) return;
+
+  mediaScheduleCancelButton.disabled = true;
+  mediaScheduleCancelButton.textContent = 'Cancelling…';
+
+  try {
+    const response = await fetch('/api/admin/media', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ action: 'cancel_schedule' })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Could not cancel this schedule.');
+
+    mediaState = data.draft;
+    mediaPublished = data.published;
+    mediaHistory = data.history || [];
+    mediaSchedule = null;
+    mediaSchedulePhase = 'none';
+    mediaDraftAhead = Boolean(data.hasDraftChanges);
+    mediaDirty = false;
+    renderMedia();
+  } catch (error) {
+    setText('[data-media-schedule-summary]', error?.message || 'Schedule was not cancelled.');
+  } finally {
+    mediaScheduleCancelButton.disabled = false;
+    mediaScheduleCancelButton.textContent = 'Cancel schedule';
     setMediaDirty(mediaDirty);
   }
 }
@@ -779,6 +1002,8 @@ logoutButton?.addEventListener('click', async () => {
     quickState = null;
     scheduleState = null;
     mediaState = null;
+    mediaSchedule = null;
+    mediaSchedulePhase = 'none';
     mediaLoaded = false;
     showLogin('Signed out.');
   }
@@ -904,6 +1129,14 @@ document.addEventListener('input', (event) => {
 });
 
 document.addEventListener('change', (event) => {
+  if (event.target.matches('[data-media-schedule-publish]')) {
+    if (mediaScheduleExpireInput) mediaScheduleExpireInput.min = event.target.value || singaporeNowLocalInput();
+    renderMediaSchedule();
+  }
+  if (event.target.matches('[data-media-schedule-expire]')) {
+    renderMediaSchedule();
+  }
+
   if (event.target.matches('[data-trip-visible], [data-rate-visible], [data-rate-featured], [data-availability-until], [data-availability-revert]')) {
     setDirty(true);
     if (event.target.matches('[data-availability-until], [data-availability-revert]')) {
@@ -966,6 +1199,9 @@ saveButton?.addEventListener('click', async () => {
 mediaSaveButton?.addEventListener('click', () => saveMediaDraft());
 mediaPreviewButton?.addEventListener('click', previewMediaDraft);
 mediaPublishButton?.addEventListener('click', publishMedia);
+mediaScheduleButton?.addEventListener('click', scheduleMediaPublish);
+mediaScheduleCancelButton?.addEventListener('click', cancelScheduledMedia);
+mediaSchedulePreviewButton?.addEventListener('click', previewScheduledMedia);
 
 document.addEventListener('rc:media-uploaded', async (event) => {
   if (!mediaState || !event.detail?.url) return;
