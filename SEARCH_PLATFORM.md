@@ -139,3 +139,37 @@ The validator prevents this layer from turning into low-value programmatic SEO. 
 A new client can reuse the same engine with a different country/city, source set, page hierarchy and neighbourhood configuration. Geo pages are generated before the general SEO render, so canonical URLs, robots rules and sitemap membership still flow through SEARCH-00.
 
 The location pages are editorial guides, not a substitute for live venue information. Facts should be checked against authoritative local sources and changing venue details should be verified directly.
+
+## SEARCH-03 — persistent global travel authority
+
+Travel SEO now treats destinations as durable entities rather than disposable campaign URLs.
+
+Rebecca's initial verified cluster is:
+
+```text
+/travel
+  ├── /travel/london
+  ├── /travel/hong-kong
+  └── /travel/india
+```
+
+Dates live inside these pages. A future London announcement updates `/travel/london`; it does not create `/travel/london-december-2027`.
+
+Shared components:
+
+- `lib/travel-authority-engine.mjs` — permanent page rendering, public-window status and structural validation.
+- `scripts/generate-travel-hubs.mjs` — deterministic destination generation.
+- `scripts/validate-travel-hubs.mjs` — evidence, dated-slug and rendered-output checks.
+- `seo/travel-authority.config.example.mjs` — template for another client/country.
+
+Rebecca-specific evidence is read from the same canonical travel data already used by the public site and concierge. Rates, announced dates and regional travel minimums are not copied into a second manual source.
+
+Quality rules:
+
+1. A travel destination must have durable canonical evidence.
+2. Dated or seasonal slugs are rejected.
+3. A multi-city tour stays consolidated when the cities share the same rate/rule and lack distinct long-term content.
+4. A destination can remain useful between public visits; no fake future date is required.
+5. New destinations such as Dubai should not be generated until client-specific evidence justifies them.
+
+The build order now generates persistent travel pages and Singapore geo pages before SEARCH-01 prerendering and SEARCH-00 metadata/sitemap rendering.
