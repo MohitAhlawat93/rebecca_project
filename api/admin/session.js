@@ -28,8 +28,8 @@ export default async function handler(req, res) {
       role: 'Owner'
     },
     control: {
-      version: 'RC-04',
-      status: 'Smart Scheduling',
+      version: 'RC-04B',
+      status: 'Scheduled Publishing',
       storeMode: site.storeMode,
       persistent: site.persistent
     },

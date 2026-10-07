@@ -31,15 +31,16 @@ async function hydrateRuntimeData(){
 function mediaPreviewMode(){
   const params=new URLSearchParams(window.location.search);
   const flag=params.get('rc_preview');
-  if(flag==='1'){
-    sessionStorage.setItem('rc-media-preview','1');
-    return true;
+  if(flag==='1'||flag==='scheduled'){
+    sessionStorage.setItem('rc-media-preview',flag);
+    return flag;
   }
   if(flag==='0'){
     sessionStorage.removeItem('rc-media-preview');
-    return false;
+    return null;
   }
-  return sessionStorage.getItem('rc-media-preview')==='1';
+  const stored=sessionStorage.getItem('rc-media-preview');
+  return stored==='1'||stored==='scheduled'?stored:null;
 }
 
 function applyRuntimeMediaState(state){
@@ -52,12 +53,13 @@ function applyRuntimeMediaState(state){
   });
 }
 
-function renderDraftPreviewBanner(){
+function renderDraftPreviewBanner(mode='1'){
   if(document.querySelector('[data-rc-preview-banner]'))return;
+  const scheduled=mode==='scheduled';
   const banner=document.createElement('div');
   banner.className='rc-preview-banner';
   banner.dataset.rcPreviewBanner='true';
-  banner.innerHTML='<strong>Rebecca Control preview</strong><span>Draft media · not live</span><button type="button" data-exit-rc-preview>Exit preview</button>';
+  banner.innerHTML='<strong>Rebecca Control preview</strong><span>'+(scheduled?'Scheduled media snapshot · not live yet':'Draft media · not live')+'</span><button type="button" data-exit-rc-preview>Exit preview</button>';
   document.body.prepend(banner);
   document.body.classList.add('has-rc-preview-banner');
   banner.querySelector('[data-exit-rc-preview]')?.addEventListener('click',()=>{
@@ -71,7 +73,8 @@ function renderDraftPreviewBanner(){
 async function hydrateRuntimeMedia(){
   const preview=mediaPreviewMode();
   try{
-    const response=await fetch('/api/media-content'+(preview?'?preview=1':''),{
+    const query=preview==='scheduled'?'?scheduled=1':(preview==='1'?'?preview=1':'');
+    const response=await fetch('/api/media-content'+query,{
       method:'GET',
       headers:{Accept:'application/json'},
       credentials:'same-origin',
@@ -84,7 +87,7 @@ async function hydrateRuntimeMedia(){
     const payload=await response.json();
     applyRuntimeMediaState(payload?.state);
     window.__REBECCA_MEDIA__=payload?.state||null;
-    if(preview)renderDraftPreviewBanner();
+    if(preview)renderDraftPreviewBanner(preview);
   }catch{
     // Existing curated images remain the safe fallback.
   }

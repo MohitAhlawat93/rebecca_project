@@ -413,3 +413,43 @@ button,a{-webkit-tap-highlight-color:transparent}
   .rc-schedule-date{justify-content:flex-start}
   .rc-schedule-date span{order:-1}
 }
+
+
+/* RC-04B — Scheduled Publishing */
+.rc-publish-schedule{
+  margin:22px 0 4px;padding:20px;border:1px solid var(--rc-line);border-radius:20px;
+  background:linear-gradient(145deg,#fbf7f2,#fff);display:grid;gap:18px
+}
+.rc-publish-schedule-head{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:18px
+}
+.rc-publish-schedule-head>div{display:grid;gap:5px;max-width:720px}
+.rc-publish-schedule-head strong{
+  font-family:Georgia,"Times New Roman",serif;font-size:1.18rem;font-weight:400
+}
+.rc-publish-schedule-head p{
+  margin:0;color:var(--rc-muted);font-size:.78rem;line-height:1.55
+}
+.rc-publish-schedule input[type="datetime-local"]{
+  width:100%;border:1px solid var(--rc-line);border-radius:14px;background:#fff;color:var(--rc-ink);
+  padding:13px 14px;outline:none
+}
+.rc-publish-schedule input:disabled{background:#f4f1ed;color:var(--rc-muted)}
+.rc-publish-schedule-summary{
+  padding:12px 14px;border-radius:14px;background:rgba(119,89,68,.07);color:var(--rc-muted);
+  font-size:.76rem;line-height:1.55
+}
+.rc-publish-schedule-actions{
+  display:flex;justify-content:flex-end;align-items:center;gap:9px;flex-wrap:wrap
+}
+.rc-publish-schedule-actions .rc-primary{margin:0}
+@media(max-width:700px){
+  .rc-publish-schedule{padding:16px}
+  .rc-publish-schedule-head{flex-direction:column}
+  .rc-publish-schedule-actions{display:grid;grid-template-columns:1fr 1fr}
+  .rc-publish-schedule-actions .rc-primary{grid-column:1/-1}
+}
+@media(max-width:430px){
+  .rc-publish-schedule-actions{grid-template-columns:1fr}
+  .rc-publish-schedule-actions .rc-primary{grid-column:auto}
+}
