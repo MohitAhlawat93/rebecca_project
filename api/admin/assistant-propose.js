@@ -1,6 +1,7 @@
 import { getAdminSession } from '../../lib/admin-auth.js';
 import { readVisualEditorState } from '../../lib/admin-store.js';
 import { readConciergeControlState } from '../../lib/concierge-control-store.js';
+import { readSystemSettings } from '../../lib/system-store.js';
 import {
   assistantContext,
   deterministicAssistantProposal,
@@ -109,6 +110,11 @@ export default async function handler(req,res){
   const body=bodyOf(req);
   const prompt=typeof body.prompt==='string'?body.prompt.trim().slice(0,1200):'';
   if(!prompt) return res.status(400).json({error:'Tell Rebecca Control what you want changed.'});
+
+  const preferences=await readSystemSettings();
+  if(preferences.settings?.aiAssistantEnabled===false){
+    return res.status(403).json({error:'AI Admin Assistant is turned off in Rebecca Control Settings.'});
+  }
 
   const [website,concierge]=await Promise.all([
     readVisualEditorState(),

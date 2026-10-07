@@ -39,7 +39,7 @@
     <section class="rc-app" data-app-view hidden>
       <header class="rc-topbar">
         <div>
-          <p class="rc-eyebrow">Rebecca Control · RC-10</p>
+          <p class="rc-eyebrow">Rebecca Control · RC-11</p>
           <h1>Good to see you, Rebecca.</h1>
         </div>
         <div class="rc-top-actions">
@@ -94,6 +94,7 @@
           <button type="button" data-tab="media">Media & Publish</button>
           <button type="button" data-tab="history">History</button>
           <button type="button" data-tab="export">Export & Recovery</button>
+          <button type="button" data-tab="settings">Settings</button>
         </nav>
 
         <section class="rc-panel rc-insights-panel" data-panel="insights" hidden>
@@ -555,6 +556,52 @@
           <div class="rc-export-status" data-system-status></div>
         </section>
 
+        <section class="rc-panel rc-settings-panel" data-panel="settings" hidden>
+          <div class="rc-panel-intro">
+            <p class="rc-eyebrow">Settings & Safety</p>
+            <h3>Choose how much automation you want.</h3>
+            <p>These controls affect optional Rebecca Control helpers only. Website editing, Draft review and manual publishing always remain available.</p>
+          </div>
+
+          <div class="rc-settings-stack">
+            <label class="rc-settings-card">
+              <span><strong>Open Rebecca Control on</strong><small>Choose the first section shown after sign-in.</small></span>
+              <select data-setting="dashboardStartTab">
+                <option value="insights">Insights</option>
+                <option value="availability">Availability</option>
+                <option value="assistant">AI Assistant</option>
+                <option value="needs-rebecca">Needs Rebecca</option>
+                <option value="media">Media & Publish</option>
+              </select>
+            </label>
+
+            <label class="rc-settings-card">
+              <span><strong>AI Admin Assistant</strong><small>Allow natural-language proposals. The assistant still cannot publish automatically.</small></span>
+              <input type="checkbox" data-setting-toggle="aiAssistantEnabled">
+            </label>
+
+            <label class="rc-settings-card">
+              <span><strong>Needs Rebecca capture</strong><small>Store privacy-filtered grouped questions when the concierge cannot answer. No identity or raw chat history is stored.</small></span>
+              <input type="checkbox" data-setting-toggle="needsRebeccaCaptureEnabled">
+            </label>
+
+            <label class="rc-settings-card">
+              <span><strong>Automatic recovery points</strong><small>Create a recovery point before important publishes. Manual recovery points remain available even when this is off.</small></span>
+              <input type="checkbox" data-setting-toggle="automaticRecoveryEnabled">
+            </label>
+          </div>
+
+          <div class="rc-settings-boundary">
+            <strong>Always protected</strong>
+            <span>These settings cannot enable silent publishing, expose credentials, modify code, change database schema or bypass Draft review.</span>
+          </div>
+
+          <div class="rc-panel-actions rc-settings-actions">
+            <span data-settings-status>No changes</span>
+            <button type="button" class="rc-primary" data-settings-save disabled>Save settings</button>
+          </div>
+        </section>
+
         <section class="rc-panel rc-media-panel" data-panel="media" hidden>
           <div class="rc-panel-intro rc-panel-intro-row">
             <div>
@@ -667,7 +714,7 @@
       </div>
 
       <footer class="rc-footer">
-        <span>Rebecca Control · RC-10</span>
+        <span>Rebecca Control · RC-11</span>
         <span>Owner access only</span>
       </footer>
     </section>

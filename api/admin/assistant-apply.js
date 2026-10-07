@@ -8,7 +8,7 @@ import {
   saveConciergeDraft
 } from '../../lib/concierge-control-store.js';
 import { applyAssistantChange } from '../../lib/admin-assistant.js';
-import { recordSystemEvent } from '../../lib/system-store.js';
+import { readSystemSettings, recordSystemEvent } from '../../lib/system-store.js';
 
 function noCache(res){
   res.setHeader('Cache-Control','private, no-store, max-age=0');
@@ -33,6 +33,10 @@ export default async function handler(req,res){
   if(!change||typeof change!=='object') return res.status(400).json({error:'Choose a proposal to apply.'});
 
   try{
+    const preferences=await readSystemSettings();
+    if(preferences.settings?.aiAssistantEnabled===false){
+      return res.status(403).json({error:'AI Admin Assistant is turned off in Rebecca Control Settings.'});
+    }
     const [website,concierge]=await Promise.all([
       readVisualEditorState(),
       readConciergeControlState()

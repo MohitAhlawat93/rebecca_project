@@ -4,7 +4,8 @@ import {
   captureRecoverySnapshot,
   readSystemState,
   restoreBundleToDraft,
-  restoreSnapshotToDraft
+  restoreSnapshotToDraft,
+  saveSystemSettings
 } from '../../lib/system-store.js';
 
 function noCache(res){
@@ -50,6 +51,10 @@ export default async function handler(req,res){
           destination:'Draft only',
           message:'Recovery point restored to Website, Concierge and Media Drafts. Nothing was published.'
         });
+      }
+      if(body.action==='saveSettings'){
+        const saved=await saveSystemSettings(body.settings,'Rebecca');
+        return res.status(200).json(shape(saved));
       }
       if(body.action==='restoreBundle'){
         await restoreBundleToDraft(body.bundle,'Rebecca Backup Import');
