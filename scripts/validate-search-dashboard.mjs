@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { normalizeSystemSettings } from '../lib/system-store.js';
-import { normalizeBingRows, summarizeSearchData } from '../lib/search-measurement-engine.mjs';
+import { normalizeBingAiPerformance, normalizeBingRows, normalizeGoogleGenerativeAiExport, summarizeSearchData } from '../lib/search-measurement-engine.mjs';
 
 const admin = fs.readFileSync(new URL('../admin.html', import.meta.url), 'utf8');
 const searchJs = fs.readFileSync(new URL('../admin-search.js', import.meta.url), 'utf8');
@@ -70,5 +70,27 @@ const pageRollup = normalizeBingRows(
 const totals = summarizeSearchData([...queryRollup, ...pageRollup]);
 assert.equal(totals.clicks, 8);
 assert.equal(totals.impressions, 100);
+
+const bingAi = normalizeBingAiPerformance([{
+  'Date': '2026-10-01',
+  'Cited page': 'https://www.risquerebecca.com/travel/london',
+  'Grounding query': 'rebecca london travel',
+  'Citation count': '5',
+  'Cited pages': '1',
+  'Topic': 'London travel',
+  'Intent': 'planning'
+}]);
+assert.equal(bingAi[0].query, 'rebecca london travel');
+assert.equal(bingAi[0].citations, 5);
+assert.equal(bingAi[0].page, 'https://www.risquerebecca.com/travel/london');
+
+const googleAi = normalizeGoogleGenerativeAiExport([{
+  'Date': '2026-10-01',
+  'Landing page': 'https://www.risquerebecca.com/about',
+  'Impressions': '42',
+  'Clicks': '3'
+}]);
+assert.equal(googleAi[0].page, 'https://www.risquerebecca.com/about');
+assert.equal(googleAi[0].impressions, 42);
 
 console.log('SEARCH-09 Search Intelligence dashboard validation passed.');
