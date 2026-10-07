@@ -28,8 +28,8 @@ export default async function handler(req, res) {
       role: 'Owner'
     },
     control: {
-      version: 'RC-07',
-      status: 'Needs Rebecca',
+      version: 'RC-08',
+      status: 'AI Admin Assistant',
       storeMode: site.storeMode,
       persistent: site.persistent
     },

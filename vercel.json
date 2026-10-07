@@ -16,6 +16,9 @@
     },
     "api/admin/concierge-test.js": {
       "maxDuration": 30
+    },
+    "api/admin/assistant-propose.js": {
+      "maxDuration": 30
     }
   },
   "headers": [

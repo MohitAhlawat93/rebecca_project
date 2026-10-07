@@ -39,7 +39,7 @@
     <section class="rc-app" data-app-view hidden>
       <header class="rc-topbar">
         <div>
-          <p class="rc-eyebrow">Rebecca Control · RC-07</p>
+          <p class="rc-eyebrow">Rebecca Control · RC-08</p>
           <h1>Good to see you, Rebecca.</h1>
         </div>
         <div class="rc-top-actions">
@@ -80,6 +80,7 @@
         </div>
 
         <nav class="rc-tabs" aria-label="Rebecca Control sections">
+          <button type="button" data-tab="assistant">AI Assistant</button>
           <button type="button" class="is-active" data-tab="availability">Availability</button>
           <button type="button" data-tab="travel">Travel</button>
           <button type="button" data-tab="schedule">Schedule</button>
@@ -91,6 +92,51 @@
           <button type="button" data-tab="concierge-test">Test Concierge</button>
           <button type="button" data-tab="media">Media & Publish</button>
         </nav>
+
+        <section class="rc-panel rc-assistant-panel" data-panel="assistant" hidden>
+          <div class="rc-panel-intro rc-panel-intro-row">
+            <div>
+              <p class="rc-eyebrow">AI Admin Assistant</p>
+              <h3>Describe the change. Review the proposal. You stay in control.</h3>
+              <p>Rebecca Control can prepare structured changes for Website Draft or Concierge Draft. It cannot publish, deploy, delete content or silently apply anything.</p>
+            </div>
+            <span class="rc-phase-pill">Draft-only</span>
+          </div>
+
+          <section class="rc-assistant-compose">
+            <label class="rc-field rc-field-wide">
+              <span>What would you like to change?</span>
+              <textarea data-assistant-prompt maxlength="1200" rows="5" placeholder="e.g. Make my availability limited until 15 October, then return to accepting enquiries."></textarea>
+            </label>
+            <div class="rc-assistant-examples" aria-label="Example requests">
+              <button type="button" data-assistant-example="Make my availability limited until 15 October.">Limited availability</button>
+              <button type="button" data-assistant-example="Change my 3 hour Singapore rate to SGD 3000.">Change a rate</button>
+              <button type="button" data-assistant-example="Pause Rebecca’s Desk for now.">Pause concierge</button>
+              <button type="button" data-assistant-example="Add a Trusted Answer for: How quickly do you reply? Answer: I usually reply personally as soon as practical; for time-sensitive enquiries, please send a complete introduction through Contact.">Add trusted answer</button>
+            </div>
+            <div class="rc-assistant-submit-row">
+              <p data-assistant-status>Nothing will change until you review a proposal and choose Apply to Draft.</p>
+              <button type="button" class="rc-primary" data-assistant-propose>Prepare Proposal</button>
+            </div>
+          </section>
+
+          <section class="rc-assistant-boundary">
+            <strong>Approval boundary</strong>
+            <span>AI request → Proposal only → Rebecca reviews → Apply to Draft → existing Preview/Test → separate Publish. The assistant has no direct publish or deployment action.</span>
+          </section>
+
+          <section class="rc-assistant-results" data-assistant-results hidden>
+            <div class="rc-media-section-title">
+              <div>
+                <span class="rc-card-kicker">Proposed changes</span>
+                <strong data-assistant-summary>Review before applying</strong>
+              </div>
+              <small>Apply multiple changes from top to bottom. If the Draft changes elsewhere, stale proposals are blocked.</small>
+            </div>
+            <div class="rc-assistant-proposal-list" data-assistant-proposal-list></div>
+            <div class="rc-assistant-unsupported" data-assistant-unsupported hidden></div>
+          </section>
+        </section>
 
         <section class="rc-panel is-active" data-panel="availability">
           <div class="rc-panel-intro">
@@ -495,7 +541,7 @@
       </div>
 
       <footer class="rc-footer">
-        <span>Rebecca Control · RC-07</span>
+        <span>Rebecca Control · RC-08</span>
         <span>Owner access only</span>
       </footer>
     </section>
