@@ -1,0 +1,117 @@
+/* RC-05 — Visual Website Editor */
+html.rc-visual-editing [data-rc-edit],
+html.rc-visual-editing [data-rc-media-placement]{
+  position:relative;
+  cursor:pointer;
+  outline:1px dashed transparent;
+  outline-offset:6px;
+  transition:outline-color .18s ease,box-shadow .18s ease;
+}
+html.rc-visual-editing [data-rc-edit]:hover,
+html.rc-visual-editing [data-rc-media-placement]:hover,
+html.rc-visual-editing [data-rc-edit].is-rc-edit-target,
+html.rc-visual-editing [data-rc-media-placement].is-rc-edit-target{
+  outline-color:rgba(108,82,62,.65);
+  box-shadow:0 0 0 5px rgba(245,239,231,.72);
+}
+html.rc-visual-preview [data-rc-edit],
+html.rc-visual-preview [data-rc-media-placement]{
+  outline-color:transparent!important;
+  box-shadow:none!important;
+  cursor:default;
+}
+.rc-ve-toolbar{
+  position:fixed;left:50%;bottom:20px;transform:translateX(-50%);
+  z-index:2147483000;display:flex;align-items:center;gap:8px;
+  max-width:calc(100vw - 28px);padding:8px;
+  border:1px solid rgba(80,61,49,.18);border-radius:999px;
+  background:rgba(252,249,245,.96);backdrop-filter:blur(18px);
+  box-shadow:0 18px 70px rgba(40,28,20,.18);
+  font-family:Manrope,system-ui,sans-serif;
+}
+.rc-ve-toolbar-copy{display:grid;gap:1px;padding:0 8px 0 10px;min-width:150px}
+.rc-ve-toolbar-copy strong{font-size:.72rem;letter-spacing:.04em}
+.rc-ve-toolbar-copy span{font-size:.62rem;color:#776b62;white-space:nowrap}
+.rc-ve-toolbar button,.rc-ve-toolbar a,.rc-ve-panel button,.rc-ve-panel a{
+  appearance:none;border:0;text-decoration:none;font:inherit;cursor:pointer
+}
+.rc-ve-toolbar button,.rc-ve-toolbar a{
+  padding:10px 13px;border-radius:999px;background:#eee7df;color:#3e332c;
+  font-size:.68rem;font-weight:700;white-space:nowrap
+}
+.rc-ve-toolbar .rc-ve-publish{background:#3d322b;color:#fff}
+.rc-ve-toolbar .rc-ve-danger{background:transparent;color:#8a5a52}
+.rc-ve-toolbar button:disabled{opacity:.42;cursor:not-allowed}
+.rc-ve-panel{
+  position:fixed;z-index:2147483100;top:14px;right:14px;bottom:14px;width:min(430px,calc(100vw - 28px));
+  padding:0;border:1px solid rgba(80,61,49,.16);border-radius:24px;background:#fbf8f4;color:#3f342d;
+  box-shadow:0 24px 90px rgba(35,25,18,.24);font-family:Manrope,system-ui,sans-serif;overflow:hidden
+}
+.rc-ve-panel[hidden]{display:none}
+.rc-ve-panel-inner{height:100%;display:flex;flex-direction:column}
+.rc-ve-panel-head{
+  display:flex;justify-content:space-between;gap:16px;align-items:flex-start;
+  padding:20px;border-bottom:1px solid rgba(80,61,49,.12)
+}
+.rc-ve-kicker{display:block;margin-bottom:4px;font-size:.61rem;font-weight:800;text-transform:uppercase;letter-spacing:.13em;color:#8a786b}
+.rc-ve-panel-head strong{display:block;font-family:"Cormorant Garamond",Georgia,serif;font-size:1.55rem;font-weight:500;line-height:1.05}
+.rc-ve-panel-head p{margin:6px 0 0;color:#7c7067;font-size:.72rem;line-height:1.5}
+.rc-ve-close{width:34px;height:34px;border-radius:50%;background:#eee7df!important;color:#443831!important;font-size:1rem!important}
+.rc-ve-form{padding:18px 20px 26px;overflow:auto;display:grid;gap:14px}
+.rc-ve-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.rc-ve-field{display:grid;gap:6px}
+.rc-ve-field.is-wide{grid-column:1/-1}
+.rc-ve-field span{font-size:.65rem;font-weight:700;color:#6e625a}
+.rc-ve-field input,.rc-ve-field textarea,.rc-ve-field select{
+  width:100%;box-sizing:border-box;border:1px solid rgba(80,61,49,.18);border-radius:12px;
+  padding:11px 12px;background:#fff;color:#352c26;font:inherit;font-size:.78rem;outline:none
+}
+.rc-ve-field textarea{min-height:96px;resize:vertical;line-height:1.5}
+.rc-ve-field input:focus,.rc-ve-field textarea:focus,.rc-ve-field select:focus{border-color:#796251;box-shadow:0 0 0 3px rgba(121,98,81,.08)}
+.rc-ve-check{display:flex;align-items:center;gap:9px;font-size:.72rem;color:#554941}
+.rc-ve-check input{width:auto}
+.rc-ve-panel-actions{display:flex;gap:8px;justify-content:flex-end;padding-top:4px}
+.rc-ve-panel-actions button,.rc-ve-panel-actions a{
+  padding:11px 14px;border-radius:12px;background:#eee7df;color:#3e332c;font-size:.7rem;font-weight:800
+}
+.rc-ve-panel-actions .is-primary{background:#3d322b;color:#fff}
+.rc-ve-media-preview{
+  aspect-ratio:4/3;border-radius:16px;overflow:hidden;background:#eee7df;margin-bottom:3px
+}
+.rc-ve-media-preview img{width:100%;height:100%;object-fit:cover;display:block}
+.rc-ve-note{padding:12px 13px;border-radius:12px;background:#f0e9e2;color:#70635a;font-size:.7rem;line-height:1.55}
+.rc-ve-toast{
+  position:fixed;z-index:2147483200;left:50%;top:18px;transform:translateX(-50%);
+  max-width:min(520px,calc(100vw - 30px));padding:11px 15px;border-radius:999px;
+  background:#3d322b;color:#fff;font:600 .7rem/1.4 Manrope,system-ui,sans-serif;
+  box-shadow:0 12px 40px rgba(30,22,17,.18)
+}
+.rc-ve-toast.is-error{background:#754d47}
+.rc-ve-badge{
+  position:absolute;z-index:50;top:10px;right:10px;padding:6px 9px;border-radius:999px;
+  background:rgba(251,248,244,.94);color:#4e4037;font:800 .57rem/1 Manrope,system-ui,sans-serif;
+  letter-spacing:.06em;text-transform:uppercase;pointer-events:none;opacity:0;transition:opacity .18s ease
+}
+html.rc-visual-editing [data-rc-edit]:hover>.rc-ve-badge,
+html.rc-visual-editing [data-rc-media-placement]:hover>.rc-ve-badge{opacity:1}
+
+@media(max-width:760px){
+  .rc-ve-toolbar{
+    left:12px;right:12px;bottom:12px;transform:none;border-radius:20px;display:grid;
+    grid-template-columns:1fr auto auto auto;gap:6px
+  }
+  .rc-ve-toolbar-copy{min-width:0;padding-left:7px}
+  .rc-ve-toolbar-copy span{overflow:hidden;text-overflow:ellipsis;max-width:34vw}
+  .rc-ve-toolbar button,.rc-ve-toolbar a{padding:9px 10px}
+  .rc-ve-toolbar .rc-ve-danger{display:none}
+  .rc-ve-panel{
+    top:auto;left:8px;right:8px;bottom:8px;width:auto;max-height:82vh;border-radius:22px
+  }
+}
+@media(max-width:520px){
+  .rc-ve-toolbar{grid-template-columns:1fr repeat(3,auto)}
+  .rc-ve-toolbar-copy strong{font-size:.68rem}
+  .rc-ve-toolbar-copy span{font-size:.58rem}
+  .rc-ve-grid{grid-template-columns:1fr}
+  .rc-ve-field.is-wide{grid-column:auto}
+}
