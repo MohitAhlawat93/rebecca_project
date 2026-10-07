@@ -1,3 +1,5 @@
+import { MULTILINGUAL_QUALITY } from './multilingual-quality.config.example.mjs';
+
 // Copy this file for a new client and point CLIENT_CONFIG_PATH to it.
 // The SEO engine is shared; only client/market/language/page data should change.
 export default {
@@ -8,6 +10,7 @@ export default {
     publicName: 'Client Public Name',
     entityType: 'Person'
   },
+  multilingualQuality: MULTILINGUAL_QUALITY,
   market: {
     primaryCountry: 'US',
     primaryRegion: 'New York',
@@ -43,8 +46,11 @@ export default {
       id: 'en',
       hreflang: 'en',
       htmlLang: 'en',
+      direction: 'ltr',
+      ogLocale: 'en_US',
       prefix: '',
-      searchStatus: 'approved',
+      searchStatus: MULTILINGUAL_QUALITY.locales.en.status,
+      pageSearchStatus: MULTILINGUAL_QUALITY.locales.en.pages,
       includeInSitemap: true,
       includeInHreflang: true
     }
