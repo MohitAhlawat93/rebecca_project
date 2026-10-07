@@ -82,13 +82,16 @@ async function renderPage(source, pathname, id) {
   const { window, document } = parseHTML(source);
   const pageUrl = new URL(pathname, config.deployment.origin);
 
-  window.location = {
-    href: pageUrl.href,
-    origin: pageUrl.origin,
-    pathname: pageUrl.pathname,
-    search: '',
-    hash: ''
-  };
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: {
+      href: pageUrl.href,
+      origin: pageUrl.origin,
+      pathname: pageUrl.pathname,
+      search: '',
+      hash: ''
+    }
+  });
 
   const storage = memoryStorage();
   const previous = {
@@ -98,26 +101,24 @@ async function renderPage(source, pathname, id) {
     Event: globalThis.Event,
     Node: globalThis.Node,
     HTMLElement: globalThis.HTMLElement,
-    navigator: globalThis.navigator,
     sessionStorage: globalThis.sessionStorage,
     localStorage: globalThis.localStorage,
     fetch: globalThis.fetch
   };
 
-  globalThis.window = window;
-  globalThis.document = document;
-  globalThis.CustomEvent = window.CustomEvent;
-  globalThis.Event = window.Event;
-  globalThis.Node = window.Node;
-  globalThis.HTMLElement = window.HTMLElement;
-  globalThis.navigator = window.navigator || { language: 'en' };
-  globalThis.sessionStorage = storage;
-  globalThis.localStorage = storage;
-  globalThis.fetch = async () => ({
+  setGlobal('window', window);
+  setGlobal('document', document);
+  setGlobal('CustomEvent', window.CustomEvent);
+  setGlobal('Event', window.Event);
+  setGlobal('Node', window.Node);
+  setGlobal('HTMLElement', window.HTMLElement);
+  setGlobal('sessionStorage', storage);
+  setGlobal('localStorage', storage);
+  setGlobal('fetch', async () => ({
     ok: false,
     status: 503,
     json: async () => ({})
-  });
+  }));
 
   try {
     await import(pathToFileURL(entry).href + '?prerender=' + id);
@@ -131,7 +132,6 @@ async function renderPage(source, pathname, id) {
     restore('Event', previous.Event);
     restore('Node', previous.Node);
     restore('HTMLElement', previous.HTMLElement);
-    restore('navigator', previous.navigator);
     restore('sessionStorage', previous.sessionStorage);
     restore('localStorage', previous.localStorage);
     restore('fetch', previous.fetch);
@@ -154,6 +154,14 @@ function memoryStorage() {
       map.clear();
     }
   };
+}
+
+function setGlobal(key, value) {
+  Object.defineProperty(globalThis, key, {
+    configurable: true,
+    writable: true,
+    value
+  });
 }
 
 function restore(key, value) {
