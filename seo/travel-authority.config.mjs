@@ -29,6 +29,7 @@ export const TRAVEL_AUTHORITY = {
       rateKey: 'London',
       calendarIds: ['london-europe-dec-2026'],
       sideTripKeys: ['londonToUkEurope'],
+      sideTripLabels: { londonToUkEurope: 'From London → Greater UK / major European cities' },
       title: 'Rebecca in London — Touring Dates, Rates & Travel Guidance',
       description: 'Rebecca’s permanent London travel page with current public touring dates when announced, published London rates, nearby invitation minimums and practical travel guidance.',
       eyebrow: 'London · permanent travel hub',
@@ -55,6 +56,7 @@ export const TRAVEL_AUTHORITY = {
       rateKey: 'Hong Kong',
       calendarIds: [],
       sideTripKeys: ['hongKongToChinaJapanKorea'],
+      sideTripLabels: { hongKongToChinaJapanKorea: 'From Hong Kong → China / Japan / Korea' },
       title: 'Rebecca in Hong Kong — Rates, Regional Travel & Future Visits',
       description: 'Rebecca’s permanent Hong Kong travel page with published Hong Kong rates, regional side-trip guidance and a stable place for future public visit updates.',
       eyebrow: 'Hong Kong · permanent travel hub',
@@ -81,6 +83,10 @@ export const TRAVEL_AUTHORITY = {
       rateKey: 'India',
       calendarIds: ['india-nov-2026'],
       sideTripKeys: ['domesticIndia', 'indiaToSriLankaMaldives'],
+      sideTripLabels: {
+        domesticIndia: 'Domestic India invitations',
+        indiaToSriLankaMaldives: 'From India → Sri Lanka / Maldives'
+      },
       title: 'Rebecca in India — Touring Cities, Rates & Invitation Guidance',
       description: 'Rebecca’s permanent India travel hub with the current public multi-city tour when announced, India rates, domestic invitation minimums and nearby travel guidance.',
       eyebrow: 'India · permanent travel hub',
