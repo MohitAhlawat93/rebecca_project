@@ -766,3 +766,30 @@ button,a{-webkit-tap-highlight-color:transparent}
   .rc-insights-action{grid-template-columns:auto minmax(0,1fr)}
   .rc-insights-action>span:last-child{display:none}
 }
+
+
+/* RC-11 — Settings & Safety */
+.rc-settings-stack{display:grid;gap:12px;margin:20px 0}
+.rc-settings-card{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center;
+  padding:18px 19px;border:1px solid var(--rc-line);border-radius:18px;background:#fff
+}
+.rc-settings-card>span{display:grid;gap:5px}
+.rc-settings-card strong{font-size:.84rem}
+.rc-settings-card small{color:var(--rc-muted);font-size:.72rem;line-height:1.5}
+.rc-settings-card select{min-width:190px;border:1px solid var(--rc-line);border-radius:12px;background:#fff;padding:10px 12px;color:var(--rc-ink)}
+.rc-settings-card input[type="checkbox"]{width:22px;height:22px;accent-color:var(--rc-ink)}
+.rc-settings-boundary{
+  display:grid;grid-template-columns:auto 1fr;gap:12px 18px;padding:15px 17px;border-radius:16px;background:#eee8e0
+}
+.rc-settings-boundary strong{font-size:.75rem}
+.rc-settings-boundary span{color:var(--rc-muted);font-size:.73rem;line-height:1.55}
+.rc-settings-actions{margin-top:18px;display:flex;justify-content:flex-end;align-items:center;gap:14px}
+.rc-settings-actions span{color:var(--rc-muted);font-size:.73rem;margin-right:auto}
+@media(max-width:650px){
+  .rc-settings-card{grid-template-columns:1fr}
+  .rc-settings-card select{width:100%;min-width:0}
+  .rc-settings-boundary{grid-template-columns:1fr}
+  .rc-settings-actions{align-items:stretch;flex-direction:column}
+  .rc-settings-actions button{width:100%}
+}
