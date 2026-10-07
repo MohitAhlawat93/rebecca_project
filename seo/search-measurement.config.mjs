@@ -5,6 +5,13 @@ export const SEARCH_MEASUREMENT = {
   id: 'risque-rebecca-search-measurement',
   clientId: 'risque-rebecca',
   productionOrigin: 'https://www.risquerebecca.com',
+  sync: {
+    enabled: true,
+    schedule: '23 4 * * *',
+    lookbackDays: 35,
+    providers: ['google', 'bing'],
+    persistence: 'supabase'
+  },
   reporting: {
     currentWindowDays: 28,
     comparisonWindowDays: 28,
