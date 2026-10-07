@@ -369,3 +369,29 @@ Missing connections are states, not zero metrics. Export-only AI surfaces are ne
 The protected endpoint is `/api/admin/search-intelligence`. It uses the existing owner session and never returns search credentials.
 
 See `SEARCH_MEASUREMENT.md` for provider capabilities, environment variables, data contract and guardrails.
+
+
+## SEARCH-08 — automated search sync and persistence
+
+SEARCH-08 makes SEARCH-07 historical and automatic instead of depending on a live provider request every time the dashboard opens.
+
+The shared platform now has:
+
+- encrypted Google/Bing OAuth token persistence
+- a multi-client normalized metric store
+- deterministic metric upserts
+- sync-run and sync-health history
+- a secured daily Vercel Cron collector
+- manual owner-triggered sync
+- persistence for export-only Google/Bing AI reports
+- persisted intelligence as the default admin data source
+
+Provider access/refresh tokens are encrypted with AES-256-GCM before Supabase storage. The encryption key and RLS store secret stay server-side.
+
+The Supabase schema is source-controlled in `supabase/search_08_measurement_persistence.sql` and uses RLS on every search table.
+
+The daily sync uses a 35-day finalized rolling window. Overlap is safe because metric keys are deterministic and sync runs are idempotent.
+
+Actual Google/Bing collection remains in `needs-connection` state until the relevant provider OAuth client and verified site/property credentials are added. Missing connection is never represented as zero traffic.
+
+See `SEARCH_MEASUREMENT.md` for the complete OAuth, persistence, cron and future-client configuration.
