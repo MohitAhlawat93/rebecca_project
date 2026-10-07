@@ -151,3 +151,64 @@ Storage:
 - portable schema → `supabase/rc-03-media-publishing.sql`
 
 The current Supabase state is temporary in Mohit's account. At Rebecca handoff, apply the schema in her project, use a fresh `RC_STORE_SECRET`, copy the media state, and update the existing Vercel persistence environment variables. Media files can remain in the project's Blob store while the same Vercel project is retained; otherwise migrate Blob assets during infrastructure handoff.
+
+
+## Rebecca Control — RC-04 Smart Scheduling
+
+RC-04 makes temporary public state expire automatically without a GitHub commit, Vercel deployment or database cron job.
+
+### Availability expiry
+
+Rebecca can set a normal public availability status and optionally choose:
+
+- **Keep this status until** — a date interpreted in `Asia/Singapore`
+- **Then return to** — the status that should become effective afterwards
+
+The `until` date is inclusive. Example:
+
+```text
+Limited availability
+Until: 2026-10-18
+Then: Accepting enquiries
+
+18 Oct Singapore → still Limited
+19 Oct Singapore → automatically Accepting enquiries
+```
+
+The stored Quick Control record is not rewritten by a background process. Instead, the server evaluates the schedule whenever the website, concierge or owner dashboard reads the state. That keeps scheduling deterministic and removes cron drift/failure as a dependency.
+
+### Travel lifecycle
+
+Travel windows can now store machine-readable `startDate` and `endDate` alongside Rebecca's public date wording.
+
+When both dates are valid:
+
+```text
+before start date       → Upcoming
+start date through end  → Current
+after end date          → Past
+```
+
+Past travel remains in Rebecca Control but is automatically hidden from public travel output. Trips without both dates remain **Manual** and keep the previous behavior.
+
+Current structured dates:
+- India: 2026-11-10 → 2026-11-30
+- London & Europe: 2026-12-01 → 2026-12-07
+
+### Schedule workspace
+
+Rebecca Control now includes **Schedule → What changes next?**
+
+It shows:
+- current Singapore date
+- Current / Upcoming / Past trip counts
+- upcoming automatic availability/travel transitions
+- automatic transitions that have already taken effect
+
+### Privacy and public output
+
+Scheduling metadata such as availability fallback settings, machine travel dates and lifecycle bookkeeping is evaluated server-side and removed from the public content payload. Visitors only receive the resulting public availability and travel content.
+
+### Storage
+
+RC-04 reuses the existing `rebecca_control_state.payload`. No new Supabase table, function, cron, service-role key or RLS policy is required.
