@@ -2,6 +2,7 @@ import { getAdminSession } from '../../lib/admin-auth.js';
 import {
   MEDIA_PLACEMENTS,
   cancelMediaSchedule,
+  commitActiveMediaSchedule,
   getEffectiveMediaState,
   mediaHasDraftChanges,
   mediaStoreConfigured,
@@ -73,6 +74,8 @@ export default async function handler(req, res) {
         }, 'Rebecca');
       } else if (body.action === 'cancel_schedule') {
         state = await cancelMediaSchedule('Rebecca');
+      } else if (body.action === 'commit_schedule') {
+        state = await commitActiveMediaSchedule('Rebecca');
       } else return res.status(400).json({ error: 'Unknown media action.' });
 
       const effective = getEffectiveMediaState(state);
@@ -101,7 +104,8 @@ export default async function handler(req, res) {
     if (
       error?.code === 'MEDIA_SCHEDULE_ACTIVE' ||
       error?.code === 'MEDIA_SCHEDULE_INVALID' ||
-      error?.code === 'MEDIA_SCHEDULE_NO_CHANGES'
+      error?.code === 'MEDIA_SCHEDULE_NO_CHANGES' ||
+      error?.code === 'MEDIA_SCHEDULE_NOT_ACTIVE'
     ) {
       return res.status(409).json({ error: error.message });
     }
