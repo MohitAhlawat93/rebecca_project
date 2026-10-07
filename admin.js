@@ -38,6 +38,7 @@ const assistantUnsupported = document.querySelector('[data-assistant-unsupported
 const systemImportFile = document.querySelector('[data-system-import-file]');
 const systemImportButton = document.querySelector('[data-system-import]');
 const systemStatus = document.querySelector('[data-system-status]');
+const insightsActions = document.querySelector('[data-insights-actions]');
 
 const startupParams = new URLSearchParams(window.location.search);
 const requestedTab = startupParams.get('tab');
@@ -82,6 +83,8 @@ let systemSnapshots = [];
 let systemLoaded = false;
 let systemPersistent = false;
 let systemImportBundle = null;
+let insightsState = null;
+let insightsLoaded = false;
 
 const STATUS_LABELS = {
   accepting: 'Accepting enquiries',
@@ -213,11 +216,12 @@ function activateTab(name) {
     panel.hidden = !selected;
     panel.classList.toggle('is-active', selected);
   });
-  if (quickSavebar) quickSavebar.hidden = ['assistant','media','concierge','concierge-test','needs-rebecca','history','export'].includes(name);
+  if (quickSavebar) quickSavebar.hidden = ['insights','assistant','media','concierge','concierge-test','needs-rebecca','history','export'].includes(name);
   if (name === 'media' && !mediaLoaded) loadMedia();
   if ((name === 'concierge' || name === 'concierge-test') && !conciergeLoaded) loadConcierge();
   if (name === 'needs-rebecca' && !needsLoaded) loadNeedsRebecca();
   if ((name === 'history' || name === 'export') && !systemLoaded) loadSystem();
+  if (name === 'insights' && !insightsLoaded) loadInsights();
 }
 
 function renderAvailability() {
@@ -1710,6 +1714,90 @@ async function loadQuickControl() {
 }
 
 
+
+function renderInsights() {
+  const data = insightsState;
+  if (!data) return;
+  setText('[data-insights-open]', String(data.health?.openNeeds || 0));
+  setText('[data-insights-recurring]', String(data.health?.recurringNeeds || 0));
+  setText('[data-insights-upcoming]', String(data.health?.upcomingAutomaticChanges || 0));
+  setText('[data-insights-recovery]', String(data.health?.recoveryPoints || 0));
+  setText('[data-insights-privacy]', data.privacy || 'Operational insights only.');
+
+  const actions = document.querySelector('[data-insights-actions]');
+  if (actions) {
+    actions.innerHTML = data.attention?.length
+      ? data.attention.map((item) => `
+        <button type="button" class="rc-insights-action is-${esc(item.level || 'info')}" data-insights-tab="${esc(item.tab || 'insights')}">
+          <span class="rc-insights-level" aria-hidden="true"></span>
+          <span><strong>${esc(item.title)}</strong><p>${esc(item.detail || '')}</p></span>
+          <span aria-hidden="true">→</span>
+        </button>
+      `).join('')
+      : '<div class="rc-empty">Nothing urgent needs attention right now.</div>';
+  }
+
+  const questions = document.querySelector('[data-insights-questions]');
+  if (questions) {
+    questions.innerHTML = data.recurringQuestions?.length
+      ? data.recurringQuestions.map((item) => `
+        <article class="rc-insights-item">
+          <strong>${esc(item.question)}</strong>
+          <small>Asked ${esc(item.count)} times · ${esc(item.page === '/' ? 'Homepage' : item.page)}</small>
+        </article>
+      `).join('')
+      : '<div class="rc-empty">No recurring unanswered questions.</div>';
+  }
+
+  const schedule = document.querySelector('[data-insights-schedule]');
+  if (schedule) {
+    schedule.innerHTML = data.upcoming?.length
+      ? data.upcoming.map((item) => `
+        <article class="rc-insights-item">
+          <strong>${esc(item.title)}</strong>
+          <small>${esc(item.date)}${item.detail ? ' · ' + esc(item.detail) : ''}</small>
+        </article>
+      `).join('')
+      : '<div class="rc-empty">No automatic changes are currently queued.</div>';
+  }
+
+  const activity = document.querySelector('[data-insights-activity]');
+  if (activity) {
+    activity.innerHTML = data.recentActivity?.length
+      ? data.recentActivity.map((item) => `
+        <article class="rc-insights-item">
+          <strong>${esc(item.summary)}</strong>
+          <small>${esc(item.area)} · ${esc(friendlyDate(item.at))}</small>
+        </article>
+      `).join('')
+      : '<div class="rc-empty">No recent Rebecca Control activity yet.</div>';
+  }
+}
+
+async function loadInsights() {
+  try {
+    const response = await fetch('/api/admin/insights', {
+      method:'GET', credentials:'same-origin', cache:'no-store',
+      headers:{Accept:'application/json'}
+    });
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      showLogin('Your owner session expired. Please sign in again.');
+      return false;
+    }
+    if (!response.ok) throw new Error(data.error || 'Could not load Insights.');
+    insightsState = data;
+    insightsLoaded = true;
+    renderInsights();
+    return true;
+  } catch (error) {
+    insightsLoaded = false;
+    const holder = document.querySelector('[data-insights-actions]');
+    if (holder) holder.innerHTML = '<div class="rc-empty">' + esc(error?.message || 'Insights are unavailable.') + '</div>';
+    return false;
+  }
+}
+
 function renderSystem() {
   setText('[data-system-event-count]', String(systemEvents.length));
   setText('[data-system-snapshot-count]', String(systemSnapshots.length));
@@ -2027,6 +2115,8 @@ logoutButton?.addEventListener('click', async () => {
     systemLoaded = false;
     systemPersistent = false;
     systemImportBundle = null;
+    insightsState = null;
+    insightsLoaded = false;
     showLogin('Signed out.');
   }
 });
@@ -2192,6 +2282,19 @@ document.addEventListener('click', async (event) => {
   const apply = event.target.closest('[data-assistant-apply]');
   if (apply) {
     await applyAssistantProposal(Number(apply.dataset.assistantApply));
+  }
+});
+
+document.addEventListener('click', async (event) => {
+  if (event.target.closest('[data-insights-refresh]')) {
+    insightsLoaded = false;
+    await loadInsights();
+    return;
+  }
+  const insight = event.target.closest('[data-insights-tab]');
+  if (insight) {
+    activateTab(insight.dataset.insightsTab || 'insights');
+    return;
   }
 });
 

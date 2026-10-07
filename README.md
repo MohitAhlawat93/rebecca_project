@@ -642,3 +642,25 @@ with the same existing RLS + `x-rc-control-secret` authorization model.
 
 Portable schema:
 `supabase/rc-09-history-export-recovery.sql`
+
+
+## Rebecca Control — RC-10 Insights
+
+RC-10 adds a privacy-safe operational dashboard inside Rebecca Control.
+
+It intentionally does **not** duplicate the separate Growth/Search system. No Google Analytics, Search Console or ranking data is pulled here.
+
+Insights are built from owner-controlled Rebecca Control state:
+
+- privacy-filtered Needs Rebecca question groups
+- recurring unresolved questions
+- Website / Concierge / Media Draft status
+- current Media schedule state
+- upcoming Availability / Travel automatic changes
+- active Trusted Answer count
+- Recovery point count
+- recent Rebecca Control activity
+
+Each recommended action links Rebecca directly to the relevant Control area.
+
+Privacy boundary: no visitor identity, IP address, user-agent, raw chat history or screening documents are included.

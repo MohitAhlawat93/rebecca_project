@@ -723,3 +723,46 @@ button,a{-webkit-tap-highlight-color:transparent}
   .rc-system-row{grid-template-columns:1fr}
   .rc-system-row .rc-primary,.rc-system-row .rc-secondary{width:100%}
 }
+
+
+/* RC-10 — Insights */
+.rc-insights-privacy{
+  margin:0 0 18px;padding:13px 15px;border-radius:16px;background:#f2ece5;color:var(--rc-muted);
+  font-size:.75rem;line-height:1.5
+}
+.rc-insights-score-grid{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:22px
+}
+.rc-insights-score-grid>div{
+  min-height:105px;padding:17px;border:1px solid var(--rc-line);border-radius:18px;background:#fff;
+  display:grid;align-content:center;gap:4px
+}
+.rc-insights-score-grid span,.rc-insights-score-grid small{color:var(--rc-muted);font-size:.7rem}
+.rc-insights-score-grid strong{font-family:Georgia,"Times New Roman",serif;font-size:1.42rem;font-weight:400}
+.rc-insights-block{margin-top:20px}
+.rc-insights-actions,.rc-insights-list{display:grid;gap:10px}
+.rc-insights-action{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:13px;align-items:center;
+  padding:15px 16px;border:1px solid var(--rc-line);border-radius:17px;background:#fff;cursor:pointer;text-align:left
+}
+.rc-insights-action:hover{border-color:rgba(119,89,68,.42);background:#fcf8f4}
+.rc-insights-level{width:9px;height:9px;border-radius:50%;background:#8b8178}
+.rc-insights-action.is-high .rc-insights-level{background:#9a554b}
+.rc-insights-action.is-medium .rc-insights-level{background:#b2864f}
+.rc-insights-action.is-info .rc-insights-level{background:#62758b}
+.rc-insights-action strong{display:block;font-size:.82rem}
+.rc-insights-action p{margin:4px 0 0;color:var(--rc-muted);font-size:.71rem;line-height:1.45}
+.rc-insights-action>span:last-child{color:var(--rc-muted);font-size:.9rem}
+.rc-insights-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.rc-insights-item{
+  padding:14px 15px;border:1px solid var(--rc-line);border-radius:16px;background:#fff;display:grid;gap:5px
+}
+.rc-insights-item strong{font-size:.79rem;line-height:1.4}
+.rc-insights-item small{color:var(--rc-muted);font-size:.69rem;line-height:1.45}
+@media(max-width:900px){.rc-insights-score-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.rc-insights-grid{grid-template-columns:1fr}}
+@media(max-width:520px){
+  .rc-insights-score-grid{grid-template-columns:1fr 1fr}
+  .rc-insights-action{grid-template-columns:auto minmax(0,1fr)}
+  .rc-insights-action>span:last-child{display:none}
+}
