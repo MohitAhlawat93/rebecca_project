@@ -212,3 +212,64 @@ For Rebecca:
 The validator prevents an unfinished translation from entering search simply because a route exists. An SEO-approved localized page must have translated metadata, sufficiently localized visible content, correct language metadata, reciprocal hreflang, sitemap membership and native-review evidence when required.
 
 This follows the principle that translated UX and indexable localized SEO are separate release decisions.
+
+## SEARCH-05 — entity, reputation and press graph
+
+SEARCH-05 turns public identity, press, authorship and reputation into one evidence-aware graph.
+
+Core rule: machine-readable claims must not be stronger than the visible/source evidence.
+
+Shared components:
+
+- `lib/entity-authority-engine.mjs` — Person/ProfilePage/WebPage/CollectionPage graph generation.
+- `scripts/render-entity-authority.mjs` — deterministic build-time JSON-LD injection.
+- `scripts/validate-entity-authority.mjs` — identity, authorship, duplicate graph and review-policy checks.
+- `seo/entity-authority.config.example.mjs` — reusable client template.
+
+Rebecca-specific authority lives in `seo/entity-authority.config.mjs`.
+
+### Identity hierarchy
+
+```text
+WebSite
+  ↓
+Person: Risqué Rebecca
+  ├── ProfilePage: /about
+  ├── verified sameAs identity references
+  ├── subjectOf → third-party press
+  └── author → verified first-person writing
+```
+
+The homepage is no longer treated as the canonical `ProfilePage`. The focused `/about` page owns that relationship.
+
+Only verified pages that represent the same public entity enter `sameAs`. Partnerships/collaborations are stored separately and cannot leak into `sameAs`.
+
+### Press vs authorship
+
+Third-party interviews/profiles are modeled as external Articles that are `about` Rebecca.
+
+Verified first-person pieces are modeled as external Articles whose `author` points to the canonical Rebecca Person entity.
+
+Press and journal pages remain collection/index pages; the original publishers remain the source URLs.
+
+### Reviews
+
+The review archive preserves source names, dates and excerpts/summaries, but intentionally does **not** emit `Review` or `AggregateRating` structured data.
+
+The current archive does not store an exact public URL for every third-party review, and Google review-rich-result guidance does not support manufacturing an aggregate score from reviews copied/aggregated from other sites.
+
+The build therefore fails if someone enables Review/AggregateRating markup without changing the evidence policy deliberately.
+
+### Future clients
+
+For a new client, keep the graph engine shared and configure:
+
+1. canonical entity type/name/profile page
+2. verified same-entity external profiles
+3. related but non-identical profiles/partnerships
+4. press sources
+5. authored works
+6. review evidence policy
+7. page roles
+
+Candidate identities can be tracked separately but do not become `sameAs` until verified.
