@@ -40,11 +40,20 @@ const selectedAsia=conciergePlan('Can Rebecca come to Tokyo for 10 hours?',[],'/
 assert(selectedAsia?.answer.includes('14 hours + travel'),'Selected-Asia planner did not use the confirmed 14-hour minimum');
 
 const script=fs.readFileSync('script.js','utf8');
+const api=fs.readFileSync('api/concierge.js','utf8');
+const knowledge=fs.readFileSync('lib/rebecca-knowledge.js','utf8');
 assert(script.includes('page:currentPath'),'Client does not send page context');
 assert(script.includes('language:preferredLanguage'),'Client does not send preferred language');
 assert(script.includes('Rebecca’s Desk'),'Rebecca’s Desk name is missing');
 assert(script.includes('renderChatActions'),'Client does not render structured actions');
 assert(script.includes("matchMedia('(max-width: 640px)')"),'Mobile keyboard behavior is not guarded');
+assert(script.includes("button.dataset.afterhoursLauncher='true'"),'Persistent Rebecca Afterhours launcher is missing');
+assert(script.includes('Rebecca Afterhours'),'Afterhours official-links panel is missing');
+assert(!script.includes('twitter.com/risquerebecca')&&!script.includes('throne.com/risquerebecca'),'Unverified social links must not be hard-coded');
+assert(api.includes('Attraction is subjective'),'Concierge lacks a helpful subjective-attraction response');
+assert(api.includes('temperature:0.45'),'Concierge model temperature was not updated for more natural answers');
+assert(knowledge.includes("id:'profile-public-details'"),'Public profile details are missing from RAG knowledge');
+assert(knowledge.includes("like: ['likes','favourites'"),'Broad like/interests retrieval synonyms are missing');
 
 const css=fs.readFileSync('styles.css','utf8');
 assert(css.includes('width:min(340px,calc(100vw - 40px))'),'Compact phone width rule is missing');

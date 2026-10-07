@@ -275,14 +275,11 @@
   document.querySelector('[data-close-concierge]')?.addEventListener('click',()=>setConcierge(false));
   panel?.addEventListener('keydown',(event)=>{if(event.key!=='Tab')return;const focusable=[...panel.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')];if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}});
 
-  // First-visit discovery: make Rebecca's Desk impossible to miss without nagging repeat visitors.
-  const RR_CONCIERGE_AUTO_KEY='rr-concierge-autoshown-v1';
-  const RR_OFFICIAL_LINKS_KEY='rr-official-links-shown-v1';
-  const RR_OFFICIAL_LINKS_COOLDOWN=7*24*60*60*1000;
+
+  // First-visit discovery: auto-open Rebecca's Desk once per session and keep Afterhours discoverable.
+  const RR_CONCIERGE_AUTO_KEY='rr-concierge-autoshown-v2';
   const safeSessionGet=(key)=>{try{return sessionStorage.getItem(key)}catch{return null}};
   const safeSessionSet=(key,value)=>{try{sessionStorage.setItem(key,value)}catch{}};
-  const safeLocalGet=(key)=>{try{return localStorage.getItem(key)}catch{return null}};
-  const safeLocalSet=(key,value)=>{try{localStorage.setItem(key,value)}catch{}};
 
   const ensureFirstVisitStyles=()=>{
     if(document.querySelector('[data-first-visit-styles]'))return;
@@ -293,6 +290,10 @@
       @keyframes rr-concierge-arrive{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
       .concierge-launcher{animation:rr-concierge-nudge 5s ease-in-out 2}
       @keyframes rr-concierge-nudge{0%,72%,100%{transform:translateY(0);box-shadow:0 12px 35px rgba(0,0,0,.2)}80%{transform:translateY(-4px);box-shadow:0 16px 42px rgba(0,0,0,.26)}88%{transform:translateY(0)}}
+      .afterhours-launcher{position:fixed;z-index:72;left:22px;bottom:22px;display:flex;align-items:center;gap:9px;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:var(--wine);color:#fff;padding:8px 14px 8px 8px;box-shadow:0 14px 38px rgba(48,27,30,.24);cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}
+      .afterhours-launcher:hover{transform:translateY(-2px);box-shadow:0 18px 46px rgba(48,27,30,.3)}
+      .afterhours-launcher .afterhours-spark{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.14);font-size:.8rem}
+      .afterhours-launcher .afterhours-copy{display:grid;text-align:left;line-height:1.05}.afterhours-launcher small{font-size:.52rem;letter-spacing:.13em;text-transform:uppercase;opacity:.68}.afterhours-launcher strong{margin-top:3px;font-family:var(--serif);font-size:1rem;font-weight:500}
       .official-links-backdrop{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:22px;background:rgba(22,20,18,.34);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .22s ease}
       .official-links-backdrop.is-visible{opacity:1}
       .official-links-card{position:relative;width:min(470px,100%);max-height:min(680px,calc(100svh - 44px));overflow:auto;border:1px solid rgba(61,51,44,.15);border-radius:30px;background:#f8f3eb;padding:clamp(28px,5vw,42px);box-shadow:0 32px 90px rgba(25,20,17,.28);transform:translateY(12px) scale(.985);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
@@ -306,10 +307,11 @@
       .official-links-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
       .official-links-grid a{position:relative;min-height:84px;padding:14px 34px 14px 15px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.46);display:flex;flex-direction:column;justify-content:center;text-decoration:none;transition:background .18s ease,transform .18s ease}
       .official-links-grid a:hover{background:#fff;transform:translateY(-1px)}
-      .official-links-grid span{font-size:.76rem;font-weight:600}.official-links-grid small{margin-top:4px;color:var(--ink-soft);font-size:.66rem}.official-links-grid b{position:absolute;right:13px;top:13px;font-weight:400}
+      .official-links-grid span{font-size:.76rem;font-weight:600}.official-links-grid small{margin-top:4px;color:var(--ink-soft);font-size:.66rem;overflow-wrap:anywhere}.official-links-grid b{position:absolute;right:13px;top:13px;font-weight:400}
       .official-links-note{margin:16px 2px 0;color:var(--ink-soft);font-size:.64rem;line-height:1.5}
       @media(max-width:640px){
         .concierge-panel{right:10px;bottom:10px;width:calc(100vw - 20px);height:min(560px,calc(100svh - 84px));border-radius:22px 22px 8px 8px;overflow:hidden}
+        .afterhours-launcher{left:14px;bottom:14px;padding-right:11px}.afterhours-launcher small{display:none}.afterhours-launcher strong{font-size:.9rem}
         .official-links-backdrop{align-items:end;padding:0;background:rgba(22,20,18,.3)}
         .official-links-card{width:100%;max-height:82svh;border-radius:26px 26px 0 0;border-bottom:0;padding:28px 20px max(24px,env(safe-area-inset-bottom))}
         .official-links-card h2{font-size:2.65rem}
@@ -322,32 +324,28 @@
   };
   ensureFirstVisitStyles();
 
-  const officialLinksRecentlyShown=()=>{
-    const shownAt=Number(safeLocalGet(RR_OFFICIAL_LINKS_KEY)||0);
-    return Number.isFinite(shownAt)&&shownAt>0&&(Date.now()-shownAt)<RR_OFFICIAL_LINKS_COOLDOWN;
-  };
   const closeOfficialLinksPopup=()=>{
     const popup=document.querySelector('[data-official-links-popup]');
     if(!popup)return;
     popup.classList.remove('is-visible');
     window.setTimeout(()=>popup.remove(),220);
   };
+
   const showOfficialLinksPopup=async()=>{
-    if(document.hidden)return false;
-    if(officialLinksRecentlyShown()||document.querySelector('[data-official-links-popup]'))return true;
-    if(!panel?.hidden||document.querySelector('[data-live-modal]'))return false;
+    if(document.querySelector('[data-official-links-popup]'))return;
+    if(!panel?.hidden)setConcierge(false);
     let data=window.__REBECCA_DATA__;
     if(!data){
-      try{data=(await import('/data/rebecca-data.js')).REBECCA_DATA}catch{return false}
+      try{data=(await import('/data/rebecca-data.js')).REBECCA_DATA}catch{return}
     }
     const contact=data?.contact||{};
-    const primaryUrl=contact.telegramChannelUrl||'https://tinyurl.com/rebecca-afterhours';
+    const channelUrl=contact.telegramChannelUrl||'https://tinyurl.com/rebecca-afterhours';
     const links=[
-      {label:'Telegram',detail:contact.telegramHandle||'@forkmerebecca',href:contact.telegramUrl||'https://t.me/forkmerebecca'},
-      {label:'WhatsApp',detail:'Official contact',href:contact.whatsappUrl||'https://wa.me/6585282912'},
-      {label:'X / Twitter',detail:'@risquerebecca',href:'https://twitter.com/risquerebecca'},
-      {label:'Throne',detail:'Wishlist',href:'https://throne.com/risquerebecca'}
-    ].filter((item)=>/^https:\/\//i.test(item.href));
+      {label:'Telegram',detail:contact.telegramHandle||'@forkmerebecca',href:contact.telegramUrl||'https://t.me/forkmerebecca',external:true},
+      {label:'WhatsApp',detail:contact.phoneDisplay||'Official contact',href:contact.whatsappUrl||'https://wa.me/6585282912',external:true},
+      {label:'Email',detail:contact.email||'Email Rebecca',href:'mailto:'+(contact.email||'risquerebeccaxo@protonmail.com'),external:false},
+      {label:'Favourites',detail:'Wishlist, tastes & date ideas',href:'/favourites',external:false}
+    ];
     const popup=document.createElement('div');
     popup.className='official-links-backdrop';
     popup.dataset.officialLinksPopup='true';
@@ -355,33 +353,34 @@
       <button class="official-links-close" type="button" data-close-official-links aria-label="Close official links">×</button>
       <span class="page-kicker">Stay close</span>
       <h2 id="official-links-title">Rebecca Afterhours</h2>
-      <p class="official-links-intro">Occasional tour notes, new public posts and updates from Rebecca — plus her verified ways to stay in touch.</p>
-      <a class="official-links-primary" href="${escapeHtml(primaryUrl)}" target="_blank" rel="noopener noreferrer"><span><small>Telegram channel</small><strong>${escapeHtml(contact.telegramChannelLabel||'Rebecca Afterhours')}</strong></span><b aria-hidden="true">↗</b></a>
-      <div class="official-links-grid">${links.map((item)=>`<a href="${escapeHtml(item.href)}" target="_blank" rel="noopener noreferrer"><span>${escapeHtml(item.label)}</span><small>${escapeHtml(item.detail)}</small><b aria-hidden="true">↗</b></a>`).join('')}</div>
-      <p class="official-links-note">These are Rebecca’s official public links. Instagram is currently suspended.</p>
+      <p class="official-links-intro">Tour notes, new public posts and Rebecca’s verified ways to stay in touch — all in one place.</p>
+      <a class="official-links-primary" href="${escapeHtml(channelUrl)}" target="_blank" rel="noopener noreferrer"><span><small>Telegram channel</small><strong>${escapeHtml(contact.telegramChannelLabel||'Rebecca Afterhours')}</strong></span><b aria-hidden="true">↗</b></a>
+      <div class="official-links-grid">${links.map((item)=>`<a href="${escapeHtml(item.href)}"${item.external?' target="_blank" rel="noopener noreferrer"':''}><span>${escapeHtml(item.label)}</span><small>${escapeHtml(item.detail)}</small><b aria-hidden="true">↗</b></a>`).join('')}</div>
+      <p class="official-links-note">Rebecca’s public site currently lists WhatsApp/iMessage/Signal, Telegram, Rebecca Afterhours and email as official contact routes. Instagram is suspended.</p>
     </aside>`;
     document.body.appendChild(popup);
-    safeLocalSet(RR_OFFICIAL_LINKS_KEY,String(Date.now()));
     requestAnimationFrame(()=>popup.classList.add('is-visible'));
     popup.querySelector('[data-close-official-links]')?.addEventListener('click',closeOfficialLinksPopup);
     popup.addEventListener('click',(event)=>{if(event.target===popup)closeOfficialLinksPopup();});
-    popup.addEventListener('keydown',(event)=>{if(event.key==='Escape')closeOfficialLinksPopup();});
-    return true;
   };
-  let officialLinksQueueTimer=null;
-  const queueOfficialLinksPopup=(delay=1000,attempt=0)=>{
-    if(officialLinksRecentlyShown()||attempt>18)return;
-    clearTimeout(officialLinksQueueTimer);
-    officialLinksQueueTimer=setTimeout(async()=>{
-      const shown=await showOfficialLinksPopup();
-      if(!shown)queueOfficialLinksPopup(1400,attempt+1);
-    },delay);
+
+  const ensureAfterhoursLauncher=()=>{
+    if(document.querySelector('[data-afterhours-launcher]'))return;
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='afterhours-launcher';
+    button.dataset.afterhoursLauncher='true';
+    button.setAttribute('aria-label','Open Rebecca Afterhours and official links');
+    button.innerHTML='<span class="afterhours-spark" aria-hidden="true">✦</span><span class="afterhours-copy"><small>Stay close</small><strong>Afterhours</strong></span>';
+    document.body.appendChild(button);
+    button.addEventListener('click',showOfficialLinksPopup);
   };
 
   let firstVisitPromptsStarted=false;
   const startFirstVisitPrompts=()=>{
     if(firstVisitPromptsStarted)return;
     firstVisitPromptsStarted=true;
+    ensureAfterhoursLauncher();
     const conciergeAlreadyShown=safeSessionGet(RR_CONCIERGE_AUTO_KEY)==='1';
     if(conciergeEnabled&&!conciergeAlreadyShown){
       window.setTimeout(()=>{
@@ -393,12 +392,9 @@
         safeSessionSet(RR_CONCIERGE_AUTO_KEY,'1');
         setConcierge(true);
       },900);
-      queueOfficialLinksPopup(9000);
-    }else{
-      queueOfficialLinksPopup(2600);
     }
   };
-  document.querySelector('[data-close-concierge]')?.addEventListener('click',()=>queueOfficialLinksPopup(750));
+  document.addEventListener('keydown',(event)=>{if(event.key==='Escape')closeOfficialLinksPopup();});
   if(document.documentElement.dataset.rebeccaContentReady==='true')startFirstVisitPrompts();
   else{
     document.addEventListener('rebecca:content-ready',startFirstVisitPrompts,{once:true});

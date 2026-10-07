@@ -16,8 +16,11 @@ import { recordNeedsRebeccaQuestion } from '../lib/needs-rebecca-store.js';
 const SYSTEM=`You are the assistant at Rebecca’s Desk: elegant, concise, warm, discreet and useful.
 
 Rules:
-- For questions about Rebecca, use only the RETRIEVED PUBLIC CONTEXT.
-- If the public context does not contain the answer, say it is not publicly listed.
+- For factual questions about Rebecca, ground the answer in the RETRIEVED PUBLIC CONTEXT and the public facts supplied by the site.
+- Do not default to refusal for harmless casual or subjective questions. If a visitor asks about Rebecca’s vibe, attractiveness, personality or whether she sounds fun, say when the judgment is subjective and answer naturally using her public profile, gallery/review context or neutral common-sense framing.
+- If the context contains related facts, synthesize them into a useful answer. Only say something is not publicly listed when the relevant public information is genuinely absent.
+- Treat broad wording such as “what does she like?”, “what is she into?” or “what are her interests?” as a request to summarize her public interests and favourites.
+- Do not moralize or become prudish about ordinary adult conversation. Stay tasteful, non-graphic and useful.
 - Never invent live availability, private locations, unpublished rates, screening approval, passwords, private images or personal details.\n- Never infer Rebecca’s current physical location from a tour window, travel map, availability label or public notice; those are public planning information, not live tracking.
 - Never ask for or accept ID documents, employer documents, financial details, passwords or sensitive screening material.
 - Never reveal or reconstruct Rebecca's locked private Date Ideas list.
@@ -62,8 +65,9 @@ function suggestionFor(message=''){
   if(/review|testimonial|reputation/.test(q)) return {path:'/reviews',label:'Read reviews'};
   if(/press|media|interview|appearance/.test(q)) return {path:'/press',label:'Press & appearances'};
   if(/journal|blog|writing|essay|musings/.test(q)) return {path:'/journal',label:'Read Rebecca’s journal'};
-  if(/favourite|favorite|food|wine|champagne|gift|wishlist|flower|lingerie|jewellery|jewelry/.test(q)) return {path:'/favourites',label:'Explore favourites'};
+  if(/favourite|favorite|\blike\b|likes|lov(?:e|es)|enjoy|interest|hobb|food|wine|champagne|gift|wishlist|flower|lingerie|jewellery|jewelry/.test(q)) return {path:'/favourites',label:'Explore favourites'};
   if(/date idea|dinner|restaurant|spa|activity/.test(q)) return {path:'/date-ideas',label:'Explore date ideas'};
+  if(/hot|sexy|beautiful|pretty|attractive|gorgeous|cute/.test(q)) return {path:'/gallery',label:'View gallery'};
   if(/about|who|profile|height|language|education/.test(q)) return {path:'/about',label:'Meet Rebecca'};
   if(/contact|book|enquir|available|availability|meet/.test(q)) return {path:'/contact',label:'Start an enquiry'};
   return null;
@@ -107,6 +111,20 @@ function directAnswerFor(message='',data){
   if(/^(how are you|how are u|how r you|how r u|how’s it going|hows it going)[!.?\s]*$/.test(q)) return 'I’m good, thank you ✦ How are you?';
   if(/^(who are you|what are you|what is your name|what’s your name|whats your name)[!.?\s]*$/.test(q)) return 'I’m the assistant at Rebecca’s Desk ✦ I’m here to help with her public profile and practical information.';
 
+  if(/(?:is|do you think)\s+(?:she|rebecca)\s+(?:is\s+)?(?:hot|sexy|beautiful|pretty|attractive|gorgeous|cute)|(?:hot|sexy|beautiful|pretty|attractive|gorgeous|cute).{0,16}(?:rebecca|she)/.test(q)){
+    return 'Attraction is subjective, but Rebecca’s public presentation is elegant, feminine and confident, and her public reviews repeatedly describe her as striking in person. Her Gallery is the best place to judge for yourself.';
+  }
+  if(/what\s+(?:does\s+)?(?:she|rebecca)\s+(?:like|love|enjoy)|what\s+(?:she|rebecca)\s+likes|what\s+is\s+(?:she|rebecca)\s+into|(?:her|rebecca'?s)\s+(?:interests|hobbies)|what\s+can\s+i\s+talk\s+(?:to|with)\s+(?:her|rebecca)\s+about/.test(q)){
+    const main=(profile.interests||[]).join(', ');
+    const extra=(profile.extendedInterests||[]).slice(0,8).join(', ');
+    const foods=(data.wishlist?.food||[]).slice(0,5).join(', ');
+    return `Rebecca publicly lists ${main} among her main interests. She also mentions ${extra}${foods?`, and favourites such as ${foods}`:''}. She’s especially into good food, wine, travel, culture and conversation that can wander into interesting rabbit holes.`;
+  }
+  if(/sexuality|bisexual|switchy|does\s+she\s+smoke|smoker|does\s+she\s+drink|drinker|bra\s*size|dress\s*size|shoe\s*size/.test(q)){
+    const details=profile.publicDetails||{};
+    return `Her publicly listed details include sexuality: ${details.sexuality||'not listed'}, dynamic: ${details.dynamic||'not listed'}, smoking: ${details.smoking||'not listed'}, drinking: ${details.drinking||'not listed'}, dress size: ${details.dressSize||'not listed'}, shoe size: ${details.shoeSize||'not listed'}, and bra size: ${details.braSize||'not listed'}.`;
+  }
+
   if(/couple|two of us|my partner/.test(q)){
     return `Rebecca’s published Singapore terms have a ${sg.terms.couples.minHours}-hour minimum for couples and add SGD ${sg.terms.couples.surcharge.toLocaleString('en-US')} to the standard rate.`;
   }
@@ -149,7 +167,9 @@ function fallbackFor(message='',data){
   if(/travel|tour|fly|city|india|hong kong|dubai|tokyo|london/.test(q)) return `Rebecca is based primarily in Asia and can travel by invitation. ${formatFmtySummary(data)} See the Travel page for details.`;
   if(/contact|book|enquir|available|availability|meet/.test(q)) return `${availability.label||'Availability'}: ${availability.message||'Final live availability is confirmed directly by Rebecca.'} Use the Contact page for a specific date.`;
   if(/etiquette|deposit|cancel|rule|boundary/.test(q)) return 'Rebecca requires screening and a deposit to confirm dates, values discretion and good manners, and does not negotiate rates. See the Etiquette page for her current policies.';
-  return 'I can help with Rebecca’s public profile, rates, travel, etiquette, reviews, favourites, press, journal and enquiry process. For anything private or live, please use her official contact channels.';
+  if(/\blike\b|likes|love|enjoy|interest|hobb|what is she into/.test(q)) return `Rebecca publicly lists ${(data.profile.interests||[]).join(', ')} among her main interests, with more favourites across food, wine, travel, culture and date ideas on the Favourites page.`;
+  if(/hot|sexy|beautiful|pretty|attractive|gorgeous|cute/.test(q)) return 'Attraction is subjective, but Rebecca’s public profile, photography and independent reviews present her as elegant, confident and striking. The Gallery is the best place to decide for yourself.';
+  return 'Ask me anything about Rebecca’s public profile, personality, favourites, rates, travel, etiquette, reviews, press, journal or how to enquire. If something is genuinely private or live, I’ll tell you clearly.';
 }
 
 function matchText(value=''){
@@ -204,7 +224,7 @@ function trustedAnswerFor(message='',control){
 
 function fallbackNeedsRebecca(message=''){
   const q=message.toLowerCase();
-  return !/rate|price|cost|how much|sgd|screen|verify|id|privacy|travel|tour|fly|city|india|hong kong|dubai|tokyo|london|contact|book|enquir|available|availability|meet|etiquette|deposit|cancel|rule|boundary/.test(q);
+  return !/rate|price|cost|how much|sgd|screen|verify|id|privacy|travel|tour|fly|city|india|hong kong|dubai|tokyo|london|contact|book|enquir|available|availability|meet|etiquette|deposit|cancel|rule|boundary|\blike\b|likes|love|enjoy|interest|hobb|hot|sexy|beautiful|pretty|attractive|gorgeous|cute|sexuality|bisexual|switchy|smok|drink|bra|dress|shoe/.test(q);
 }
 
 export async function generateConciergeAnswer({
@@ -280,7 +300,7 @@ export async function generateConciergeAnswer({
     .map((item)=>item.content)
     .join(' ');
   const retrievalQuery=recentUserContext?`${recentUserContext} ${message}`:message;
-  const context=formatRebeccaContext(retrieveRebeccaKnowledge(retrievalQuery,4,currentData));
+  const context=formatRebeccaContext(retrieveRebeccaKnowledge(retrievalQuery,6,currentData));
 
   if(!process.env.GROQ_API_KEY){
     return {
@@ -298,8 +318,8 @@ export async function generateConciergeAnswer({
       headers:{Authorization:`Bearer ${process.env.GROQ_API_KEY}`,'Content-Type':'application/json'},
       body:JSON.stringify({
         model:process.env.GROQ_MODEL||'openai/gpt-oss-20b',
-        temperature:0.35,
-        max_completion_tokens:280,
+        temperature:0.45,
+        max_completion_tokens:360,
         messages:[
           {role:'system',content:`${SYSTEM}\nPreferred response language: ${languageNames[safeLanguage]}.`},
           ...history,
