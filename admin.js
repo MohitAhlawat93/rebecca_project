@@ -35,6 +35,9 @@ const assistantProposeButton = document.querySelector('[data-assistant-propose]'
 const assistantResults = document.querySelector('[data-assistant-results]');
 const assistantProposalList = document.querySelector('[data-assistant-proposal-list]');
 const assistantUnsupported = document.querySelector('[data-assistant-unsupported]');
+const systemImportFile = document.querySelector('[data-system-import-file]');
+const systemImportButton = document.querySelector('[data-system-import]');
+const systemStatus = document.querySelector('[data-system-status]');
 
 const startupParams = new URLSearchParams(window.location.search);
 const requestedTab = startupParams.get('tab');
@@ -74,6 +77,11 @@ let needsLoaded = false;
 let needsFilter = 'open';
 let assistantProposal = null;
 let assistantBusy = false;
+let systemEvents = [];
+let systemSnapshots = [];
+let systemLoaded = false;
+let systemPersistent = false;
+let systemImportBundle = null;
 
 const STATUS_LABELS = {
   accepting: 'Accepting enquiries',
@@ -205,10 +213,11 @@ function activateTab(name) {
     panel.hidden = !selected;
     panel.classList.toggle('is-active', selected);
   });
-  if (quickSavebar) quickSavebar.hidden = ['assistant','media','concierge','concierge-test','needs-rebecca'].includes(name);
+  if (quickSavebar) quickSavebar.hidden = ['assistant','media','concierge','concierge-test','needs-rebecca','history','export'].includes(name);
   if (name === 'media' && !mediaLoaded) loadMedia();
   if ((name === 'concierge' || name === 'concierge-test') && !conciergeLoaded) loadConcierge();
   if (name === 'needs-rebecca' && !needsLoaded) loadNeedsRebecca();
+  if ((name === 'history' || name === 'export') && !systemLoaded) loadSystem();
 }
 
 function renderAvailability() {
@@ -1700,6 +1709,220 @@ async function loadQuickControl() {
   }
 }
 
+
+function renderSystem() {
+  setText('[data-system-event-count]', String(systemEvents.length));
+  setText('[data-system-snapshot-count]', String(systemSnapshots.length));
+  setText('[data-system-connection]', systemPersistent ? 'Connected' : 'Unavailable');
+
+  const snapshots = document.querySelector('[data-system-snapshots]');
+  if (snapshots) {
+    snapshots.innerHTML = systemSnapshots.length
+      ? systemSnapshots.map((item) => `
+        <article class="rc-system-row">
+          <div class="rc-system-row-main">
+            <div class="rc-system-row-meta">
+              <span>Recovery point</span>
+              <span>${esc(friendlyDate(item.at))}</span>
+            </div>
+            <strong>${esc(item.label || 'Recovery point')}</strong>
+            <small>Restore copies this older live configuration into Website, Concierge and Media Drafts only.</small>
+          </div>
+          <button type="button" class="rc-secondary" data-system-restore="${esc(item.id)}">Restore to Draft</button>
+        </article>
+      `).join('')
+      : '<div class="rc-empty">No recovery points yet. Rebecca Control will create them automatically before important publishes.</div>';
+  }
+
+  const events = document.querySelector('[data-system-events]');
+  if (events) {
+    events.innerHTML = systemEvents.length
+      ? systemEvents.map((item) => `
+        <article class="rc-system-row">
+          <div class="rc-system-row-main">
+            <div class="rc-system-row-meta">
+              <span>${esc(item.area || 'System')}</span>
+              <span>${esc(item.type || 'update')}</span>
+            </div>
+            <strong>${esc(item.summary)}</strong>
+            <small>${esc(friendlyDate(item.at))} · ${esc(item.source || 'Rebecca Control')}</small>
+          </div>
+        </article>
+      `).join('')
+      : '<div class="rc-empty">No History events yet.</div>';
+  }
+}
+
+async function loadSystem() {
+  try {
+    const response = await fetch('/api/admin/system', {
+      method:'GET', credentials:'same-origin', cache:'no-store',
+      headers:{Accept:'application/json'}
+    });
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      showLogin('Your owner session expired. Please sign in again.');
+      return false;
+    }
+    if (!response.ok) throw new Error(data.error || 'Could not load History & Recovery.');
+    systemEvents = data.events || [];
+    systemSnapshots = data.snapshots || [];
+    systemPersistent = Boolean(data.persistent);
+    systemLoaded = true;
+    renderSystem();
+    return true;
+  } catch (error) {
+    systemLoaded = false;
+    systemPersistent = false;
+    setText('[data-system-connection]', 'Unavailable');
+    if (systemStatus) {
+      systemStatus.textContent = error?.message || 'History & Recovery is unavailable.';
+      systemStatus.className = 'rc-export-status is-error';
+    }
+    return false;
+  }
+}
+
+async function systemPost(payload) {
+  const response = await fetch('/api/admin/system', {
+    method:'POST',
+    credentials:'same-origin',
+    headers:{'Content-Type':'application/json',Accept:'application/json'},
+    body:JSON.stringify(payload)
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Could not complete that recovery action.');
+  return data;
+}
+
+async function refreshEditorsAfterRecovery() {
+  await loadQuickControl();
+  conciergeLoaded = false;
+  mediaLoaded = false;
+  await loadConcierge();
+  await loadMedia();
+  setDirty(false);
+  conciergeDirty = false;
+  mediaDirty = false;
+}
+
+async function createManualRecoveryPoint() {
+  const label = window.prompt('Name this recovery point:', 'Manual recovery point');
+  if (label === null) return;
+  try {
+    const data = await systemPost({action:'snapshot', label:label || 'Manual recovery point'});
+    systemEvents = data.events || [];
+    systemSnapshots = data.snapshots || [];
+    systemPersistent = Boolean(data.persistent);
+    systemLoaded = true;
+    renderSystem();
+  } catch (error) {
+    if (systemStatus) {
+      systemStatus.textContent = error.message;
+      systemStatus.className = 'rc-export-status is-error';
+    }
+  }
+}
+
+async function restoreSystemSnapshot(id) {
+  if (!window.confirm('Restore this recovery point into Website, Concierge and Media Drafts? Nothing will be published.')) return;
+  try {
+    const data = await systemPost({action:'restoreSnapshot', id});
+    await refreshEditorsAfterRecovery();
+    systemLoaded = false;
+    await loadSystem();
+    if (systemStatus) {
+      systemStatus.textContent = data.message || 'Recovery point restored to Draft.';
+      systemStatus.className = 'rc-export-status is-good';
+    }
+  } catch (error) {
+    if (systemStatus) {
+      systemStatus.textContent = error.message;
+      systemStatus.className = 'rc-export-status is-error';
+    }
+  }
+}
+
+async function downloadSystemBackup() {
+  try {
+    const response = await fetch('/api/admin/system?action=export', {
+      method:'GET', credentials:'same-origin', cache:'no-store',
+      headers:{Accept:'application/json'}
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.bundle) throw new Error(data.error || 'Could not build the backup.');
+    const stamp = new Date().toISOString().replace(/[:.]/g,'-');
+    const blob = new Blob([JSON.stringify(data.bundle,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'rebecca-control-backup-' + stamp + '.json';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    if (systemStatus) {
+      systemStatus.textContent = 'Backup downloaded.';
+      systemStatus.className = 'rc-export-status is-good';
+    }
+  } catch (error) {
+    if (systemStatus) {
+      systemStatus.textContent = error.message;
+      systemStatus.className = 'rc-export-status is-error';
+    }
+  }
+}
+
+async function readBackupFile(file) {
+  systemImportBundle = null;
+  if (systemImportButton) systemImportButton.disabled = true;
+  setText('[data-system-import-name]', file?.name || 'No file selected');
+  if (!file) return;
+  try {
+    if (file.size > 8 * 1024 * 1024) throw new Error('Backup file is too large.');
+    const parsed = JSON.parse(await file.text());
+    if (parsed?.format !== 'rebecca-control-backup' || Number(parsed?.version) !== 1) {
+      throw new Error('This is not a supported Rebecca Control backup.');
+    }
+    systemImportBundle = parsed;
+    if (systemImportButton) systemImportButton.disabled = false;
+    if (systemStatus) {
+      systemStatus.textContent = 'Backup validated locally. Ready to restore to Draft.';
+      systemStatus.className = 'rc-export-status is-good';
+    }
+  } catch (error) {
+    setText('[data-system-import-name]', 'Invalid backup');
+    if (systemStatus) {
+      systemStatus.textContent = error.message || 'Could not read that backup.';
+      systemStatus.className = 'rc-export-status is-error';
+    }
+  }
+}
+
+async function restoreImportedBackup() {
+  if (!systemImportBundle) return;
+  if (!window.confirm('Restore this backup into Website, Concierge and Media Drafts? Nothing will be published.')) return;
+  try {
+    const data = await systemPost({action:'restoreBundle', bundle:systemImportBundle});
+    await refreshEditorsAfterRecovery();
+    systemImportBundle = null;
+    if (systemImportFile) systemImportFile.value = '';
+    if (systemImportButton) systemImportButton.disabled = true;
+    setText('[data-system-import-name]', 'No file selected');
+    systemLoaded = false;
+    await loadSystem();
+    if (systemStatus) {
+      systemStatus.textContent = data.message || 'Backup restored to Draft.';
+      systemStatus.className = 'rc-export-status is-good';
+    }
+  } catch (error) {
+    if (systemStatus) {
+      systemStatus.textContent = error.message;
+      systemStatus.className = 'rc-export-status is-error';
+    }
+  }
+}
+
 async function loadSession() {
   try {
     const response = await fetch('/api/admin/session', {
@@ -1799,6 +2022,11 @@ logoutButton?.addEventListener('click', async () => {
     needsFilter = 'open';
     assistantProposal = null;
     assistantBusy = false;
+    systemEvents = [];
+    systemSnapshots = [];
+    systemLoaded = false;
+    systemPersistent = false;
+    systemImportBundle = null;
     showLogin('Signed out.');
   }
 });
@@ -1965,6 +2193,38 @@ document.addEventListener('click', async (event) => {
   if (apply) {
     await applyAssistantProposal(Number(apply.dataset.assistantApply));
   }
+});
+
+document.addEventListener('click', async (event) => {
+  if (event.target.closest('[data-system-refresh]')) {
+    systemLoaded = false;
+    await loadSystem();
+    return;
+  }
+  if (event.target.closest('[data-system-snapshot]')) {
+    await createManualRecoveryPoint();
+    return;
+  }
+  const restore = event.target.closest('[data-system-restore]');
+  if (restore) {
+    await restoreSystemSnapshot(restore.dataset.systemRestore);
+    return;
+  }
+  if (event.target.closest('[data-system-export]')) {
+    await downloadSystemBackup();
+    return;
+  }
+  if (event.target.closest('[data-system-import-choose]')) {
+    systemImportFile?.click();
+    return;
+  }
+  if (event.target.closest('[data-system-import]')) {
+    await restoreImportedBackup();
+  }
+});
+
+systemImportFile?.addEventListener('change', (event) => {
+  readBackupFile(event.target.files?.[0]);
 });
 
 assistantProposeButton?.addEventListener('click', prepareAssistantProposal);
