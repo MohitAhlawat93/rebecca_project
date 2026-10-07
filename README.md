@@ -212,3 +212,76 @@ Scheduling metadata such as availability fallback settings, machine travel dates
 ### Storage
 
 RC-04 reuses the existing `rebecca_control_state.payload`. No new Supabase table, function, cron, service-role key or RLS policy is required.
+
+
+## Rebecca Control — RC-04B Scheduled Publishing
+
+RC-04B adds time-based publishing to the RC-03 Media & Publish workflow while preserving explicit Draft safety.
+
+### Owner workflow
+
+```text
+Edit / upload media
+      ↓
+Save Draft
+      ↓
+Preview Draft
+      ↓
+Choose Singapore publish time
+      ↓
+Optional expiry / revert time
+      ↓
+Schedule saved Draft
+      ↓
+Preview Scheduled snapshot
+      ↓
+Automatic live switch
+```
+
+### Safety model
+
+- Scheduling captures an **immutable snapshot** of the saved media Draft.
+- Later Draft edits do not silently change the scheduled version.
+- A pending or active schedule blocks a conflicting manual Publish.
+- Creating another schedule requires cancelling/clearing the existing schedule first.
+- Cancelling a pending schedule leaves the live website unchanged.
+- Cancelling an active schedule immediately returns the website to the version that was live before the schedule began.
+- **Keep live permanently** converts an active scheduled snapshot into the normal published version, records the previous live state in history, removes any automatic expiry, and preserves later Draft edits.
+- Scheduled preview is distinct from normal Draft preview.
+
+### Time handling
+
+All owner-entered schedule times are interpreted in `Asia/Singapore`.
+
+Example:
+
+```text
+Publish: 10 Oct 2026 · 09:30 Singapore
+Expiry:  10 Oct 2026 · 18:00 Singapore
+
+Before 09:30 → previous live version
+09:30–17:59 → scheduled snapshot
+18:00 onward → previous live version
+```
+
+The public media endpoint evaluates the schedule when requested. Its shared cache is only 30 seconds, so a scheduled transition does not require a GitHub commit, deployment or cron job.
+
+### Storage
+
+RC-04B adds one protected JSON column to the existing media row:
+
+```text
+public.rebecca_media_state.schedule
+```
+
+Portable schema update:
+`supabase/rc-04b-scheduled-publishing.sql`
+
+The schedule stores:
+- publish / optional expiry timestamps
+- the locked scheduled media snapshot
+- the previous live snapshot used for automatic revert
+- previous published version reference
+- creation metadata
+
+The existing RLS + secret-header policy continues to protect the row. No service-role key is exposed and no new public write surface is introduced.
