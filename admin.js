@@ -18,6 +18,7 @@ const mediaUploadButton = document.querySelector('[data-media-upload-button]');
 const mediaUploadStatus = document.querySelector('[data-media-upload-status]');
 
 let quickState = null;
+let scheduleState = null;
 let persistentStore = false;
 let dirty = false;
 let activeTab = 'availability';
@@ -73,6 +74,28 @@ function friendlyDate(value) {
   }).format(date);
 }
 
+function friendlyDateKey(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return value || '—';
+  const [year, month, day] = value.split('-').map(Number);
+  return new Intl.DateTimeFormat('en', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC'
+  }).format(new Date(Date.UTC(year, month - 1, day)));
+}
+
+function availabilityExpirySummary() {
+  const until = document.querySelector('[data-availability-until]')?.value || '';
+  const revertStatus = document.querySelector('[data-availability-revert]')?.value || 'accepting';
+  if (!until) return 'Permanent until you add an expiry date.';
+  return `Stays active through ${friendlyDateKey(until)}. On the next Singapore day it returns to ${STATUS_LABELS[revertStatus] || 'Accepting enquiries'}.`;
+}
+
+function updateAvailabilityExpirySummary() {
+  setText('[data-availability-expiry-summary]', availabilityExpirySummary());
+}
+
 function setDirty(value = true) {
   dirty = value;
   if (!saveButton) return;
@@ -119,26 +142,50 @@ function renderAvailability() {
   });
   const message = document.querySelector('[data-availability-message]');
   if (message) message.value = current.message || '';
+  const until = document.querySelector('[data-availability-until]');
+  if (until) until.value = current.until || '';
+  const revert = document.querySelector('[data-availability-revert]');
+  if (revert) revert.value = current.revertStatus || 'accepting';
   setText('[data-availability-summary]', current.label || STATUS_LABELS[current.status] || '—');
+  updateAvailabilityExpirySummary();
 }
 
 function travelCard(item, index) {
+  const lifecycle = item.lifecycle || 'manual';
+  const lifecycleLabel = {
+    upcoming: 'Upcoming',
+    current: 'Current',
+    past: 'Past',
+    manual: 'Manual'
+  }[lifecycle] || 'Manual';
+  const lifecycleNote = lifecycle === 'past'
+    ? 'Automatically hidden from the public Travel page.'
+    : lifecycle === 'current'
+      ? 'This trip is currently active.'
+      : lifecycle === 'upcoming'
+        ? 'This trip will become Current automatically.'
+        : 'Add both start and end dates to automate this trip.';
+
   return `
-    <article class="rc-edit-card" data-trip-index="${index}">
+    <article class="rc-edit-card rc-trip-card is-${esc(lifecycle)}" data-trip-index="${index}">
       <div class="rc-edit-card-head">
         <div>
           <span class="rc-card-kicker">Trip ${index + 1}</span>
           <strong>${esc(item.title || 'New trip')}</strong>
+          <small class="rc-lifecycle-note">${esc(lifecycleNote)}</small>
         </div>
         <div class="rc-inline-actions">
+          <span class="rc-lifecycle-pill is-${esc(lifecycle)}">${esc(lifecycleLabel)}</span>
           <label class="rc-toggle"><input type="checkbox" data-trip-visible ${item.visible !== false ? 'checked' : ''}><span>Visible</span></label>
           <button type="button" class="rc-danger-link" data-remove-trip>Remove</button>
         </div>
       </div>
       <div class="rc-form-grid">
         <label class="rc-field"><span>Headline</span><input data-trip="title" value="${esc(item.title || '')}" maxlength="180"></label>
-        <label class="rc-field"><span>Date range</span><input data-trip="dateRange" value="${esc(item.dateRange || '')}" maxlength="140"></label>
-        <label class="rc-field"><span>Cities <small>comma separated</small></span><input data-trip="cities" value="${esc((item.cities || []).join(', '))}"></label>
+        <label class="rc-field"><span>Public date wording</span><input data-trip="dateRange" value="${esc(item.dateRange || '')}" maxlength="140"></label>
+        <label class="rc-field"><span>Starts <small>automatic</small></span><input type="date" data-trip="startDate" value="${esc(item.startDate || '')}"></label>
+        <label class="rc-field"><span>Ends <small>automatic</small></span><input type="date" data-trip="endDate" value="${esc(item.endDate || '')}"></label>
+        <label class="rc-field rc-field-wide"><span>Cities <small>comma separated</small></span><input data-trip="cities" value="${esc((item.cities || []).join(', '))}"></label>
         <label class="rc-field rc-field-wide"><span>Public description</span><textarea data-trip="body" maxlength="800" rows="4">${esc(item.body || '')}</textarea></label>
         <label class="rc-field rc-field-wide"><span>Notes <small>comma separated</small></span><input data-trip="meta" value="${esc((item.meta || []).join(', '))}"></label>
       </div>
@@ -152,6 +199,48 @@ function renderTravel() {
   list.innerHTML = quickState.travel.length
     ? quickState.travel.map(travelCard).join('')
     : '<div class="rc-empty">No public travel windows. Use “Add trip” when you need one.</div>';
+}
+
+function scheduleEventCard(event, mode = 'next') {
+  const icon = event.kind?.startsWith('travel') ? '✈' : '↻';
+  return `
+    <article class="rc-schedule-event is-${esc(mode)}">
+      <div class="rc-schedule-date">
+        <strong>${esc(friendlyDateKey(event.date))}</strong>
+        <span>${esc(icon)}</span>
+      </div>
+      <div>
+        <strong>${esc(event.title || 'Automatic change')}</strong>
+        <p>${esc(event.detail || '')}</p>
+      </div>
+    </article>
+  `;
+}
+
+function renderSchedule() {
+  const schedule = scheduleState || {};
+  const counts = schedule.travelCounts || {};
+  setText('[data-schedule-timezone]', schedule.timeZone || 'Asia/Singapore');
+  setText('[data-schedule-today]', friendlyDateKey(schedule.today));
+  setText('[data-schedule-current-count]', counts.current || 0);
+  setText('[data-schedule-upcoming-count]', counts.upcoming || 0);
+  setText('[data-schedule-past-count]', counts.past || 0);
+
+  const next = document.querySelector('[data-schedule-next]');
+  if (next) {
+    next.innerHTML = (schedule.nextChanges || []).length
+      ? schedule.nextChanges.map((event) => scheduleEventCard(event, 'next')).join('')
+      : '<div class="rc-empty">Nothing is scheduled to change automatically yet.</div>';
+  }
+
+  const applied = document.querySelector('[data-schedule-applied]');
+  const appliedChanges = schedule.appliedChanges || [];
+  setText('[data-schedule-applied-count]', appliedChanges.length);
+  if (applied) {
+    applied.innerHTML = appliedChanges.length
+      ? appliedChanges.slice(0, 12).map((event) => scheduleEventCard(event, 'applied')).join('')
+      : '<div class="rc-empty">No automatic changes have taken effect yet.</div>';
+  }
 }
 
 function rateCard(rate, index) {
@@ -204,6 +293,7 @@ function renderProfile() {
 function renderAll() {
   renderAvailability();
   renderTravel();
+  renderSchedule();
   renderRates();
   renderContact();
   renderProfile();
@@ -218,6 +308,8 @@ function collectTravel() {
       ...previous,
       title: get('title').trim(),
       dateRange: get('dateRange').trim(),
+      startDate: get('startDate') || null,
+      endDate: get('endDate') || null,
       kicker: previous.kicker || '',
       cities: csv(get('cities')),
       body: get('body').trim(),
@@ -261,7 +353,9 @@ function collectState() {
       status: availabilityStatus,
       label: STATUS_LABELS[availabilityStatus] || quickState.availability.label,
       message: document.querySelector('[data-availability-message]')?.value?.trim() || STATUS_MESSAGES[availabilityStatus],
-      until: quickState.availability.until || null
+      until: document.querySelector('[data-availability-until]')?.value || null,
+      revertStatus: document.querySelector('[data-availability-revert]')?.value || 'accepting',
+      revertMessage: ''
     },
     travel: collectTravel(),
     rates: collectRates(),
@@ -591,7 +685,8 @@ async function loadQuickControl() {
     }
     if (!response.ok) throw new Error(data.error || 'Could not load Quick Control.');
 
-    quickState = data.state;
+    quickState = data.effectiveState || data.state;
+    scheduleState = data.schedule || null;
     persistentStore = Boolean(data.persistent && data.configured);
 
     setText('[data-store-mode]', persistentStore ? 'Connected' : 'Safe fallback');
@@ -682,6 +777,7 @@ logoutButton?.addEventListener('click', async () => {
   } finally {
     logoutButton.disabled = false;
     quickState = null;
+    scheduleState = null;
     mediaState = null;
     mediaLoaded = false;
     showLogin('Signed out.');
@@ -754,6 +850,7 @@ document.addEventListener('click', (event) => {
     const messageInput = document.querySelector('[data-availability-message]');
     if (messageInput) messageInput.value = quickState.availability.message;
     setText('[data-availability-summary]', quickState.availability.label);
+    updateAvailabilityExpirySummary();
     setDirty(true);
     return;
   }
@@ -769,6 +866,8 @@ document.addEventListener('click', (event) => {
       body: '',
       meta: [],
       alt: false,
+      startDate: null,
+      endDate: null,
       visible: true
     });
     renderTravel();
@@ -790,7 +889,7 @@ document.addEventListener('click', (event) => {
 
 document.addEventListener('input', (event) => {
   if (
-    event.target.matches('[data-availability-message], [data-trip], [data-rate], [data-contact], [data-profile]')
+    event.target.matches('[data-availability-message], [data-availability-until], [data-trip], [data-rate], [data-contact], [data-profile]')
   ) {
     setDirty(true);
   }
@@ -805,8 +904,11 @@ document.addEventListener('input', (event) => {
 });
 
 document.addEventListener('change', (event) => {
-  if (event.target.matches('[data-trip-visible], [data-rate-visible], [data-rate-featured]')) {
+  if (event.target.matches('[data-trip-visible], [data-rate-visible], [data-rate-featured], [data-availability-until], [data-availability-revert]')) {
     setDirty(true);
+    if (event.target.matches('[data-availability-until], [data-availability-revert]')) {
+      updateAvailabilityExpirySummary();
+    }
   }
 
   if (event.target.matches('[data-media-placement]')) {
@@ -846,7 +948,8 @@ saveButton?.addEventListener('click', async () => {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || 'Could not save these changes.');
 
-    quickState = data.state;
+    quickState = data.effectiveState || data.state;
+    scheduleState = data.schedule || null;
     setText('[data-last-saved]', friendlyDate(data.updatedAt));
     renderAll();
     setDirty(false);

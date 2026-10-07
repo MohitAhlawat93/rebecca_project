@@ -39,7 +39,7 @@
     <section class="rc-app" data-app-view hidden>
       <header class="rc-topbar">
         <div>
-          <p class="rc-eyebrow">Rebecca Control · RC-03</p>
+          <p class="rc-eyebrow">Rebecca Control · RC-04</p>
           <h1>Good to see you, Rebecca.</h1>
         </div>
         <div class="rc-top-actions">
@@ -81,6 +81,7 @@
         <nav class="rc-tabs" aria-label="Rebecca Control sections">
           <button type="button" class="is-active" data-tab="availability">Availability</button>
           <button type="button" data-tab="travel">Travel</button>
+          <button type="button" data-tab="schedule">Schedule</button>
           <button type="button" data-tab="rates">Rates</button>
           <button type="button" data-tab="contact">Contact</button>
           <button type="button" data-tab="profile">Profile</button>
@@ -108,18 +109,77 @@
               <input type="text" data-availability-message maxlength="280">
             </label>
           </div>
+
+          <div class="rc-schedule-card">
+            <div class="rc-schedule-card-copy">
+              <span class="rc-card-kicker">Automatic expiry</span>
+              <strong>Make this status temporary.</strong>
+              <p>Leave the date empty for no expiry. If you choose a date, this status stays active through that day in Singapore time.</p>
+            </div>
+            <div class="rc-form-grid">
+              <label class="rc-field">
+                <span>Keep this status until</span>
+                <input type="date" data-availability-until>
+              </label>
+              <label class="rc-field">
+                <span>Then return to</span>
+                <select data-availability-revert>
+                  <option value="accepting">Accepting enquiries</option>
+                  <option value="limited">Limited availability</option>
+                  <option value="travelling">Travelling</option>
+                  <option value="away">Temporarily away</option>
+                  <option value="unavailable">Not accepting enquiries</option>
+                </select>
+              </label>
+            </div>
+            <div class="rc-schedule-explain" data-availability-expiry-summary>Permanent until you add an expiry date.</div>
+          </div>
         </section>
 
         <section class="rc-panel" data-panel="travel" hidden>
           <div class="rc-panel-intro rc-panel-intro-row">
             <div>
               <p class="rc-eyebrow">Travel</p>
-              <h3>Upcoming public windows.</h3>
-              <p>Add, edit, hide or remove a trip. Exact private locations do not belong here.</p>
+              <h3>Travel that manages its own lifecycle.</h3>
+              <p>Add real start/end dates once. Rebecca Control will move the trip from Upcoming → Current → Past automatically, while keeping exact private locations out of public content.</p>
             </div>
             <button type="button" class="rc-secondary" data-add-trip>+ Add trip</button>
           </div>
           <div class="rc-stack" data-travel-list></div>
+        </section>
+
+        <section class="rc-panel rc-schedule-panel" data-panel="schedule" hidden>
+          <div class="rc-panel-intro rc-panel-intro-row">
+            <div>
+              <p class="rc-eyebrow">Smart schedule</p>
+              <h3>What changes next?</h3>
+              <p>These transitions happen automatically in Singapore time. No GitHub commit or Vercel deployment is required.</p>
+            </div>
+            <span class="rc-phase-pill" data-schedule-timezone>Asia/Singapore</span>
+          </div>
+
+          <div class="rc-schedule-summary-grid">
+            <div><span>Today</span><strong data-schedule-today>—</strong><small>Singapore date</small></div>
+            <div><span>Current trips</span><strong data-schedule-current-count>0</strong><small>automatically active</small></div>
+            <div><span>Upcoming trips</span><strong data-schedule-upcoming-count>0</strong><small>waiting to start</small></div>
+            <div><span>Past trips</span><strong data-schedule-past-count>0</strong><small>kept in Control, hidden publicly</small></div>
+          </div>
+
+          <section class="rc-schedule-section">
+            <div class="rc-media-section-title">
+              <div>
+                <span class="rc-card-kicker">Next</span>
+                <strong>Upcoming automatic changes</strong>
+              </div>
+              <small>Rebecca can still edit or remove any schedule before it takes effect.</small>
+            </div>
+            <div class="rc-schedule-timeline" data-schedule-next></div>
+          </section>
+
+          <details class="rc-schedule-history">
+            <summary>Recently applied automatic changes <span data-schedule-applied-count>0</span></summary>
+            <div class="rc-schedule-timeline" data-schedule-applied></div>
+          </details>
         </section>
 
         <section class="rc-panel" data-panel="rates" hidden>
@@ -243,7 +303,7 @@
       </div>
 
       <footer class="rc-footer">
-        <span>Rebecca Control · RC-03</span>
+        <span>Rebecca Control · RC-04</span>
         <span>Owner access only</span>
       </footer>
     </section>
