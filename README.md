@@ -72,6 +72,29 @@ GitHub `main` is connected to Vercel. Production deployment is triggered by the 
 - See `LAUNCH_CHECKLIST.md` for the final cutover sequence.
 
 
+
+## Canonical Rebecca Control roadmap
+
+These names and numbers are the canonical Rebecca Control phase registry. Do not renumber or rename a phase in later work; sub-phases such as **RC-02B** and **RC-04B** extend their parent phase.
+
+| Phase | Canonical name | Status |
+| --- | --- | --- |
+| RC-01 | Foundation & Security | Implemented |
+| RC-02 | Quick Control | Implemented |
+| RC-02B | Persistent Quick Control Store | Implemented |
+| RC-03 | Media & Publishing | Implemented |
+| RC-04 | Smart Scheduling & Automatic Expiry | Implemented |
+| RC-04B | Scheduled Publishing | Implemented |
+| RC-05 | Visual Website Editor | Implemented |
+| RC-06 | Concierge Control | Implemented |
+| RC-07 | Needs Rebecca | Implemented |
+| RC-08 | AI Admin Assistant | Implemented |
+| RC-09 | History, Export & Recovery | Implemented |
+| RC-10 | Owner Insights | Implemented |
+| RC-11 | Settings & Safety Controls | Implemented |
+
+The production website may temporarily show an earlier Rebecca Control version when newer phases have been merged to GitHub but intentionally not deployed.
+
 ## Rebecca Control — RC-01 + RC-02 integrated
 
 The current site includes the private Rebecca Control foundation and Quick Control editor at `/admin`.
@@ -571,6 +594,54 @@ Portable schema:
 The inbox is capped to the most relevant 100 grouped questions rather than growing without bound.
 
 
+
+## Rebecca Control — RC-08 AI Admin Assistant
+
+RC-08 adds a private natural-language proposal layer on top of the existing Website Draft and Concierge Draft workflows.
+
+### Owner workflow
+
+```text
+Rebecca describes a change
+        ↓
+AI Admin Assistant prepares structured proposals
+        ↓
+Rebecca reviews before / after
+        ↓
+Rebecca explicitly applies an individual proposal
+        ↓
+Website Draft or Concierge Draft only
+        ↓
+Rebecca reviews / tests
+        ↓
+Rebecca explicitly publishes elsewhere if desired
+```
+
+### Supported proposal areas
+
+- Availability
+- Profile
+- Rates
+- Travel updates and additions
+- Contact
+- Concierge presentation/configuration
+- Trusted Answers
+
+### Safety model
+
+RC-08 cannot silently publish or deploy. Proposal types are server-side allowlisted, each proposal is tied to the Draft state it was generated from, and stale proposals are rejected if the underlying Draft changes before application.
+
+Media/photo changes are intentionally excluded from direct AI manipulation and remain in **Media & Publish**.
+
+### Model fallback
+
+When the configured proposal model is unavailable, deterministic rules still support a small safe subset of common requests rather than giving the model publishing authority.
+
+### Validation
+
+Portable validation:
+`scripts/validate-admin-assistant.mjs`
+
 ## Rebecca Control — RC-09 History, Export & Recovery
 
 RC-09 adds owner-readable history, portable backups and recovery points without exposing GitHub, Vercel or database internals.
@@ -644,7 +715,7 @@ Portable schema:
 `supabase/rc-09-history-export-recovery.sql`
 
 
-## Rebecca Control — RC-10 Insights
+## Rebecca Control — RC-10 Owner Insights
 
 RC-10 adds a privacy-safe operational dashboard inside Rebecca Control.
 
@@ -666,7 +737,7 @@ Each recommended action links Rebecca directly to the relevant Control area.
 Privacy boundary: no visitor identity, IP address, user-agent, raw chat history or screening documents are included.
 
 
-## Rebecca Control — RC-11 Settings & Safety
+## Rebecca Control — RC-11 Settings & Safety Controls
 
 RC-11 adds owner-facing preferences for optional Rebecca Control automation while preserving manual editing and explicit publishing.
 
