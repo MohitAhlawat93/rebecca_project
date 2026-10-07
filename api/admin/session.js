@@ -1,5 +1,6 @@
 import { getAdminSession, adminAuthConfigured } from '../../lib/admin-auth.js';
 import { getAdminDashboardSnapshot } from '../../lib/admin-store.js';
+import { readSystemSettings } from '../../lib/system-store.js';
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -18,7 +19,10 @@ export default async function handler(req, res) {
   const session = getAdminSession(req);
   if (!session) return res.status(401).json({ authenticated: false, configured: true });
 
-  const site = await getAdminDashboardSnapshot();
+  const [site, preferences] = await Promise.all([
+    getAdminDashboardSnapshot(),
+    readSystemSettings()
+  ]);
 
   return res.status(200).json({
     authenticated: true,
@@ -28,10 +32,11 @@ export default async function handler(req, res) {
       role: 'Owner'
     },
     control: {
-      version: 'RC-10',
-      status: 'Owner Insights',
+      version: 'RC-11',
+      status: 'Settings & Safety Controls',
       storeMode: site.storeMode,
-      persistent: site.persistent
+      persistent: site.persistent,
+      settings: preferences.settings
     },
     site
   });
