@@ -39,9 +39,6 @@ const systemImportFile = document.querySelector('[data-system-import-file]');
 const systemImportButton = document.querySelector('[data-system-import]');
 const systemStatus = document.querySelector('[data-system-status]');
 const insightsActions = document.querySelector('[data-insights-actions]');
-const searchSyncButton = document.querySelector('[data-search-sync]');
-const searchImportFile = document.querySelector('[data-search-import-file]');
-const searchImportButton = document.querySelector('[data-search-import]');
 const settingsSaveButton = document.querySelector('[data-settings-save]');
 
 const startupParams = new URLSearchParams(window.location.search);
@@ -89,10 +86,6 @@ let systemPersistent = false;
 let systemImportBundle = null;
 let insightsState = null;
 let insightsLoaded = false;
-let searchState = null;
-let searchLoaded = false;
-let searchBusy = false;
-let searchImportRows = null;
 let settingsState = {
   dashboardStartTab:'insights',
   aiAssistantEnabled:true,
@@ -2183,10 +2176,6 @@ logoutButton?.addEventListener('click', async () => {
     systemImportBundle = null;
     insightsState = null;
     insightsLoaded = false;
-    searchState = null;
-    searchLoaded = false;
-    searchBusy = false;
-    searchImportRows = null;
     settingsState = {
       dashboardStartTab:'insights',
       aiAssistantEnabled:true,
