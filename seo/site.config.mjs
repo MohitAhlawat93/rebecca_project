@@ -1,4 +1,4 @@
-import { MULTILINGUAL_QUALITY, localePageStatus } from './multilingual-quality.config.mjs';
+import { MULTILINGUAL_QUALITY } from './multilingual-quality.config.mjs';
 import { TRAVEL_PAGES } from './travel-authority.config.mjs';
 import { GEO_PAGES } from './geo-hubs.config.mjs';
 
@@ -50,6 +50,8 @@ export default {
       id: 'en',
       hreflang: 'en',
       htmlLang: 'en',
+      direction: 'ltr',
+      ogLocale: 'en_SG',
       prefix: '',
       searchStatus: MULTILINGUAL_QUALITY.locales.en.status,
       pageSearchStatus: MULTILINGUAL_QUALITY.locales.en.pages,
@@ -60,6 +62,8 @@ export default {
       id: 'zh',
       hreflang: 'zh-CN',
       htmlLang: 'zh-CN',
+      direction: 'ltr',
+      ogLocale: 'zh_CN',
       prefix: '/zh',
       searchStatus: MULTILINGUAL_QUALITY.locales.zh.status,
       pageSearchStatus: MULTILINGUAL_QUALITY.locales.zh.pages,
@@ -70,6 +74,8 @@ export default {
       id: 'hi',
       hreflang: 'hi',
       htmlLang: 'hi',
+      direction: 'ltr',
+      ogLocale: 'hi_IN',
       prefix: '/hi',
       searchStatus: MULTILINGUAL_QUALITY.locales.hi.status,
       pageSearchStatus: MULTILINGUAL_QUALITY.locales.hi.pages,
@@ -80,6 +86,8 @@ export default {
       id: 'fr',
       hreflang: 'fr',
       htmlLang: 'fr',
+      direction: 'ltr',
+      ogLocale: 'fr_FR',
       prefix: '/fr',
       searchStatus: MULTILINGUAL_QUALITY.locales.fr.status,
       pageSearchStatus: MULTILINGUAL_QUALITY.locales.fr.pages,
@@ -90,6 +98,8 @@ export default {
       id: 'es',
       hreflang: 'es',
       htmlLang: 'es',
+      direction: 'ltr',
+      ogLocale: 'es_ES',
       prefix: '/es',
       searchStatus: MULTILINGUAL_QUALITY.locales.es.status,
       pageSearchStatus: MULTILINGUAL_QUALITY.locales.es.pages,
