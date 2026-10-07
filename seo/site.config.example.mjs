@@ -31,6 +31,11 @@ export default {
     excludedPrefixes: ['/api/', '/admin'],
     legacyCanonicalOrigins: ['https://example.vercel.app']
   },
+  entityAuthority: {
+    enabled: false,
+    module: 'seo/entity-authority.config.example.mjs',
+    generatedAtBuild: true
+  },
   travelAuthority: {
     enabled: false,
     module: 'seo/travel-authority.config.example.mjs',
