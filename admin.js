@@ -20,6 +20,7 @@ const mediaScheduleButton = document.querySelector('[data-media-schedule]');
 const mediaSchedulePublishInput = document.querySelector('[data-media-schedule-publish]');
 const mediaScheduleExpireInput = document.querySelector('[data-media-schedule-expire]');
 const mediaScheduleCancelButton = document.querySelector('[data-media-cancel-schedule]');
+const mediaScheduleCommitButton = document.querySelector('[data-media-commit-schedule]');
 const mediaSchedulePreviewButton = document.querySelector('[data-media-preview-scheduled]');
 
 let quickState = null;
@@ -437,6 +438,10 @@ function mediaScheduleBlocksManualPublish() {
   return mediaSchedulePhase === 'pending' || mediaSchedulePhase === 'active';
 }
 
+function hasMediaSchedule() {
+  return Boolean(mediaSchedule);
+}
+
 function setMediaDirty(value = true) {
   mediaDirty = value;
   const canSave = mediaPersistent && mediaDirty;
@@ -507,16 +512,14 @@ function renderMediaSchedule() {
 
   if (mediaSchedulePublishInput) {
     mediaSchedulePublishInput.min = singaporeNowLocalInput();
-    mediaSchedulePublishInput.disabled = mediaScheduleBlocksManualPublish();
+    mediaSchedulePublishInput.disabled = hasMediaSchedule();
     if (mediaSchedule?.publishLocal) mediaSchedulePublishInput.value = mediaSchedule.publishLocal;
-    else if (!mediaScheduleBlocksManualPublish() && phase !== 'expired') mediaSchedulePublishInput.value = '';
   }
 
   if (mediaScheduleExpireInput) {
     mediaScheduleExpireInput.min = mediaSchedulePublishInput?.value || singaporeNowLocalInput();
-    mediaScheduleExpireInput.disabled = mediaScheduleBlocksManualPublish();
+    mediaScheduleExpireInput.disabled = hasMediaSchedule();
     if (mediaSchedule?.expireLocal) mediaScheduleExpireInput.value = mediaSchedule.expireLocal;
-    else if (!mediaScheduleBlocksManualPublish() && phase !== 'expired') mediaScheduleExpireInput.value = '';
   }
 
   let summary = mediaDirty
@@ -545,9 +548,10 @@ function renderMediaSchedule() {
 
   if (mediaSchedulePreviewButton) mediaSchedulePreviewButton.hidden = !mediaSchedule;
   if (mediaScheduleCancelButton) mediaScheduleCancelButton.hidden = !mediaSchedule;
+  if (mediaScheduleCommitButton) mediaScheduleCommitButton.hidden = phase !== 'active';
   if (mediaScheduleButton) {
-    mediaScheduleButton.hidden = mediaScheduleBlocksManualPublish();
-    mediaScheduleButton.disabled = !mediaPersistent || mediaDirty || !mediaDraftAhead || mediaScheduleBlocksManualPublish();
+    mediaScheduleButton.hidden = hasMediaSchedule();
+    mediaScheduleButton.disabled = !mediaPersistent || mediaDirty || !mediaDraftAhead || hasMediaSchedule();
   }
 }
 
@@ -859,12 +863,52 @@ async function cancelScheduledMedia() {
     mediaSchedulePhase = 'none';
     mediaDraftAhead = Boolean(data.hasDraftChanges);
     mediaDirty = false;
+    if (mediaSchedulePublishInput) mediaSchedulePublishInput.value = '';
+    if (mediaScheduleExpireInput) mediaScheduleExpireInput.value = '';
     renderMedia();
   } catch (error) {
     setText('[data-media-schedule-summary]', error?.message || 'Schedule was not cancelled.');
   } finally {
     mediaScheduleCancelButton.disabled = false;
     mediaScheduleCancelButton.textContent = 'Cancel schedule';
+    setMediaDirty(mediaDirty);
+  }
+}
+
+async function commitScheduledMedia() {
+  if (!mediaSchedule || mediaSchedulePhase !== 'active') return;
+  if (!window.confirm('Keep the currently live scheduled version permanently? Any automatic expiry will be removed.')) return;
+
+  mediaScheduleCommitButton.disabled = true;
+  mediaScheduleCommitButton.textContent = 'Keeping live…';
+
+  try {
+    const response = await fetch('/api/admin/media', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ action: 'commit_schedule' })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Could not keep this scheduled version live.');
+
+    mediaState = data.draft;
+    mediaPublished = data.published;
+    mediaHistory = data.history || [];
+    mediaSchedule = null;
+    mediaSchedulePhase = 'none';
+    mediaDraftAhead = Boolean(data.hasDraftChanges);
+    mediaDirty = false;
+    window.__rcMediaPublishedVersion = data.publishedVersion || 0;
+    window.__rcMediaPublishedAt = data.publishedAt || null;
+    if (mediaSchedulePublishInput) mediaSchedulePublishInput.value = '';
+    if (mediaScheduleExpireInput) mediaScheduleExpireInput.value = '';
+    renderMedia();
+  } catch (error) {
+    setText('[data-media-schedule-summary]', error?.message || 'The scheduled version was not changed.');
+  } finally {
+    mediaScheduleCommitButton.disabled = false;
+    mediaScheduleCommitButton.textContent = 'Keep live permanently';
     setMediaDirty(mediaDirty);
   }
 }
@@ -1201,6 +1245,7 @@ mediaPreviewButton?.addEventListener('click', previewMediaDraft);
 mediaPublishButton?.addEventListener('click', publishMedia);
 mediaScheduleButton?.addEventListener('click', scheduleMediaPublish);
 mediaScheduleCancelButton?.addEventListener('click', cancelScheduledMedia);
+mediaScheduleCommitButton?.addEventListener('click', commitScheduledMedia);
 mediaSchedulePreviewButton?.addEventListener('click', previewScheduledMedia);
 
 document.addEventListener('rc:media-uploaded', async (event) => {
