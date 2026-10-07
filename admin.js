@@ -39,6 +39,9 @@ const systemImportFile = document.querySelector('[data-system-import-file]');
 const systemImportButton = document.querySelector('[data-system-import]');
 const systemStatus = document.querySelector('[data-system-status]');
 const insightsActions = document.querySelector('[data-insights-actions]');
+const searchSyncButton = document.querySelector('[data-search-sync]');
+const searchImportFile = document.querySelector('[data-search-import-file]');
+const searchImportButton = document.querySelector('[data-search-import]');
 const settingsSaveButton = document.querySelector('[data-settings-save]');
 
 const startupParams = new URLSearchParams(window.location.search);
@@ -86,6 +89,10 @@ let systemPersistent = false;
 let systemImportBundle = null;
 let insightsState = null;
 let insightsLoaded = false;
+let searchState = null;
+let searchLoaded = false;
+let searchBusy = false;
+let searchImportRows = null;
 let settingsState = {
   dashboardStartTab:'insights',
   aiAssistantEnabled:true,
@@ -224,12 +231,13 @@ function activateTab(name) {
     panel.hidden = !selected;
     panel.classList.toggle('is-active', selected);
   });
-  if (quickSavebar) quickSavebar.hidden = ['insights','assistant','media','concierge','concierge-test','needs-rebecca','history','export','settings'].includes(name);
+  if (quickSavebar) quickSavebar.hidden = ['insights','search','assistant','media','concierge','concierge-test','needs-rebecca','history','export','settings'].includes(name);
   if (name === 'media' && !mediaLoaded) loadMedia();
   if ((name === 'concierge' || name === 'concierge-test') && !conciergeLoaded) loadConcierge();
   if (name === 'needs-rebecca' && !needsLoaded) loadNeedsRebecca();
   if ((name === 'history' || name === 'export' || name === 'settings') && !systemLoaded) loadSystem();
   if (name === 'insights' && !insightsLoaded) loadInsights();
+  if (name === 'search' && !searchLoaded) loadSearchIntelligence();
 }
 
 function renderAvailability() {
@@ -2175,6 +2183,10 @@ logoutButton?.addEventListener('click', async () => {
     systemImportBundle = null;
     insightsState = null;
     insightsLoaded = false;
+    searchState = null;
+    searchLoaded = false;
+    searchBusy = false;
+    searchImportRows = null;
     settingsState = {
       dashboardStartTab:'insights',
       aiAssistantEnabled:true,
