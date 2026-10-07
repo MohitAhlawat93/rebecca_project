@@ -664,3 +664,34 @@ Insights are built from owner-controlled Rebecca Control state:
 Each recommended action links Rebecca directly to the relevant Control area.
 
 Privacy boundary: no visitor identity, IP address, user-agent, raw chat history or screening documents are included.
+
+
+## Rebecca Control — RC-11 Settings & Safety
+
+RC-11 adds owner-facing preferences for optional Rebecca Control automation while preserving manual editing and explicit publishing.
+
+### Settings
+
+Rebecca can choose:
+- which Rebecca Control section opens first after sign-in
+- whether **AI Admin Assistant** is available
+- whether **Needs Rebecca** captures new privacy-filtered grouped questions
+- whether automatic recovery points are created before important publishes
+
+These settings are enforced server-side, not merely hidden in the interface.
+
+### Safety boundary
+
+Turning optional automation off never removes manual controls.
+
+Settings can never:
+- allow silent publishing
+- bypass Draft review
+- expose credentials
+- modify code or deployments
+- alter database schema
+
+Manual recovery points remain available even when automatic recovery is disabled.
+
+Portable schema update:
+`supabase/rc-11-settings-safety.sql`
