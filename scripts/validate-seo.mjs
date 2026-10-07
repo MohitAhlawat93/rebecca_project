@@ -19,6 +19,10 @@ for (const route of routeIndex(config)) {
   try {
     html = await fs.readFile(fullPath, 'utf8');
   } catch {
+    if (route.page.generated && !strictRendered) {
+      notices.push(`Generated SEO page will be created at build time: ${route.file}`);
+      continue;
+    }
     failures.push(`Configured SEO page is missing: ${route.file}`);
     continue;
   }
