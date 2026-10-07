@@ -11,6 +11,7 @@ const entry = path.resolve(root, config.prerender?.entry || 'content.js');
 const write = process.argv.includes('--write');
 const verify = process.argv.includes('--verify');
 const eligible = routeIndex(config).filter((route) => {
+  if (route.page.generated) return false;
   if (route.page.indexable === false) return false;
   if (route.language.searchStatus !== 'approved') return false;
   if (!route.file.endsWith('.html')) return false;
