@@ -355,3 +355,17 @@ Once the final production domain is live and Search Console is connected, SEARCH
 5. image/page combinations that generate discovery but weak conversion
 
 This measurement belongs in the later Search Intelligence/dashboard phase rather than being hardcoded into this rendering engine.
+
+## SEARCH-07 — search measurement and intelligence
+
+SEARCH-07 adds the provider-aware measurement and opportunity layer behind future Search Intelligence dashboards.
+
+It normalizes Google Search Console, Google GenAI/multimodal exports, Bing Webmaster performance and Bing AI Performance exports into one measurement contract.
+
+The engine compares finalized current/previous windows and produces evidence-backed, human-reviewed opportunities such as low CTR, striking-distance queries, page declines, emerging queries, visual-search opportunities and AI citation strengths.
+
+Missing connections are states, not zero metrics. Export-only AI surfaces are never misrepresented as live APIs.
+
+The protected endpoint is `/api/admin/search-intelligence`. It uses the existing owner session and never returns search credentials.
+
+See `SEARCH_MEASUREMENT.md` for provider capabilities, environment variables, data contract and guardrails.
