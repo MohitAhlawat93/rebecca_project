@@ -39,7 +39,7 @@
     <section class="rc-app" data-app-view hidden>
       <header class="rc-topbar">
         <div>
-          <p class="rc-eyebrow">Rebecca Control · RC-08</p>
+          <p class="rc-eyebrow">Rebecca Control · RC-09</p>
           <h1>Good to see you, Rebecca.</h1>
         </div>
         <div class="rc-top-actions">
@@ -91,6 +91,8 @@
           <button type="button" data-tab="needs-rebecca">Needs Rebecca</button>
           <button type="button" data-tab="concierge-test">Test Concierge</button>
           <button type="button" data-tab="media">Media & Publish</button>
+          <button type="button" data-tab="history">History</button>
+          <button type="button" data-tab="export">Export & Recovery</button>
         </nav>
 
         <section class="rc-panel rc-assistant-panel" data-panel="assistant" hidden>
@@ -429,6 +431,77 @@
           </div>
         </section>
 
+        <section class="rc-panel rc-history-panel" data-panel="history" hidden>
+          <div class="rc-panel-intro rc-panel-intro-row">
+            <div>
+              <p class="rc-eyebrow">History</p>
+              <h3>A readable record of important changes.</h3>
+              <p>Rebecca Control records publishes, schedules, AI-applied Draft changes and recovery points. This is owner-only and never appears on the public website.</p>
+            </div>
+            <button type="button" class="rc-secondary" data-system-refresh>Refresh</button>
+          </div>
+
+          <div class="rc-system-summary-grid">
+            <div><span>Recorded events</span><strong data-system-event-count>0</strong><small>most recent first</small></div>
+            <div><span>Recovery points</span><strong data-system-snapshot-count>0</strong><small>rolling protected snapshots</small></div>
+            <div><span>Connection</span><strong data-system-connection>Loading…</strong><small>private system ledger</small></div>
+          </div>
+
+          <section class="rc-system-block">
+            <div class="rc-media-section-title">
+              <div>
+                <span class="rc-card-kicker">Recovery points</span>
+                <strong>Return an older live state to Draft</strong>
+              </div>
+              <button type="button" class="rc-secondary" data-system-snapshot>+ Create recovery point</button>
+            </div>
+            <p class="rc-concierge-help">Restore never changes the live website immediately. It fills Website, Concierge and Media Drafts so Rebecca can review and publish deliberately.</p>
+            <div class="rc-system-snapshots" data-system-snapshots></div>
+          </section>
+
+          <section class="rc-system-block">
+            <div class="rc-media-section-title">
+              <div>
+                <span class="rc-card-kicker">Activity</span>
+                <strong>Recent Rebecca Control history</strong>
+              </div>
+            </div>
+            <div class="rc-system-events" data-system-events></div>
+          </section>
+        </section>
+
+        <section class="rc-panel rc-export-panel" data-panel="export" hidden>
+          <div class="rc-panel-intro">
+            <p class="rc-eyebrow">Export & Recovery</p>
+            <h3>Your content should never be trapped in the admin system.</h3>
+            <p>Download a portable JSON backup of owner-managed Website, Concierge and Media data. Visitor-derived Needs Rebecca questions are intentionally excluded.</p>
+          </div>
+
+          <div class="rc-export-grid">
+            <article class="rc-export-card">
+              <span class="rc-card-kicker">Export</span>
+              <strong>Download Rebecca Control backup</strong>
+              <p>Creates one portable file containing the current live and Draft configuration for Website, Concierge and Media.</p>
+              <button type="button" class="rc-primary" data-system-export>Download backup</button>
+            </article>
+            <article class="rc-export-card">
+              <span class="rc-card-kicker">Import safely</span>
+              <strong>Restore a backup to Draft</strong>
+              <p>Select a Rebecca Control backup. It will be validated and restored only to Draft. Nothing goes live automatically.</p>
+              <input type="file" accept="application/json,.json" data-system-import-file hidden>
+              <button type="button" class="rc-secondary" data-system-import-choose>Choose backup file</button>
+              <span class="rc-export-file" data-system-import-name>No file selected</span>
+              <button type="button" class="rc-primary" data-system-import disabled>Restore to Draft</button>
+            </article>
+          </div>
+
+          <div class="rc-needs-privacy-note">
+            <strong>Recovery boundary.</strong>
+            <span>Imports cannot deploy code, change credentials, alter database schema or publish. After recovery, review Website Draft, AI Control Draft and Media Draft before publishing anything.</span>
+          </div>
+          <div class="rc-export-status" data-system-status></div>
+        </section>
+
         <section class="rc-panel rc-media-panel" data-panel="media" hidden>
           <div class="rc-panel-intro rc-panel-intro-row">
             <div>
@@ -541,7 +614,7 @@
       </div>
 
       <footer class="rc-footer">
-        <span>Rebecca Control · RC-08</span>
+        <span>Rebecca Control · RC-09</span>
         <span>Owner access only</span>
       </footer>
     </section>
