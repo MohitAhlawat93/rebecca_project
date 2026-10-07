@@ -446,3 +446,145 @@ Shared sync/storage logic is client-neutral. For another site, configure:
 - search thresholds
 
 The same persistence tables can separate tenants by `client_id`, or each client deployment can use its own Supabase project.
+
+
+## SEARCH-09 — Search Intelligence inside Rebecca Control
+
+SEARCH-09 turns the SEARCH-07/08 measurement infrastructure into an owner-facing dashboard.
+
+The public website is not changed by this phase. Search Intelligence lives only inside authenticated Rebecca Control.
+
+### Owner experience
+
+The new `Search Intelligence` tab answers five questions:
+
+1. Are Google and Bing connected?
+2. Is search data syncing successfully?
+3. Is visibility improving or declining?
+4. Which pages and queries matter most?
+5. What evidence-backed action deserves attention?
+
+The default dashboard does not expose OAuth tokens, API keys, raw provider payloads or implementation details.
+
+### Scorecard
+
+The current finalized comparison window shows:
+
+```text
+Clicks
+Impressions
+CTR
+AI citations
+```
+
+Each metric can show its change versus the previous comparison window.
+
+When no measured data exists, the interface shows a waiting/connection state rather than presenting missing data as zero.
+
+### Provider health
+
+Google and Bing each have a compact connection card with:
+
+- connected / not connected / needs attention
+- last successful sync
+- recent failure count
+- one-time Connect/Reconnect action
+
+The connection action uses the SEARCH-08 protected OAuth flow and returns the owner directly to the Search Intelligence tab.
+
+### Evidence-backed opportunities
+
+The dashboard renders SEARCH-07 opportunities with:
+
+- priority
+- recommendation title
+- reason
+- target page or query
+- supporting metrics
+
+Recommendations remain review-only. SEARCH-09 does not add an automatic publish path.
+
+### Top demand
+
+The owner can see:
+
+- top search pages
+- top search queries
+- clicks
+- impressions
+- CTR
+- average position
+- supported AI citation signals
+
+The Bing adapter keeps query rollups separate from page rollups so query/page statistics cannot double-count overall Bing traffic.
+
+### Discovery surfaces
+
+The dashboard groups actual measured surfaces such as:
+
+```text
+Google web
+Google image
+Google multimodal
+Google generative AI
+Bing web
+Bing AI citation
+```
+
+Dimension-only query rollups are excluded from the surface scorecards so they do not look like a second traffic channel.
+
+### Manual sync
+
+`Sync now` uses the protected SEARCH-08 manual endpoint.
+
+It is useful immediately after connecting a provider or for diagnostics. Normal operation remains the scheduled daily sync.
+
+### AI/search report import
+
+A compact advanced section accepts CSV or JSON exports for:
+
+```text
+Google Generative AI
+Google multimodal / Lens
+Bing AI Performance
+```
+
+The browser parses the selected file locally, then sends normalized report rows to the authenticated SEARCH-08 import endpoint.
+
+Imports stay idempotent and feed the same persisted history used by the rest of Search Intelligence.
+
+### Privacy and security
+
+The Search Intelligence UI states its boundary clearly:
+
+```text
+No visitor identity
+No IP address
+No private enquiry
+No screening document
+No raw concierge conversation
+```
+
+The browser module never receives or references:
+
+```text
+SEARCH_STORE_SECRET
+SEARCH_TOKEN_ENCRYPTION_KEY
+CRON_SECRET
+Google/Bing client secrets
+provider access/refresh tokens
+```
+
+All protected actions still require the existing Rebecca Control owner session. The OAuth callback uses the signed SEARCH-08 state token.
+
+### Mobile and desktop
+
+SEARCH-09 has its own `admin-search.css` and `admin-search.js` modules.
+
+The provider cards, scorecards, recommendations, top-pages/queries and import controls collapse progressively for tablet and mobile layouts without changing the rest of Rebecca Control.
+
+### Reuse for future clients
+
+The UI is Rebecca-branded only at the presentation level.
+
+The underlying dashboard contract consumes the generic SEARCH measurement shape and provider state. A future client can reuse the same module by changing client configuration, provider properties and owner branding rather than rebuilding the intelligence logic.
