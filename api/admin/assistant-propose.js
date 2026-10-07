@@ -111,6 +111,11 @@ export default async function handler(req,res){
   const prompt=typeof body.prompt==='string'?body.prompt.trim().slice(0,1200):'';
   if(!prompt) return res.status(400).json({error:'Tell Rebecca Control what you want changed.'});
 
+  const preferences=await readSystemSettings();
+  if(preferences.settings?.aiAssistantEnabled===false){
+    return res.status(403).json({error:'AI Admin Assistant is turned off in Rebecca Control Settings.'});
+  }
+
   const [website,concierge]=await Promise.all([
     readVisualEditorState(),
     readConciergeControlState()
