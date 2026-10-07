@@ -8,6 +8,7 @@ alter table public.rebecca_control_state
 grant select (visual_draft) on public.rebecca_control_state to anon;
 grant update (visual_draft) on public.rebecca_control_state to anon;
 
+-- Preserve the existing view column order; append visual_draft at the end.
 create or replace view public.rebecca_control_api
 with (security_invoker = true)
 as
@@ -15,19 +16,19 @@ select
   id,
   version,
   payload,
-  visual_draft,
   updated_by,
-  updated_at
+  updated_at,
+  visual_draft
 from public.rebecca_control_state;
 
 revoke all on public.rebecca_control_api from anon, authenticated;
 
 grant select (
-  id, version, payload, visual_draft, updated_by, updated_at
+  id, version, payload, updated_by, updated_at, visual_draft
 ) on public.rebecca_control_api to anon;
 
 grant update (
-  version, payload, visual_draft, updated_by, updated_at
+  version, payload, updated_by, updated_at, visual_draft
 ) on public.rebecca_control_api to anon;
 
 notify pgrst, 'reload schema';
