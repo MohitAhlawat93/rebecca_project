@@ -13,6 +13,9 @@
     },
     "api/admin/media-upload.js": {
       "maxDuration": 30
+    },
+    "api/admin/concierge-test.js": {
+      "maxDuration": 30
     }
   },
   "headers": [
