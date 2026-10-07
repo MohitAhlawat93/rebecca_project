@@ -7,7 +7,7 @@ const admin = fs.readFileSync(new URL('../admin.html', import.meta.url), 'utf8')
 const store = fs.readFileSync(new URL('../lib/admin-store.js', import.meta.url), 'utf8');
 const api = fs.readFileSync(new URL('../api/admin/visual-editor.js', import.meta.url), 'utf8');
 
-assert.match(content, /data\.rcEdit='availability'/);
+assert.match(content, /rcEdit=['\"]availability['\"]/);
 assert.match(content, /data-rc-edit="rate:/);
 assert.match(content, /data-rc-edit="travel:/);
 assert.match(content, /rcMediaPlacement=['"]hero['"]/);
