@@ -55,7 +55,7 @@ A language is not automatically an SEO asset simply because a URL exists.
 
 Each language has a `searchStatus`, plus independent `includeInSitemap` and `includeInHreflang` switches. This lets future clients publish a language only after the copy is genuinely reviewed for that market rather than indexing low-quality machine translations.
 
-For Rebecca, English is approved. Existing Chinese, Hindi, French and Spanish routes remain available in the codebase but are marked `review-required` in the new SEO config until language quality is reviewed.
+For Rebecca, English is SEO-approved. Simplified Chinese is the priority next locale, while Hindi, French and Spanish remain available for visitor convenience but are not search-published until page-level quality review is complete.
 
 ## Domain migration
 
@@ -97,7 +97,7 @@ SEO metadata/canonical/hreflang render
 runtime hydration from Rebecca Control / public-content API
 ```
 
-Only languages marked `searchStatus: approved` are prerendered/indexed as search assets. Existing review-required languages remain available to the application but are kept out of the serious search surface until content quality is approved.
+Only page/language combinations with `seo-approved` status are prerendered/indexed as search assets. Other translations may remain available to visitors without being emitted into sitemap/hreflang search surfaces.
 
 Commands:
 
@@ -173,3 +173,42 @@ Quality rules:
 5. New destinations such as Dubai should not be generated until client-specific evidence justifies them.
 
 The build order now generates persistent travel pages and Singapore geo pages before SEARCH-01 prerendering and SEARCH-00 metadata/sitemap rendering.
+
+## SEARCH-04 — multilingual search quality
+
+SEARCH-04 separates visitor translation from search publication.
+
+The reusable workflow is:
+
+```text
+draft
+  ↓
+machine-assisted
+  ↓
+editorial-reviewed
+  ↓
+native-reviewed
+  ↓
+seo-approved
+```
+
+Only `seo-approved` page/language combinations can enter sitemap, hreflang and indexing output.
+
+Shared components:
+
+- `lib/multilingual-quality-engine.mjs` — page-level status, visible-text, script-ratio and source-similarity helpers.
+- `scripts/validate-multilingual-quality.mjs` — content, hreflang and sitemap quality gate.
+- `seo/multilingual-quality.config.example.mjs` — reusable workflow for future clients/languages.
+- `seo/multilingual-quality.config.mjs` — Rebecca-specific rollout state.
+
+The engine supports locale metadata such as `htmlLang`, `ogLocale` and text direction, so the same architecture works for LTR and RTL markets.
+
+For Rebecca:
+
+- English is SEO-approved.
+- Simplified Chinese is priority 1 but is not indexed yet because the current raw pages still contain substantial English/source-language body content.
+- Hindi, French and Spanish remain available as runtime/user-experience translations but are deliberately excluded from serious search publication.
+
+The validator prevents an unfinished translation from entering search simply because a route exists. An SEO-approved localized page must have translated metadata, sufficiently localized visible content, correct language metadata, reciprocal hreflang, sitemap membership and native-review evidence when required.
+
+This follows the principle that translated UX and indexable localized SEO are separate release decisions.
