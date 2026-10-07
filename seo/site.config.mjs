@@ -107,6 +107,11 @@ export default {
       includeInHreflang: true
     }
   ],
+  entityAuthority: {
+    enabled: true,
+    module: 'seo/entity-authority.config.mjs',
+    generatedAtBuild: true
+  },
   travelAuthority: {
     enabled: true,
     module: 'seo/travel-authority.config.mjs',
@@ -124,10 +129,10 @@ export default {
     approvedLanguagesOnly: true,
     requiredBindingsByPage: {
       'index.html': ['data-profile-hero-meta', 'data-profile-home-facts', 'data-home-trust'],
-      'about.html': ['data-profile-about-facts', 'data-profile-philosophy', 'data-profile-interview', 'data-profile-faq'],
+      'about.html': ['data-profile-about-facts', 'data-profile-philosophy', 'data-profile-interview', 'data-profile-faq', 'data-entity-identities'],
       'rates.html': ['data-singapore-rates', 'data-singapore-terms'],
       'travel.html': ['data-travel-calendar', 'data-fmty-grid', 'data-touring-rates', 'data-travel-practicalities'],
-      'reviews.html': ['data-reputation-proof', 'data-reputation-reviews'],
+      'reviews.html': ['data-reputation-proof', 'data-reputation-method', 'data-reputation-reviews'],
       'journal.html': ['data-journal-entries'],
       'press.html': ['data-press-appearances'],
       'etiquette.html': ['data-screening-policy', 'data-deposit-grid', 'data-cancellation-policy', 'data-boundaries-policy'],
