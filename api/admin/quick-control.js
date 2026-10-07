@@ -4,6 +4,7 @@ import {
   readQuickControlState,
   writeQuickControlState
 } from '../../lib/admin-store.js';
+import { evaluateQuickControlSchedules } from '../../lib/schedule-engine.js';
 
 function noCache(res) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -26,10 +27,13 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     const current = await readQuickControlState();
+    const evaluated = evaluateQuickControlSchedules(current.state);
     return res.status(200).json({
       ok: true,
       configured: adminStoreConfigured(),
-      ...current
+      ...current,
+      effectiveState: evaluated.state,
+      schedule: evaluated.schedule
     });
   }
 
@@ -37,7 +41,13 @@ export default async function handler(req, res) {
     const body = readBody(req);
     try {
       const saved = await writeQuickControlState(body.state, 'Rebecca');
-      return res.status(200).json({ ok: true, ...saved });
+      const evaluated = evaluateQuickControlSchedules(saved.state);
+      return res.status(200).json({
+        ok: true,
+        ...saved,
+        effectiveState: evaluated.state,
+        schedule: evaluated.schedule
+      });
     } catch (error) {
       if (error?.code === 'STORE_NOT_CONFIGURED' || error?.code === 'STORE_UNAVAILABLE') {
         return res.status(503).json({
@@ -49,7 +59,7 @@ export default async function handler(req, res) {
           error: 'This content changed in another session. Reload Rebecca Control before saving again.'
         });
       }
-      console.error('RC-02 save failed:', error);
+      console.error('RC-04 save failed:', error);
       return res.status(500).json({ error: 'Could not save this change safely.' });
     }
   }
