@@ -11,6 +11,7 @@ import {
   getPublishedConciergeControl,
   normalizeConciergeControl
 } from '../lib/concierge-control-store.js';
+import { recordNeedsRebeccaQuestion } from '../lib/needs-rebecca-store.js';
 
 const SYSTEM=`You are the assistant at Rebecca’s Desk: elegant, concise, warm, discreet and useful.
 
@@ -309,12 +310,13 @@ export async function generateConciergeAnswer({
     const answer=data?.choices?.[0]?.message?.content?.trim();
     if(!answer) throw new Error('Empty Groq response');
 
+    const uncertain=/not publicly listed|not publicly available|not published|isn[’']?t published|is not published|do not have.{0,40}public|don't have.{0,40}public|can(?:not|’t|'t) confirm|ask rebecca directly/i.test(answer);
     return {
       answer,
       mode:'rag-groq',
       suggestion:suggestionFor(message),
       actions:[],
-      needsRebecca:false
+      needsRebecca:uncertain
     };
   }catch{
     return {
@@ -363,5 +365,18 @@ export default async function handler(req,res){
     control
   });
 
-  return res.status(200).json(result);
+  if(result.needsRebecca){
+    try{
+      await recordNeedsRebeccaQuestion({
+        message,
+        page,
+        sourceMode:result.mode
+      });
+    }catch(error){
+      console.error('Needs Rebecca capture skipped:',error?.message||error);
+    }
+  }
+
+  const {needsRebecca,...publicResult}=result;
+  return res.status(200).json(publicResult);
 }
