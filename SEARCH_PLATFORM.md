@@ -273,3 +273,85 @@ For a new client, keep the graph engine shared and configure:
 7. page roles
 
 Candidate identities can be tracked separately but do not become `sameAs` until verified.
+
+## SEARCH-06 — image and multimodal discovery
+
+SEARCH-06 makes visual content a first-class search asset instead of treating photography as decoration.
+
+Shared components:
+
+- `lib/image-discovery-engine.mjs` — preferred-image metadata, ImageObject/primaryImageOfPage graph, archive alt improvements and image sitemap generation.
+- `scripts/render-image-discovery.mjs` — deterministic build-time image metadata and image-sitemap rendering.
+- `scripts/validate-image-discovery.mjs` — structured-data, Open Graph, alt-text, sitemap and robots validation.
+- `seo/image-discovery.config.example.mjs` — reusable client template.
+
+Rebecca-specific image discovery configuration lives in `seo/image-discovery.config.mjs`.
+
+### Search surfaces
+
+The system now prepares images for:
+
+- normal Google/Bing web-result thumbnails
+- Google Images
+- Google Discover preferred-image selection
+- Lens / Circle to Search / image-upload multimodal discovery
+- Bing image/search surfaces that consume Open Graph and structured data
+
+### Preferred image hierarchy
+
+Each important page can define one representative high-quality image. The build emits:
+
+```text
+og:image
+og:image:alt
+twitter:image
+twitter:image:alt
+ImageObject
+WebPage.primaryImageOfPage
+```
+
+This prevents every page from reusing one generic site-wide image.
+
+### Image sitemap
+
+`/image-sitemap.xml` is generated from the canonical image library and linked from `robots.txt`.
+
+For Rebecca this includes the major editorial sets plus the complete professional and candid archive landing pages. The sitemap uses only current `image:loc` fields; deprecated image sitemap caption/title/license tags are intentionally not generated.
+
+### Archive semantics
+
+Professional and candid archive images keep real HTML `<img>` elements and responsive `srcset`. SEARCH-06 replaces weak numbered alt text with contextual, truthful archive descriptions without pretending to know visual details that have not been reviewed.
+
+Do not keyword-stuff alt text and do not use metadata to manipulate or bypass SafeSearch/classification systems.
+
+### Rights and credits
+
+Rights metadata is evidence-gated:
+
+- copyright notice may be configured when verified
+- creator/credit is omitted until known
+- license/acquireLicensePage is omitted until a real licensing policy exists
+
+Do not invent a photographer, creator or license for search markup.
+
+### Image hosting
+
+Google supports CDN URLs in image sitemaps, but recommends verifying the CDN hostname in Search Console.
+
+Rebecca's current canonical archive is still served from `images.squarespace-cdn.com`. SEARCH-06 supports that now, while keeping a production migration flag for moving important imagery to an owned/custom image hostname later.
+
+For future clients, prefer an image hostname controlled by the client/platform whenever practical.
+
+### Measurement
+
+Google Search Console introduced web multimodal search reporting in September 2026, covering traffic from Lens, Circle to Search, image uploads and Chrome's image-search flow.
+
+Once the final production domain is live and Search Console is connected, SEARCH measurement should track:
+
+1. multimodal impressions
+2. multimodal clicks
+3. image-result traffic by landing page
+4. which preferred images surface
+5. image/page combinations that generate discovery but weak conversion
+
+This measurement belongs in the later Search Intelligence/dashboard phase rather than being hardcoded into this rendering engine.
