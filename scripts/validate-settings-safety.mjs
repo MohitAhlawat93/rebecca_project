@@ -46,4 +46,4 @@ assert.match(system,/automaticRecoveryEnabled\s*===\s*false/);
 assert.match(schema,/settings jsonb/);
 assert.match(schema,/security_invoker = true/);
 
-console.log('RC-11 Settings & Safety validation passed.');
+console.log('RC-11 Settings & Safety Controls validation passed.');
