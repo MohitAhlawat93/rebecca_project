@@ -132,7 +132,7 @@ function directAnswerFor(message='',data){
   }
   if(/\bfmty\b|fly me to you|travel to me|come to my city|invite .*?(city|country)/.test(q)) return `General fly-me-to-you minimums: ${formatFmtySummary(data)}`;
 
-  if(/about|who is rebecca|tell me about rebecca|profile/.test(q)){
+  if(/\b(?:who is rebecca|tell me about rebecca|about rebecca|rebecca'?s profile|rebecca profile)\b/.test(q)){
     return `Rebecca is based in ${profile.base} and has been established since ${profile.establishedSince}. She is ${profile.age.toLowerCase()}, ${profile.height.metric} / ${profile.height.imperial}, speaks ${profile.languages.join(' and ')}, has visited ${profile.countriesVisited} countries, and is especially interested in ${profile.interests.join(', ')}.`;
   }
   return null;
