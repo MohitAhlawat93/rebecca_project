@@ -34,7 +34,7 @@ export default async function handler(req, res) {
       provider,
       authorizationUrl: buildSearchAuthorizationUrl(provider, {
         clientId: SEARCH_MEASUREMENT.clientId,
-        returnPath: '/admin.html'
+        returnPath: '/admin.html?tab=search'
       })
     });
   } catch (error) {
