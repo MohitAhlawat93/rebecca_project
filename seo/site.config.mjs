@@ -107,6 +107,11 @@ export default {
       includeInHreflang: true
     }
   ],
+  imageDiscovery: {
+    enabled: true,
+    module: 'seo/image-discovery.config.mjs',
+    generatedAtBuild: true
+  },
   entityAuthority: {
     enabled: true,
     module: 'seo/entity-authority.config.mjs',
