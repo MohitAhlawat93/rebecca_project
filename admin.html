@@ -39,7 +39,7 @@
     <section class="rc-app" data-app-view hidden>
       <header class="rc-topbar">
         <div>
-          <p class="rc-eyebrow">Rebecca Control · RC-04</p>
+          <p class="rc-eyebrow">Rebecca Control · RC-04B</p>
           <h1>Good to see you, Rebecca.</h1>
         </div>
         <div class="rc-top-actions">
@@ -264,6 +264,38 @@
             </div>
           </div>
 
+          <section class="rc-publish-schedule" data-media-schedule-card>
+            <div class="rc-publish-schedule-head">
+              <div>
+                <span class="rc-card-kicker">Scheduled publishing</span>
+                <strong>Make a saved Draft go live later.</strong>
+                <p>The scheduled version is locked when you create the schedule. Later Draft edits will not silently change it.</p>
+              </div>
+              <span class="rc-lifecycle-pill is-manual" data-media-schedule-phase>Not scheduled</span>
+            </div>
+
+            <div class="rc-form-grid">
+              <label class="rc-field">
+                <span>Publish in Singapore</span>
+                <input type="datetime-local" data-media-schedule-publish step="60">
+              </label>
+              <label class="rc-field">
+                <span>Expire / revert <small>optional</small></span>
+                <input type="datetime-local" data-media-schedule-expire step="60">
+              </label>
+            </div>
+
+            <div class="rc-publish-schedule-summary" data-media-schedule-summary>
+              Save a Draft first, then choose when it should go live.
+            </div>
+
+            <div class="rc-publish-schedule-actions">
+              <button type="button" class="rc-secondary" data-media-preview-scheduled hidden>Preview scheduled ↗</button>
+              <button type="button" class="rc-secondary" data-media-cancel-schedule hidden>Cancel schedule</button>
+              <button type="button" class="rc-primary" data-media-schedule disabled>Schedule saved draft</button>
+            </div>
+          </section>
+
           <section class="rc-media-selected-section">
             <div class="rc-media-section-title">
               <div>
@@ -303,7 +335,7 @@
       </div>
 
       <footer class="rc-footer">
-        <span>Rebecca Control · RC-04</span>
+        <span>Rebecca Control · RC-04B</span>
         <span>Owner access only</span>
       </footer>
     </section>
