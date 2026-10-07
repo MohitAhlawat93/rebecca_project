@@ -1,3 +1,4 @@
+import { TRAVEL_PAGES } from './travel-authority.config.mjs';
 import { GEO_PAGES } from './geo-hubs.config.mjs';
 
 const normalizeOrigin = (value) => String(value || '').trim().replace(/\/+$/, '');
@@ -89,6 +90,11 @@ export default {
       includeInHreflang: false
     }
   ],
+  travelAuthority: {
+    enabled: true,
+    module: 'seo/travel-authority.config.mjs',
+    generatedAtBuild: true
+  },
   geoAuthority: {
     enabled: true,
     module: 'seo/geo-hubs.config.mjs',
@@ -134,6 +140,7 @@ export default {
       localized: false,
       priority: 0.7
     },
-    ...GEO_PAGES
+    ...GEO_PAGES,
+    ...TRAVEL_PAGES
   ]
 };
