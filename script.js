@@ -261,7 +261,13 @@
   document.body.insertAdjacentHTML('beforeend',`
     <button class="concierge-launcher" type="button" data-open-concierge aria-label="Open ${escapeHtml(conciergePublic.displayName)}" aria-expanded="false" aria-controls="rebecca-concierge"><span class="spark" aria-hidden="true">✦</span><span>${escapeHtml(conciergePublic.displayName)}</span></button>
     <aside class="concierge-panel" id="rebecca-concierge" data-concierge-panel hidden role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="rebecca-concierge-title">
-      <div class="concierge-panel-head"><div><strong id="rebecca-concierge-title">${escapeHtml(conciergePublic.displayName)}</strong><small>${escapeHtml(conciergePublic.subtitle)}</small></div><button class="concierge-close" type="button" data-close-concierge aria-label="Close concierge">×</button></div>
+      <div class="concierge-panel-head"><div><strong id="rebecca-concierge-title">${escapeHtml(conciergePublic.displayName)}</strong><small>${escapeHtml(conciergePublic.subtitle)}</small></div><div class="concierge-head-actions"><button class="concierge-size-toggle" type="button" data-chat-size-toggle aria-expanded="false" aria-controls="rebecca-chat-size" aria-label="Resize Rebecca’s Desk">Size</button><button class="concierge-close" type="button" data-close-concierge aria-label="Close concierge">×</button></div></div>
+      <div class="concierge-size-popover" id="rebecca-chat-size" data-chat-size-popover hidden>
+        <div class="concierge-size-row"><span>Width</span><button type="button" data-chat-width="-1" aria-label="Make chat narrower">−</button><button type="button" data-chat-width="1" aria-label="Make chat wider">+</button></div>
+        <div class="concierge-size-row"><span>Height</span><button type="button" data-chat-height="-1" aria-label="Make chat shorter">−</button><button type="button" data-chat-height="1" aria-label="Make chat taller">+</button></div>
+        <button type="button" class="concierge-size-reset" data-chat-size-reset>Reset size</button>
+      </div>
+      <button class="concierge-resize-grip" type="button" data-chat-resize-grip aria-label="Drag to resize chat" title="Drag to resize"></button>
       <div class="concierge-thread" data-concierge-thread aria-live="polite"><div class="chat-message assistant"><p>${escapeHtml(conciergePublic.welcome)}</p><p>${escapeHtml(conciergeIntro)}</p></div></div>
       <div class="concierge-chips" data-concierge-chips${conciergeEnabled?'':' hidden'}></div>
       <form class="concierge-form" data-concierge-form${conciergeEnabled?'':' hidden'}><input type="text" maxlength="600" autocomplete="off" placeholder="Ask something discreetly…" aria-label="Message concierge" required><button class="concierge-send" type="submit" aria-label="Send">↗</button></form>
@@ -274,6 +280,85 @@
   document.querySelectorAll('[data-open-concierge]').forEach(b=>b.addEventListener('click',()=>setConcierge(true)));
   document.querySelector('[data-close-concierge]')?.addEventListener('click',()=>setConcierge(false));
   panel?.addEventListener('keydown',(event)=>{if(event.key!=='Tab')return;const focusable=[...panel.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')];if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}});
+
+  const CHAT_SIZE_KEY='rr-concierge-size-v2';
+  const sizeToggle=document.querySelector('[data-chat-size-toggle]');
+  const sizePopover=document.querySelector('[data-chat-size-popover]');
+  const resizeGrip=document.querySelector('[data-chat-resize-grip]');
+  const desktopChat=()=>window.matchMedia('(min-width: 641px)').matches;
+  const chatBounds=()=>({minW:340,maxW:Math.max(340,Math.min(760,window.innerWidth-40)),minH:360,maxH:Math.max(360,window.innerHeight-40)});
+  const applyChatSize=(width,height,{persist=true}={})=>{
+    if(!panel||!desktopChat())return;
+    const bounds=chatBounds();
+    const w=Math.max(bounds.minW,Math.min(bounds.maxW,Number(width)||panel.getBoundingClientRect().width));
+    const h=Math.max(bounds.minH,Math.min(bounds.maxH,Number(height)||panel.getBoundingClientRect().height));
+    panel.style.width=Math.round(w)+'px';
+    panel.style.height=Math.round(h)+'px';
+    if(persist){try{localStorage.setItem(CHAT_SIZE_KEY,JSON.stringify({width:Math.round(w),height:Math.round(h)}))}catch{}}
+  };
+  const restoreChatSize=()=>{
+    if(!panel)return;
+    if(!desktopChat()){
+      panel.style.removeProperty('width');
+      panel.style.removeProperty('height');
+      sizePopover?.setAttribute('hidden','');
+      sizeToggle?.setAttribute('aria-expanded','false');
+      return;
+    }
+    try{
+      const saved=JSON.parse(localStorage.getItem(CHAT_SIZE_KEY)||'null');
+      if(saved?.width&&saved?.height)applyChatSize(saved.width,saved.height,{persist:false});
+    }catch{}
+  };
+  restoreChatSize();
+  sizeToggle?.addEventListener('click',(event)=>{
+    event.stopPropagation();
+    if(!desktopChat())return;
+    const open=sizePopover?.hasAttribute('hidden');
+    sizePopover?.toggleAttribute('hidden',!open);
+    sizeToggle.setAttribute('aria-expanded',String(Boolean(open)));
+  });
+  sizePopover?.addEventListener('click',(event)=>event.stopPropagation());
+  document.addEventListener('click',()=>{
+    sizePopover?.setAttribute('hidden','');
+    sizeToggle?.setAttribute('aria-expanded','false');
+  });
+  document.querySelectorAll('[data-chat-width]').forEach((button)=>button.addEventListener('click',()=>{
+    const rect=panel?.getBoundingClientRect();if(rect)applyChatSize(rect.width+Number(button.dataset.chatWidth||0)*80,rect.height);
+  }));
+  document.querySelectorAll('[data-chat-height]').forEach((button)=>button.addEventListener('click',()=>{
+    const rect=panel?.getBoundingClientRect();if(rect)applyChatSize(rect.width,rect.height+Number(button.dataset.chatHeight||0)*80);
+  }));
+  document.querySelector('[data-chat-size-reset]')?.addEventListener('click',()=>{
+    try{localStorage.removeItem(CHAT_SIZE_KEY)}catch{}
+    panel?.style.removeProperty('width');
+    panel?.style.removeProperty('height');
+  });
+  resizeGrip?.addEventListener('pointerdown',(event)=>{
+    if(!panel||!desktopChat()||event.button>0)return;
+    event.preventDefault();
+    const start=panel.getBoundingClientRect(),startX=event.clientX,startY=event.clientY;
+    resizeGrip.setPointerCapture?.(event.pointerId);
+    document.body.classList.add('concierge-resizing');
+    const move=(moveEvent)=>applyChatSize(start.width+(startX-moveEvent.clientX),start.height+(startY-moveEvent.clientY),{persist:false});
+    const end=()=>{
+      document.removeEventListener('pointermove',move);
+      document.removeEventListener('pointerup',end);
+      document.removeEventListener('pointercancel',end);
+      document.body.classList.remove('concierge-resizing');
+      const rect=panel.getBoundingClientRect();
+      applyChatSize(rect.width,rect.height);
+    };
+    document.addEventListener('pointermove',move);
+    document.addEventListener('pointerup',end,{once:true});
+    document.addEventListener('pointercancel',end,{once:true});
+  });
+  window.addEventListener('resize',()=>{
+    if(!panel)return;
+    if(!desktopChat()){restoreChatSize();return}
+    const rect=panel.getBoundingClientRect();
+    applyChatSize(rect.width,rect.height,{persist:false});
+  });
 
 
   // First-visit discovery: auto-open Rebecca's Desk once per session and keep Afterhours discoverable.
