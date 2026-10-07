@@ -28,6 +28,16 @@ export default {
     excludedPrefixes: ['/api/', '/admin'],
     legacyCanonicalOrigins: ['https://example.vercel.app']
   },
+  travelAuthority: {
+    enabled: false,
+    module: 'seo/travel-authority.config.example.mjs',
+    generatedAtBuild: true
+  },
+  geoAuthority: {
+    enabled: false,
+    module: 'seo/geo-hubs.config.example.mjs',
+    generatedAtBuild: true
+  },
   languages: [
     {
       id: 'en',
