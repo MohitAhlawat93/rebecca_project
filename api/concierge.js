@@ -83,7 +83,7 @@ function policyAnswerFor(message=''){
   if(/private date|locked date|little black book|private restaurant|private venue|secret restaurant|frequented date spot/.test(q)){
     return 'Rebecca’s curated Date Ideas list is intentionally private. Confirmed guests can ask her directly; I won’t reveal, guess or reconstruct it here.';
   }
-  if(/home address|exact address|where .* (staying|sleeping|living|right now)|current location|hotel .* (staying|tonight)|private (photo|selfie|number|location)|uncensored (photo|image)|real name/.test(q)){
+  if(/home address|exact(?:\s+\w+){0,3}\s+address|hotel\s+address|address\s+of\s+(?:her|rebecca|the\s+hotel)|where\s+(?:is|does)\s+rebecca.*(?:stay|live|sleep)|where .* (staying|sleeping|living|right now)|current .*?(?:location|hotel|address)|hotel .* (staying|tonight|address)|private (photo|selfie|number|location|address)|uncensored (photo|image)|real name/.test(q)){
     return 'That information is private or not published, so I can’t provide or guess it.';
   }
   return null;
