@@ -39,6 +39,7 @@ const systemImportFile = document.querySelector('[data-system-import-file]');
 const systemImportButton = document.querySelector('[data-system-import]');
 const systemStatus = document.querySelector('[data-system-status]');
 const insightsActions = document.querySelector('[data-insights-actions]');
+const settingsSaveButton = document.querySelector('[data-settings-save]');
 
 const startupParams = new URLSearchParams(window.location.search);
 const requestedTab = startupParams.get('tab');
@@ -85,6 +86,13 @@ let systemPersistent = false;
 let systemImportBundle = null;
 let insightsState = null;
 let insightsLoaded = false;
+let settingsState = {
+  dashboardStartTab:'insights',
+  aiAssistantEnabled:true,
+  needsRebeccaCaptureEnabled:true,
+  automaticRecoveryEnabled:true
+};
+let settingsDirty = false;
 
 const STATUS_LABELS = {
   accepting: 'Accepting enquiries',
@@ -216,11 +224,11 @@ function activateTab(name) {
     panel.hidden = !selected;
     panel.classList.toggle('is-active', selected);
   });
-  if (quickSavebar) quickSavebar.hidden = ['insights','assistant','media','concierge','concierge-test','needs-rebecca','history','export'].includes(name);
+  if (quickSavebar) quickSavebar.hidden = ['insights','assistant','media','concierge','concierge-test','needs-rebecca','history','export','settings'].includes(name);
   if (name === 'media' && !mediaLoaded) loadMedia();
   if ((name === 'concierge' || name === 'concierge-test') && !conciergeLoaded) loadConcierge();
   if (name === 'needs-rebecca' && !needsLoaded) loadNeedsRebecca();
-  if ((name === 'history' || name === 'export') && !systemLoaded) loadSystem();
+  if ((name === 'history' || name === 'export' || name === 'settings') && !systemLoaded) loadSystem();
   if (name === 'insights' && !insightsLoaded) loadInsights();
 }
 
@@ -1798,6 +1806,51 @@ async function loadInsights() {
   }
 }
 
+function renderSettings() {
+  const select = document.querySelector('[data-setting="dashboardStartTab"]');
+  if (select) select.value = settingsState.dashboardStartTab || 'insights';
+  document.querySelectorAll('[data-setting-toggle]').forEach((input) => {
+    input.checked = settingsState[input.dataset.settingToggle] !== false;
+  });
+  if (settingsSaveButton) settingsSaveButton.disabled = !settingsDirty;
+  setText('[data-settings-status]', settingsDirty ? 'Unsaved changes' : 'Settings saved');
+}
+
+function collectSettings() {
+  const next = {...settingsState};
+  const select = document.querySelector('[data-setting="dashboardStartTab"]');
+  if (select) next.dashboardStartTab = select.value;
+  document.querySelectorAll('[data-setting-toggle]').forEach((input) => {
+    next[input.dataset.settingToggle] = Boolean(input.checked);
+  });
+  return next;
+}
+
+async function saveSettings() {
+  if (!settingsDirty) return;
+  if (settingsSaveButton) {
+    settingsSaveButton.disabled = true;
+    settingsSaveButton.textContent = 'Saving…';
+  }
+  try {
+    const data = await systemPost({action:'saveSettings', settings:collectSettings()});
+    settingsState = data.settings || settingsState;
+    systemEvents = data.events || systemEvents;
+    settingsDirty = false;
+    renderSettings();
+    renderSystem();
+    setText('[data-settings-status]', 'Settings saved');
+  } catch (error) {
+    setText('[data-settings-status]', error?.message || 'Settings were not saved.');
+    settingsDirty = true;
+  } finally {
+    if (settingsSaveButton) {
+      settingsSaveButton.textContent = 'Save settings';
+      settingsSaveButton.disabled = !settingsDirty;
+    }
+  }
+}
+
 function renderSystem() {
   setText('[data-system-event-count]', String(systemEvents.length));
   setText('[data-system-snapshot-count]', String(systemSnapshots.length));
@@ -1855,9 +1908,11 @@ async function loadSystem() {
     if (!response.ok) throw new Error(data.error || 'Could not load History & Recovery.');
     systemEvents = data.events || [];
     systemSnapshots = data.snapshots || [];
+    settingsState = data.settings || settingsState;
     systemPersistent = Boolean(data.persistent);
     systemLoaded = true;
     renderSystem();
+    renderSettings();
     return true;
   } catch (error) {
     systemLoaded = false;
@@ -2024,9 +2079,12 @@ async function loadSession() {
     if (response.ok && data.authenticated) {
       showApp(data);
       await loadQuickControl();
+      if (!requestedTab && data.control?.settings?.dashboardStartTab) {
+        activeTab = data.control.settings.dashboardStartTab;
+      }
       const validTab = document.querySelector('[data-tab="' + esc(activeTab) + '"]')
         ? activeTab
-        : 'availability';
+        : 'insights';
       activateTab(validTab);
       if (visualReturn) {
         const editLink = document.querySelector('[data-edit-website]');
@@ -2117,6 +2175,13 @@ logoutButton?.addEventListener('click', async () => {
     systemImportBundle = null;
     insightsState = null;
     insightsLoaded = false;
+    settingsState = {
+      dashboardStartTab:'insights',
+      aiAssistantEnabled:true,
+      needsRebeccaCaptureEnabled:true,
+      automaticRecoveryEnabled:true
+    };
+    settingsDirty = false;
     showLogin('Signed out.');
   }
 });
@@ -2329,6 +2394,15 @@ document.addEventListener('click', async (event) => {
 systemImportFile?.addEventListener('change', (event) => {
   readBackupFile(event.target.files?.[0]);
 });
+
+document.addEventListener('change', (event) => {
+  if (event.target.matches('[data-setting],[data-setting-toggle]')) {
+    settingsDirty = true;
+    renderSettings();
+  }
+});
+
+settingsSaveButton?.addEventListener('click', saveSettings);
 
 assistantProposeButton?.addEventListener('click', prepareAssistantProposal);
 assistantPrompt?.addEventListener('keydown', (event) => {
