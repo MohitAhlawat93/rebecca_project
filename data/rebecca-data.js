@@ -472,23 +472,24 @@ export const REBECCA_DATA = {
 
   press: {
     appearances: [
-      { outlet: 'Vogue Singapore', title: 'Two Singaporean sex workers on body shaming, OnlyFans and why they don’t need to be rescued', year: 2025, url: 'https://vogue.sg/two-singaporean-sex-workers-on-body-shaming-onlyfans-and-why-they-dont-need-to-be-rescued/', note: 'Interview feature on work, boundaries, independence and financial agency.' },
-      { outlet: 'VICE', title: 'What It’s Like Being an Escort in Singapore', year: 2021, url: 'https://www.vice.com/en/article/independent-escort-service-singapore-online-coronavirus-pandemic/', note: 'Interview on independent work, the pandemic, boundaries and running a solo practice.' },
-      { outlet: 'RICE Media', title: 'Risqué Rebecca: My Double Life as a Student Escort', year: 2017, url: 'https://www.ricemedia.co/risque-rebecca-my-double-life-as-a-student-escort/', note: 'Personal essay on privacy, identity and balancing two lives.' },
-      { outlet: 'RICE Media', title: 'The Economics of Social Escorts', year: 2017, url: 'https://www.ricemedia.co/the-economics-of-social-escorting/', note: 'Interview and analysis of the economics surrounding independent social escorting.' },
-      { outlet: 'RICE Media', title: '21, Sex Worker, and … a Feminist?', year: 2017, url: 'https://www.ricemedia.co/culture-people-21-sex-worker-feminist/', note: 'Profile discussing autonomy, stigma, work and personal agency.' }
+      { outlet: 'Vogue Singapore', title: 'Two Singaporean sex workers on body shaming, OnlyFans and why they don’t need to be rescued', year: 2025, datePublished: '2025-03-08', byline: 'Chandreyee Ray', relationship: 'interview', url: 'https://vogue.sg/two-singaporean-sex-workers-on-body-shaming-onlyfans-and-why-they-dont-need-to-be-rescued/', note: 'Interview feature on work, boundaries, independence and financial agency.' },
+      { outlet: 'VICE', title: 'What It’s Like Being an Escort in Singapore', year: 2021, datePublished: '2021-01-04', byline: 'AJ McDougall', relationship: 'interview', url: 'https://www.vice.com/en/article/independent-escort-service-singapore-online-coronavirus-pandemic/', note: 'Interview on independent work, the pandemic, boundaries and running a solo practice.' },
+      { outlet: 'RICE Media', title: 'Risqué Rebecca: My Double Life as a Student Escort', year: 2017, datePublished: '2017-04-08', byline: 'Risqué Rebecca', relationship: 'authored', url: 'https://www.ricemedia.co/risque-rebecca-my-double-life-as-a-student-escort/', note: 'Personal essay on privacy, identity and balancing two lives.' },
+      { outlet: 'RICE Media', title: 'The Economics of Social Escorts', year: 2017, datePublished: '2017-03-01', byline: 'Julian Wong', relationship: 'interview', url: 'https://www.ricemedia.co/the-economics-of-social-escorting/', note: 'Interview and analysis of the economics surrounding independent social escorting.' },
+      { outlet: 'RICE Media', title: '21, Sex Worker, and … a Feminist?', year: 2017, datePublished: '2017-08-02', byline: 'Grace Yeoh', relationship: 'profile', url: 'https://www.ricemedia.co/culture-people-21-sex-worker-feminist/', note: 'Profile discussing autonomy, stigma, work and personal agency.' }
     ],
     externalProfiles: [
-      { label: 'Original site', url: 'https://www.risquerebecca.com/' },
-      { label: 'Singapore duo partner', url: 'https://www.sgfemmefantasy.com/' }
+      { label: 'Original site', url: 'https://www.risquerebecca.com/', relationship: 'same-entity', verified: true },
+      { label: 'RICE author archive', url: 'https://www.ricemedia.co/author/risque-rebecca/', relationship: 'same-entity', verified: true },
+      { label: 'Singapore duo partner', url: 'https://www.sgfemmefantasy.com/', relationship: 'related', verified: true }
     ]
   },
 
   journal: {
     entries: [
-      { title: 'Does True Love Exist? A Social Escort Responds.', year: 2017, outlet: 'RICE Media', url: 'https://www.ricemedia.co/culture-life-true-love-social-escort-responds/', note: 'Rebecca writes about the difference between professional intimacy and romantic attachment.' },
-      { title: 'Tough Love: An Escort on Dating Her Clients', year: 2017, outlet: 'RICE Media', url: 'https://www.ricemedia.co/culture-people-tough-love-an-escort-on-dating-her-clients/', note: 'A personal column about privacy, trust and the complications of attraction outside work.' },
-      { title: 'Risqué Rebecca: My Double Life as a Student Escort', year: 2017, outlet: 'RICE Media', url: 'https://www.ricemedia.co/risque-rebecca-my-double-life-as-a-student-escort/', note: 'A first-person reflection on identity, secrecy and maintaining a parallel professional life.' }
+      { title: 'Does True Love Exist? A Social Escort Responds.', year: 2017, datePublished: '2017-01-04', outlet: 'RICE Media', author: 'Risqué Rebecca', url: 'https://www.ricemedia.co/culture-life-true-love-social-escort-responds/', note: 'Rebecca writes about the difference between professional intimacy and romantic attachment.' },
+      { title: 'Tough Love: An Escort on Dating Her Clients', year: 2017, datePublished: '2017-08-12', outlet: 'RICE Media', author: 'Risqué Rebecca', url: 'https://www.ricemedia.co/culture-people-tough-love-an-escort-on-dating-her-clients/', note: 'A personal column about privacy, trust and the complications of attraction outside work.' },
+      { title: 'Risqué Rebecca: My Double Life as a Student Escort', year: 2017, datePublished: '2017-04-08', outlet: 'RICE Media', author: 'Risqué Rebecca', url: 'https://www.ricemedia.co/risque-rebecca-my-double-life-as-a-student-escort/', note: 'A first-person reflection on identity, secrecy and maintaining a parallel professional life.' }
     ]
   },
 

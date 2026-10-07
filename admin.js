@@ -224,12 +224,13 @@ function activateTab(name) {
     panel.hidden = !selected;
     panel.classList.toggle('is-active', selected);
   });
-  if (quickSavebar) quickSavebar.hidden = ['insights','assistant','media','concierge','concierge-test','needs-rebecca','history','export','settings'].includes(name);
+  if (quickSavebar) quickSavebar.hidden = ['insights','search','assistant','media','concierge','concierge-test','needs-rebecca','history','export','settings'].includes(name);
   if (name === 'media' && !mediaLoaded) loadMedia();
   if ((name === 'concierge' || name === 'concierge-test') && !conciergeLoaded) loadConcierge();
   if (name === 'needs-rebecca' && !needsLoaded) loadNeedsRebecca();
   if ((name === 'history' || name === 'export' || name === 'settings') && !systemLoaded) loadSystem();
   if (name === 'insights' && !insightsLoaded) loadInsights();
+  if (name === 'search' && !searchLoaded) loadSearchIntelligence();
 }
 
 function renderAvailability() {

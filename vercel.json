@@ -1,4 +1,6 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run vercel-build",
   "cleanUrls": true,
   "trailingSlash": false,
   "functions": {
@@ -12,7 +14,10 @@
       "maxDuration": 30
     },
     "api/admin/[route].js": {
-      "maxDuration": 30
+      "maxDuration": 60
+    },
+    "api/cron/search-sync.js": {
+      "maxDuration": 60
     }
   },
   "headers": [
@@ -109,6 +114,12 @@
       "source": "/links-grouped",
       "destination": "/contact",
       "permanent": true
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/search-sync",
+      "schedule": "23 4 * * *"
     }
   ]
 }

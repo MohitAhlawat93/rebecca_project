@@ -12,6 +12,11 @@ import assistantPropose from '../../server/admin/assistant-propose.js';
 import assistantApply from '../../server/admin/assistant-apply.js';
 import system from '../../server/admin/system.js';
 import insights from '../../server/admin/insights.js';
+import searchConnect from '../../server/admin/search-connect.js';
+import searchImport from '../../server/admin/search-import.js';
+import searchIntelligence from '../../server/admin/search-intelligence.js';
+import searchOauthCallback from '../../server/admin/search-oauth-callback.js';
+import searchSync from '../../server/admin/search-sync.js';
 
 const ROUTES = {
   login,
@@ -27,7 +32,12 @@ const ROUTES = {
   'assistant-propose': assistantPropose,
   'assistant-apply': assistantApply,
   system,
-  insights
+  insights,
+  'search-connect': searchConnect,
+  'search-import': searchImport,
+  'search-intelligence': searchIntelligence,
+  'search-oauth-callback': searchOauthCallback,
+  'search-sync': searchSync
 };
 
 export default async function handler(req, res) {

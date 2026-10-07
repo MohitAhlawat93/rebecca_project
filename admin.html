@@ -8,8 +8,10 @@
   <title>Rebecca Control — Private</title>
   <link rel="icon" href="/favicon.svg">
   <link rel="stylesheet" href="/admin.css">
+  <link rel="stylesheet" href="/admin-search.css">
   <script src="/admin.js" defer></script>
   <script type="module" src="/admin-media-upload.js"></script>
+  <script type="module" src="/admin-search.js"></script>
 </head>
 <body class="rc-body">
   <main class="rc-shell">
@@ -81,6 +83,7 @@
 
         <nav class="rc-tabs" aria-label="Rebecca Control sections">
           <button type="button" data-tab="insights">Insights</button>
+          <button type="button" data-tab="search">Search Intelligence</button>
           <button type="button" data-tab="assistant">AI Assistant</button>
           <button type="button" class="is-active" data-tab="availability">Availability</button>
           <button type="button" data-tab="travel">Travel</button>
@@ -103,7 +106,7 @@
             <div>
               <p class="rc-eyebrow">RC-10 · Owner Insights</p>
               <h3>What deserves your attention right now?</h3>
-              <p>Operational intelligence from Rebecca Control only. Search Console, analytics and ranking data belong to the separate Growth system.</p>
+              <p>Operational intelligence from Rebecca Control. Search performance, Google/Bing visibility and AI-search signals now live in Search Intelligence.</p>
             </div>
             <button type="button" class="rc-secondary" data-insights-refresh>Refresh</button>
           </div>
@@ -148,6 +151,138 @@
             </div>
             <div class="rc-insights-list" data-insights-activity></div>
           </section>
+        </section>
+
+        <section class="rc-panel rc-search-panel" data-panel="search" hidden>
+          <div class="rc-panel-intro rc-panel-intro-row">
+            <div>
+              <p class="rc-eyebrow">SEARCH-09 · Search Intelligence</p>
+              <h3>See how people are discovering the website.</h3>
+              <p>Google, Bing, image and AI-search signals are translated into simple evidence and recommended next actions.</p>
+            </div>
+            <div class="rc-search-head-actions">
+              <button type="button" class="rc-secondary" data-search-sync>Sync now</button>
+              <button type="button" class="rc-secondary" data-search-refresh>Refresh</button>
+            </div>
+          </div>
+
+          <div class="rc-search-privacy">
+            Search performance only. No visitor identity, IP address, private enquiry, screening document or raw concierge conversation is used here.
+          </div>
+
+          <section class="rc-search-connections" aria-label="Search connections">
+            <article class="rc-search-provider" data-search-provider="google">
+              <div>
+                <span class="rc-card-kicker">Google</span>
+                <strong>Search Console</strong>
+                <small data-search-google-detail>Checking connection…</small>
+              </div>
+              <div class="rc-search-provider-actions">
+                <span class="rc-search-status is-neutral" data-search-google-status>Checking</span>
+                <button type="button" class="rc-secondary" data-search-connect="google">Connect Google</button>
+              </div>
+            </article>
+            <article class="rc-search-provider" data-search-provider="bing">
+              <div>
+                <span class="rc-card-kicker">Bing</span>
+                <strong>Webmaster & AI search</strong>
+                <small data-search-bing-detail>Checking connection…</small>
+              </div>
+              <div class="rc-search-provider-actions">
+                <span class="rc-search-status is-neutral" data-search-bing-status>Checking</span>
+                <button type="button" class="rc-secondary" data-search-connect="bing">Connect Bing</button>
+              </div>
+            </article>
+          </section>
+
+          <div class="rc-search-message" data-search-message hidden></div>
+
+          <div class="rc-search-score-grid">
+            <div>
+              <span>Clicks</span>
+              <strong data-search-clicks>—</strong>
+              <small data-search-clicks-delta>Waiting for measured data</small>
+            </div>
+            <div>
+              <span>Impressions</span>
+              <strong data-search-impressions>—</strong>
+              <small data-search-impressions-delta>Waiting for measured data</small>
+            </div>
+            <div>
+              <span>CTR</span>
+              <strong data-search-ctr>—</strong>
+              <small data-search-ctr-delta>Click-through rate</small>
+            </div>
+            <div>
+              <span>AI citations</span>
+              <strong data-search-citations>—</strong>
+              <small data-search-citations-delta>Bing/AI export signals</small>
+            </div>
+          </div>
+
+          <section class="rc-search-block">
+            <div class="rc-media-section-title">
+              <div>
+                <span class="rc-card-kicker">Attention</span>
+                <strong>What should I look at?</strong>
+              </div>
+              <small>Recommendations are evidence-based and never publish automatically.</small>
+            </div>
+            <div class="rc-search-opportunities" data-search-opportunities>
+              <div class="rc-empty">Search intelligence will appear after data is connected and synced.</div>
+            </div>
+          </section>
+
+          <section class="rc-search-grid">
+            <div class="rc-search-block">
+              <div class="rc-media-section-title">
+                <div><span class="rc-card-kicker">Pages</span><strong>Top pages</strong></div>
+                <small>Pages earning search attention.</small>
+              </div>
+              <div class="rc-search-list" data-search-pages></div>
+            </div>
+
+            <div class="rc-search-block">
+              <div class="rc-media-section-title">
+                <div><span class="rc-card-kicker">Queries</span><strong>What people search</strong></div>
+                <small>Search demand already associated with the site.</small>
+              </div>
+              <div class="rc-search-list" data-search-queries></div>
+            </div>
+          </section>
+
+          <section class="rc-search-block">
+            <div class="rc-media-section-title">
+              <div><span class="rc-card-kicker">Discovery surfaces</span><strong>Where visibility is coming from</strong></div>
+              <small>Web, images, multimodal and supported AI-search signals.</small>
+            </div>
+            <div class="rc-search-surfaces" data-search-surfaces></div>
+          </section>
+
+          <details class="rc-search-setup">
+            <summary>Search connections & AI report imports</summary>
+            <div class="rc-search-setup-body">
+              <p>Google/Bing standard data can sync automatically after one-time connection. Generative-AI, multimodal and Bing AI Performance reports stay clearly marked as export-based until public APIs support them.</p>
+              <div class="rc-search-import-grid">
+                <label class="rc-field">
+                  <span>Report type</span>
+                  <select data-search-import-kind>
+                    <option value="google-generative-ai">Google Generative AI</option>
+                    <option value="google-multimodal">Google multimodal / Lens</option>
+                    <option value="bing-ai-performance">Bing AI Performance</option>
+                  </select>
+                </label>
+                <label class="rc-field">
+                  <span>Export file <small>CSV or JSON</small></span>
+                  <input type="file" accept=".csv,.json,text/csv,application/json" data-search-import-file>
+                </label>
+              </div>
+              <div class="rc-search-import-actions">
+                <span data-search-import-status>No report selected.</span>
+                <button type="button" class="rc-secondary" data-search-import disabled>Import report</button>
+              </div>
+            </div>
+          </details>
         </section>
 
         <section class="rc-panel rc-assistant-panel" data-panel="assistant" hidden>
@@ -603,6 +738,7 @@
               <span><strong>Open Rebecca Control on</strong><small>Choose the first section shown after sign-in.</small></span>
               <select data-setting="dashboardStartTab">
                 <option value="insights">Insights</option>
+                <option value="search">Search Intelligence</option>
                 <option value="availability">Availability</option>
                 <option value="assistant">AI Assistant</option>
                 <option value="needs-rebecca">Needs Rebecca</option>

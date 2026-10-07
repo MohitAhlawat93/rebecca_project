@@ -400,12 +400,21 @@ function renderReputation(){
     const years=[...new Set(reputation.reviews.map((review)=>review.year))].sort((a,b)=>b-a);
     el.innerHTML=years.map((year)=>{
       const items=reputation.reviews.filter((review)=>review.year===year).map((review)=>`
-        <article class="review-item">
+        <article class="review-item" data-evidence-kind="source-named-review">
           <p class="review-copy${review.type==='excerpt'?' quoted':''}">${esc(review.excerpt)}</p>
           <footer>${esc(review.source)} · ${esc(review.date)}</footer>
         </article>`).join('');
       return `<section class="review-year"><div class="review-year-label">${year}</div><div class="review-year-grid">${items}</div></section>`;
     }).join('');
+  });
+
+  document.querySelectorAll('[data-reputation-method]').forEach((el)=>{
+    el.innerHTML=[
+      ['Named sources','Each entry keeps the independent platform name and public date attached.'],
+      ['Excerpts vs summaries','Short quotations stay quotations; longer source material is summarized rather than republished.'],
+      ['No invented score','This site does not combine third-party reviews into a self-made star rating or AggregateRating.'],
+      ['Exact links only when verified','A review is not given a direct-source URL unless that exact public URL is actually stored and verified.']
+    ].map(([title,body])=>`<article class="evidence-method-card"><span>Evidence policy</span><h3>${esc(title)}</h3><p>${esc(body)}</p></article>`).join('');
   });
 
   document.querySelectorAll('[data-home-trust]').forEach((el)=>{
@@ -451,11 +460,24 @@ function renderDateIdeas(){
 }
 
 function renderAuthority(){
+  const formatDate=(value,year)=>{
+    if(!value)return String(year||'');
+    const date=new Date(value+'T00:00:00Z');
+    if(Number.isNaN(date.getTime()))return String(year||value);
+    return date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
+  };
+  const relationshipLabel={interview:'Interview',profile:'Profile',authored:'By Rebecca'};
+
   document.querySelectorAll('[data-press-appearances]').forEach((el)=>{
-    el.innerHTML=REBECCA_DATA.press.appearances.map((item)=>`<article class="authority-card"><span>${esc(item.outlet)} · ${esc(item.year)}</span><h3>${esc(item.title)}</h3><p>${esc(item.note)}</p><a class="inline-link" href="${esc(item.url)}" target="_blank" rel="noreferrer">Read source <span aria-hidden="true">↗</span></a></article>`).join('');
+    el.innerHTML=REBECCA_DATA.press.appearances.map((item)=>`<article class="authority-card" data-evidence-kind="${esc(item.relationship||'press')}"><span>${esc(item.outlet)} · ${esc(formatDate(item.datePublished,item.year))} · ${esc(relationshipLabel[item.relationship]||'Coverage')}</span><h3>${esc(item.title)}</h3><p>${esc(item.note)}</p><small class="authority-byline">${item.byline?('By '+esc(item.byline)):'Independent publisher source'}</small><a class="inline-link" href="${esc(item.url)}" target="_blank" rel="noreferrer">Read source <span aria-hidden="true">↗</span></a></article>`).join('');
   });
   document.querySelectorAll('[data-journal-entries]').forEach((el)=>{
-    el.innerHTML=REBECCA_DATA.journal.entries.map((item)=>`<article class="journal-card"><span>${esc(item.outlet)} · ${esc(item.year)}</span><h3>${esc(item.title)}</h3><p>${esc(item.note)}</p><a class="inline-link" href="${esc(item.url)}" target="_blank" rel="noreferrer">Read the original <span aria-hidden="true">↗</span></a></article>`).join('');
+    el.innerHTML=REBECCA_DATA.journal.entries.map((item)=>`<article class="journal-card" data-evidence-kind="authored-work"><span>${esc(item.outlet)} · ${esc(formatDate(item.datePublished,item.year))}</span><h3>${esc(item.title)}</h3><p>${esc(item.note)}</p><small class="authority-byline">By ${esc(item.author||REBECCA_DATA.profile.displayName)}</small><a class="inline-link" href="${esc(item.url)}" target="_blank" rel="noreferrer">Read the original <span aria-hidden="true">↗</span></a></article>`).join('');
+  });
+
+  document.querySelectorAll('[data-entity-identities]').forEach((el)=>{
+    const verified=REBECCA_DATA.press.externalProfiles.filter((item)=>item.verified&&item.relationship==='same-entity');
+    el.innerHTML=verified.map((item)=>`<a class="identity-proof-link" href="${esc(item.url)}" target="_blank" rel="noreferrer"><span>Verified entity reference</span><strong>${esc(item.label)}</strong><b aria-hidden="true">↗</b></a>`).join('');
   });
   document.querySelectorAll('[data-updates-card]').forEach((el)=>{
     const n=REBECCA_DATA.newsletter;

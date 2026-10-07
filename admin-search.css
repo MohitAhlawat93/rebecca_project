@@ -1,0 +1,129 @@
+/* SEARCH-09 — Search Intelligence inside Rebecca Control */
+
+.rc-search-head-actions{
+  display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end
+}
+.rc-search-privacy{
+  margin:0 0 18px;padding:13px 15px;border-radius:16px;background:#f2ece5;color:var(--rc-muted);
+  font-size:.75rem;line-height:1.5
+}
+.rc-search-connections{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:16px
+}
+.rc-search-provider{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;
+  padding:18px;border:1px solid var(--rc-line);border-radius:20px;background:#fff
+}
+.rc-search-provider>div:first-child{display:grid;gap:4px}
+.rc-search-provider strong{
+  font-family:Georgia,"Times New Roman",serif;font-size:1.18rem;font-weight:400
+}
+.rc-search-provider small{color:var(--rc-muted);font-size:.71rem;line-height:1.45}
+.rc-search-provider-actions{
+  display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap
+}
+.rc-search-provider-actions .rc-secondary{margin:0;white-space:nowrap}
+.rc-search-status{
+  display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:999px;
+  font-size:.67rem;font-weight:800;background:#ece9e5;color:#6c655f
+}
+.rc-search-status.is-good{background:#e3ece0;color:#4f6d4b}
+.rc-search-status.is-warn{background:#f0dfda;color:#8c5049}
+.rc-search-status.is-neutral{background:#ece9e5;color:#6c655f}
+.rc-search-message{
+  margin:0 0 16px;padding:12px 14px;border-radius:14px;background:#eee8e0;color:#665b53;
+  font-size:.74rem;line-height:1.5
+}
+.rc-search-message.is-good{background:#e5ede2;color:#4c6849}
+.rc-search-message.is-error{background:#f4e4e1;color:#89534d}
+.rc-search-score-grid{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:24px
+}
+.rc-search-score-grid>div{
+  min-height:108px;padding:18px;border:1px solid var(--rc-line);border-radius:18px;background:#fff;
+  display:grid;align-content:center;gap:5px
+}
+.rc-search-score-grid span,.rc-search-score-grid small{color:var(--rc-muted);font-size:.7rem}
+.rc-search-score-grid strong{
+  font-family:Georgia,"Times New Roman",serif;font-size:1.45rem;font-weight:400
+}
+.rc-search-block{margin-top:22px}
+.rc-search-opportunities,.rc-search-list{display:grid;gap:10px}
+.rc-search-opportunity{
+  padding:17px;border:1px solid var(--rc-line);border-radius:18px;background:#fff;display:grid;gap:8px
+}
+.rc-search-opportunity.is-high{border-color:rgba(146,78,68,.34);background:#fffaf9}
+.rc-search-opportunity.is-medium{border-color:rgba(178,134,79,.34);background:#fffdf9}
+.rc-search-opportunity-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.rc-search-opportunity-head strong{font-size:.84rem}
+.rc-search-priority{
+  display:inline-flex;align-items:center;min-height:24px;padding:0 8px;border-radius:999px;
+  background:#eee7df;color:#665548;font-size:.62rem;font-weight:850;text-transform:uppercase;letter-spacing:.05em
+}
+.rc-search-opportunity.is-high .rc-search-priority{background:#f0dfda;color:#8b4e47}
+.rc-search-opportunity.is-medium .rc-search-priority{background:#f0e5d5;color:#8a6840}
+.rc-search-opportunity p{margin:0;color:var(--rc-muted);font-size:.74rem;line-height:1.55}
+.rc-search-opportunity small{color:#7c726a;font-size:.68rem;line-height:1.45}
+.rc-search-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.rc-search-row{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;
+  padding:14px 15px;border:1px solid var(--rc-line);border-radius:16px;background:#fff
+}
+.rc-search-row>div{display:grid;gap:4px;min-width:0}
+.rc-search-row strong{font-size:.78rem;line-height:1.4;overflow-wrap:anywhere}
+.rc-search-row small{color:var(--rc-muted);font-size:.67rem;line-height:1.45}
+.rc-search-row>span{
+  white-space:nowrap;color:#6c6058;font-size:.7rem;font-weight:800
+}
+.rc-search-surfaces{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px
+}
+.rc-search-surface{
+  min-height:105px;padding:16px;border:1px solid var(--rc-line);border-radius:17px;background:#fff;
+  display:grid;align-content:center;gap:4px
+}
+.rc-search-surface span{
+  color:var(--rc-muted);font-size:.63rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em
+}
+.rc-search-surface strong{
+  font-family:Georgia,"Times New Roman",serif;font-size:1rem;font-weight:400;text-transform:capitalize
+}
+.rc-search-surface small{color:var(--rc-muted);font-size:.67rem;line-height:1.45}
+.rc-search-setup{
+  margin-top:24px;border:1px solid var(--rc-line);border-radius:18px;background:#fff;overflow:hidden
+}
+.rc-search-setup summary{
+  cursor:pointer;padding:15px 17px;font-size:.78rem;font-weight:800;list-style:none
+}
+.rc-search-setup summary::-webkit-details-marker{display:none}
+.rc-search-setup summary::after{content:"+";float:right;color:var(--rc-muted)}
+.rc-search-setup[open] summary::after{content:"−"}
+.rc-search-setup-body{padding:0 17px 17px;border-top:1px solid var(--rc-line)}
+.rc-search-setup-body>p{margin:15px 0;color:var(--rc-muted);font-size:.74rem;line-height:1.6}
+.rc-search-import-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rc-search-import-actions{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:14px
+}
+.rc-search-import-actions span{color:var(--rc-muted);font-size:.7rem;line-height:1.45}
+.rc-search-import-actions .rc-secondary{margin:0;white-space:nowrap}
+
+@media(max-width:920px){
+  .rc-search-score-grid{grid-template-columns:1fr 1fr}
+  .rc-search-surfaces{grid-template-columns:1fr 1fr}
+}
+@media(max-width:760px){
+  .rc-search-connections,.rc-search-grid,.rc-search-import-grid{grid-template-columns:1fr}
+  .rc-search-provider{grid-template-columns:1fr}
+  .rc-search-provider-actions{justify-content:flex-start}
+  .rc-search-head-actions{width:100%;justify-content:stretch}
+  .rc-search-head-actions button{flex:1}
+}
+@media(max-width:560px){
+  .rc-search-score-grid,.rc-search-surfaces{grid-template-columns:1fr 1fr}
+  .rc-search-import-actions{align-items:stretch;flex-direction:column}
+  .rc-search-import-actions button{width:100%}
+}
+@media(max-width:400px){
+  .rc-search-score-grid,.rc-search-surfaces{grid-template-columns:1fr}
+  .rc-search-head-actions{display:grid;grid-template-columns:1fr}
+}
