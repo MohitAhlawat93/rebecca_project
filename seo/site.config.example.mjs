@@ -31,6 +31,11 @@ export default {
     excludedPrefixes: ['/api/', '/admin'],
     legacyCanonicalOrigins: ['https://example.vercel.app']
   },
+  imageDiscovery: {
+    enabled: false,
+    module: 'seo/image-discovery.config.example.mjs',
+    generatedAtBuild: true
+  },
   entityAuthority: {
     enabled: false,
     module: 'seo/entity-authority.config.example.mjs',
