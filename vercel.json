@@ -21,6 +21,12 @@
     },
     "api/admin/assistant-propose.js": {
       "maxDuration": 30
+    },
+    "api/cron/search-sync.js": {
+      "maxDuration": 60
+    },
+    "api/admin/search-sync.js": {
+      "maxDuration": 60
     }
   },
   "headers": [
@@ -117,6 +123,12 @@
       "source": "/links-grouped",
       "destination": "/contact",
       "permanent": true
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/search-sync",
+      "schedule": "23 4 * * *"
     }
   ]
 }
