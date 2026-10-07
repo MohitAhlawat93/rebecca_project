@@ -13,7 +13,7 @@ const verify = process.argv.includes('--verify');
 const eligible = routeIndex(config).filter((route) => {
   if (route.page.generated) return false;
   if (route.page.indexable === false) return false;
-  if (route.language.searchStatus !== 'approved') return false;
+  if (!route.searchApproved) return false;
   if (!route.file.endsWith('.html')) return false;
   return !route.file.startsWith('admin');
 });
