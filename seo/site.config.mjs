@@ -1,3 +1,5 @@
+import { GEO_PAGES } from './geo-hubs.config.mjs';
+
 const normalizeOrigin = (value) => String(value || '').trim().replace(/\/+$/, '');
 const boolFromEnv = (name, fallback) => {
   const value = process.env[name];
@@ -87,6 +89,11 @@ export default {
       includeInHreflang: false
     }
   ],
+  geoAuthority: {
+    enabled: true,
+    module: 'seo/geo-hubs.config.mjs',
+    generatedAtBuild: true
+  },
   prerender: {
     enabled: true,
     entry: 'content.js',
@@ -126,6 +133,7 @@ export default {
       file: 'selfies-of-risquerebecca.html',
       localized: false,
       priority: 0.7
-    }
+    },
+    ...GEO_PAGES
   ]
 };
