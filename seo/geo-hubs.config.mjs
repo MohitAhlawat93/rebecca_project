@@ -152,7 +152,8 @@ export const GEO_PAGES = [
     file: 'singapore/index.html',
     localized: false,
     priority: 0.9,
-    contentType: 'geo-hub'
+    contentType: 'geo-hub',
+    generated: true
   },
   ...GEO_AUTHORITY.hubs.map((hub) => ({
     id: 'geo-singapore-' + hub.id,
@@ -160,6 +161,7 @@ export const GEO_PAGES = [
     file: 'singapore/' + hub.slug + '.html',
     localized: false,
     priority: 0.8,
-    contentType: 'geo-micro-hub'
+    contentType: 'geo-micro-hub',
+    generated: true
   }))
 ];
