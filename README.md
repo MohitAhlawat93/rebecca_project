@@ -285,3 +285,88 @@ The schedule stores:
 - creation metadata
 
 The existing RLS + secret-header policy continues to protect the row. No service-role key is exposed and no new public write surface is introduced.
+
+
+## Rebecca Control — RC-05 Visual Website Editor
+
+RC-05 adds a private owner editing layer directly on top of the real website.
+
+### Entry
+
+From Rebecca Control:
+
+```text
+Edit Website ↗
+```
+
+opens the live website with `?rc_edit=1`. The editor only initializes when a valid Rebecca Control owner session exists.
+
+### Editable structured areas
+
+The visual editor currently supports the same structured source-of-truth fields as Quick Control:
+
+- Availability
+- Profile facts
+- Singapore rate cards
+- Travel cards + automatic start/end dates
+- Public contact details
+
+Clicking an editable area opens a desktop side drawer or mobile bottom sheet. Saving there writes only to the private Visual Editor Draft.
+
+### Photo workflow
+
+Photo regions are visually clickable too, but RC-05 intentionally does not create a second media engine.
+
+A photo click opens the existing **Media & Publish** workspace with the matching placement already selected, preserving RC-03 / RC-04B protections:
+
+```text
+Photo click
+   ↓
+Media & Publish · exact placement
+   ↓
+Draft → Preview → Publish / Schedule
+```
+
+### Structured-content safety model
+
+RC-05 adds:
+
+```text
+public.rebecca_control_state.visual_draft
+```
+
+The visual draft is protected by the same existing RLS + secret-header policy and is never returned by `/api/public-content`.
+
+Workflow:
+
+```text
+Live website
+    ↓
+Edit Website
+    ↓
+Click structured content
+    ↓
+Save to Draft
+    ↓
+Real page re-renders privately
+    ↓
+Navigate other pages with edit mode preserved
+    ↓
+Publish
+    ↓
+payload becomes the saved visual draft
+    ↓
+Website + concierge update together
+```
+
+**Discard** clears the private visual draft and restores the editor preview to current live content.
+
+A normal Quick Control **Save & apply** also clears any stored visual draft so the two editing surfaces cannot leave competing versions behind.
+
+### Privacy
+
+- `/api/admin/visual-editor` requires the signed owner session.
+- Visual draft storage is private server-side state.
+- Public content and concierge continue reading only the published Quick Control payload.
+- Edit mode is not enabled just because someone adds `?rc_edit=1`; the owner session is required.
+- No Supabase credentials or editor state are exposed to browser code.
