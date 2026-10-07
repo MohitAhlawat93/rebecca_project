@@ -33,7 +33,7 @@ assert.match(searchJs, /\/api\/admin\/search-intelligence\?mode=persisted/);
 assert.match(searchJs, /\/api\/admin\/search-sync/);
 assert.match(searchJs, /\/api\/admin\/search-connect\?provider=/);
 assert.match(searchJs, /\/api\/admin\/search-import/);
-assert.match(searchJs, /No visitor identity/);
+assert.match(admin, /No visitor identity/);
 assert.match(searchJs, /One-time technical setup/);
 assert.match(searchJs, /MutationObserver/);
 assert.doesNotMatch(searchJs, /SEARCH_TOKEN_ENCRYPTION_KEY/);
