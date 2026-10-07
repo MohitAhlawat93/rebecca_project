@@ -10,7 +10,7 @@ const api = fs.readFileSync(new URL('../api/admin/visual-editor.js', import.meta
 assert.match(content, /data\.rcEdit='availability'/);
 assert.match(content, /data-rc-edit="rate:/);
 assert.match(content, /data-rc-edit="travel:/);
-assert.match(content, /rcMediaPlacement='hero'/);
+assert.match(content, /rcMediaPlacement=['"]hero['"]/);
 assert.match(content, /window\.__RC_RENDER_STRUCTURED__/);
 assert.match(content, /import\('\/visual-editor\.js'\)/);
 
