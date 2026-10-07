@@ -1,12 +1,15 @@
 import { getAdminSession } from '../../lib/admin-auth.js';
 import {
   MEDIA_PLACEMENTS,
+  cancelMediaSchedule,
+  getEffectiveMediaState,
   mediaHasDraftChanges,
   mediaStoreConfigured,
   publishMediaDraft,
   readMediaState,
   restoreMediaVersion,
-  saveMediaDraft
+  saveMediaDraft,
+  scheduleMediaDraft
 } from '../../lib/media-store.js';
 
 function noCache(res) {
@@ -30,11 +33,15 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       const state = await readMediaState();
+      const effective = getEffectiveMediaState(state);
       return res.status(200).json({
         ok: true,
         configured: mediaStoreConfigured(),
         placements: MEDIA_PLACEMENTS,
         hasDraftChanges: mediaHasDraftChanges(state),
+        schedulePhase: effective.phase,
+        effectivePublishedAt: effective.effectivePublishedAt,
+        effectiveVersion: effective.effectiveVersion,
         ...state
       });
     }
@@ -42,10 +49,14 @@ export default async function handler(req, res) {
     if (req.method === 'PUT') {
       const body = bodyOf(req);
       const state = await saveMediaDraft(body.state, 'Rebecca');
+      const effective = getEffectiveMediaState(state);
       return res.status(200).json({
         ok: true,
         placements: MEDIA_PLACEMENTS,
         hasDraftChanges: mediaHasDraftChanges(state),
+        schedulePhase: effective.phase,
+        effectivePublishedAt: effective.effectivePublishedAt,
+        effectiveVersion: effective.effectiveVersion,
         ...state
       });
     }
@@ -55,12 +66,23 @@ export default async function handler(req, res) {
       let state;
       if (body.action === 'publish') state = await publishMediaDraft('Rebecca');
       else if (body.action === 'restore') state = await restoreMediaVersion(body.version, 'Rebecca');
-      else return res.status(400).json({ error: 'Unknown media action.' });
+      else if (body.action === 'schedule') {
+        state = await scheduleMediaDraft({
+          publishLocal: body.publishLocal,
+          expireLocal: body.expireLocal || null
+        }, 'Rebecca');
+      } else if (body.action === 'cancel_schedule') {
+        state = await cancelMediaSchedule('Rebecca');
+      } else return res.status(400).json({ error: 'Unknown media action.' });
 
+      const effective = getEffectiveMediaState(state);
       return res.status(200).json({
         ok: true,
         placements: MEDIA_PLACEMENTS,
         hasDraftChanges: mediaHasDraftChanges(state),
+        schedulePhase: effective.phase,
+        effectivePublishedAt: effective.effectivePublishedAt,
+        effectiveVersion: effective.effectiveVersion,
         ...state
       });
     }
@@ -76,7 +98,14 @@ export default async function handler(req, res) {
     if (error?.code === 'MEDIA_VERSION_NOT_FOUND') {
       return res.status(404).json({ error: error.message });
     }
-    console.error('RC-03 media API failed:', error);
+    if (
+      error?.code === 'MEDIA_SCHEDULE_ACTIVE' ||
+      error?.code === 'MEDIA_SCHEDULE_INVALID' ||
+      error?.code === 'MEDIA_SCHEDULE_NO_CHANGES'
+    ) {
+      return res.status(409).json({ error: error.message });
+    }
+    console.error('RC-04B media API failed:', error);
     return res.status(500).json({ error: 'Could not update media safely.' });
   }
 }
