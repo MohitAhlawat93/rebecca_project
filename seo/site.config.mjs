@@ -1,3 +1,4 @@
+import { MULTILINGUAL_QUALITY, localePageStatus } from './multilingual-quality.config.mjs';
 import { TRAVEL_PAGES } from './travel-authority.config.mjs';
 import { GEO_PAGES } from './geo-hubs.config.mjs';
 
@@ -22,6 +23,7 @@ export default {
     publicName: 'Risqué Rebecca',
     entityType: 'Person'
   },
+  multilingualQuality: MULTILINGUAL_QUALITY,
   market: {
     primaryCountry: 'SG',
     primaryRegion: 'Singapore',
@@ -49,7 +51,8 @@ export default {
       hreflang: 'en',
       htmlLang: 'en',
       prefix: '',
-      searchStatus: 'approved',
+      searchStatus: MULTILINGUAL_QUALITY.locales.en.status,
+      pageSearchStatus: MULTILINGUAL_QUALITY.locales.en.pages,
       includeInSitemap: true,
       includeInHreflang: true
     },
@@ -58,36 +61,40 @@ export default {
       hreflang: 'zh-CN',
       htmlLang: 'zh-CN',
       prefix: '/zh',
-      searchStatus: 'review-required',
-      includeInSitemap: false,
-      includeInHreflang: false
+      searchStatus: MULTILINGUAL_QUALITY.locales.zh.status,
+      pageSearchStatus: MULTILINGUAL_QUALITY.locales.zh.pages,
+      includeInSitemap: true,
+      includeInHreflang: true
     },
     {
       id: 'hi',
       hreflang: 'hi',
       htmlLang: 'hi',
       prefix: '/hi',
-      searchStatus: 'review-required',
-      includeInSitemap: false,
-      includeInHreflang: false
+      searchStatus: MULTILINGUAL_QUALITY.locales.hi.status,
+      pageSearchStatus: MULTILINGUAL_QUALITY.locales.hi.pages,
+      includeInSitemap: true,
+      includeInHreflang: true
     },
     {
       id: 'fr',
       hreflang: 'fr',
       htmlLang: 'fr',
       prefix: '/fr',
-      searchStatus: 'review-required',
-      includeInSitemap: false,
-      includeInHreflang: false
+      searchStatus: MULTILINGUAL_QUALITY.locales.fr.status,
+      pageSearchStatus: MULTILINGUAL_QUALITY.locales.fr.pages,
+      includeInSitemap: true,
+      includeInHreflang: true
     },
     {
       id: 'es',
       hreflang: 'es',
       htmlLang: 'es',
       prefix: '/es',
-      searchStatus: 'review-required',
-      includeInSitemap: false,
-      includeInHreflang: false
+      searchStatus: MULTILINGUAL_QUALITY.locales.es.status,
+      pageSearchStatus: MULTILINGUAL_QUALITY.locales.es.pages,
+      includeInSitemap: true,
+      includeInHreflang: true
     }
   ],
   travelAuthority: {
