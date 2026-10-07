@@ -1,5 +1,7 @@
 import { getAdminSession } from '../../lib/admin-auth.js';
 import { buildLiveSearchIntelligence } from '../../lib/search-measurement-service.mjs';
+import { searchStoreConfigured } from '../../lib/search-persistence-store.mjs';
+import { buildPersistedSearchIntelligence } from '../../lib/search-sync-service.mjs';
 
 function noCache(res) {
   res.setHeader('Cache-Control', 'private, no-store, max-age=0');
@@ -18,27 +20,32 @@ export default async function handler(req, res) {
   noCache(res);
   if (!getAdminSession(req)) return res.status(401).json({ error: 'Owner session required.' });
 
-  if (!['GET', 'POST'].includes(req.method)) {
-    return res.status(405).json({ error: 'Use GET or POST.' });
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Use GET.' });
   }
 
   try {
-    const body = req.method === 'POST' ? bodyOf(req) : {};
-    const includeLive =
-      req.method === 'GET'
-        ? String(req.query?.live || '') === '1'
-        : body.includeLive !== false;
-
-    const report = await buildLiveSearchIntelligence({
-      includeLive,
-      imports: body.imports || {}
+    const mode = String(req.query?.mode || 'persisted');
+    if (mode === 'live') {
+      const report = await buildLiveSearchIntelligence({ includeLive: true });
+      return res.status(200).json({ ok: true, mode: 'live-transient', ...report });
+    }
+    if (searchStoreConfigured()) {
+      const report = await buildPersistedSearchIntelligence();
+      return res.status(200).json({ ok: true, mode: 'persisted', ...report });
+    }
+    const fallback = await buildLiveSearchIntelligence({ includeLive: false });
+    return res.status(200).json({
+      ok: true,
+      mode: 'connection-state-only',
+      ...fallback,
+      persistence: { mode: 'not-configured' }
     });
-
-    return res.status(200).json({ ok: true, ...report });
   } catch (error) {
-    console.error('SEARCH-07 intelligence API failed:', error);
+    console.error('SEARCH-08 intelligence API failed:', error);
     return res.status(500).json({
-      error: 'Could not build search intelligence safely.'
+      error: 'Could not build search intelligence safely.',
+      code: error?.code || 'SEARCH_INTELLIGENCE_FAILED'
     });
   }
 }
