@@ -5,6 +5,13 @@ export const SEARCH_MEASUREMENT = {
   id: 'client-search-measurement',
   clientId: 'client-id',
   productionOrigin: 'https://www.example.com',
+  sync: {
+    enabled: true,
+    schedule: '23 4 * * *',
+    lookbackDays: 35,
+    providers: ['google', 'bing'],
+    persistence: 'supabase'
+  },
   reporting: {
     currentWindowDays: 28,
     comparisonWindowDays: 28,
@@ -104,5 +111,22 @@ export const SEARCH_MEASUREMENT = {
   }
 };
 
-// Keep credentials in server-side environment variables.
-// Never represent an export-only report as a live API connection.
+// Durable OAuth/token storage also requires:
+ // SEARCH_STORE_SECRET
+ // SEARCH_TOKEN_ENCRYPTION_KEY
+ // SEARCH_OAUTH_STATE_SECRET
+ // SEARCH_OAUTH_REDIRECT_ORIGIN
+ // CRON_SECRET
+ //
+ // Google OAuth client:
+ // GOOGLE_SEARCH_CLIENT_ID
+ // GOOGLE_SEARCH_CLIENT_SECRET
+ // GSC_SITE_URL
+ //
+ // Bing OAuth client:
+ // BING_WEBMASTER_CLIENT_ID
+ // BING_WEBMASTER_CLIENT_SECRET
+ // BING_SITE_URL
+ //
+ // Keep all credentials server-side.
+ // Never represent an export-only report as a live API connection.
