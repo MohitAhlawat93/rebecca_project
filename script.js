@@ -274,6 +274,137 @@
   document.querySelectorAll('[data-open-concierge]').forEach(b=>b.addEventListener('click',()=>setConcierge(true)));
   document.querySelector('[data-close-concierge]')?.addEventListener('click',()=>setConcierge(false));
   panel?.addEventListener('keydown',(event)=>{if(event.key!=='Tab')return;const focusable=[...panel.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')];if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}});
+
+  // First-visit discovery: make Rebecca's Desk impossible to miss without nagging repeat visitors.
+  const RR_CONCIERGE_AUTO_KEY='rr-concierge-autoshown-v1';
+  const RR_OFFICIAL_LINKS_KEY='rr-official-links-shown-v1';
+  const RR_OFFICIAL_LINKS_COOLDOWN=7*24*60*60*1000;
+  const safeSessionGet=(key)=>{try{return sessionStorage.getItem(key)}catch{return null}};
+  const safeSessionSet=(key,value)=>{try{sessionStorage.setItem(key,value)}catch{}};
+  const safeLocalGet=(key)=>{try{return localStorage.getItem(key)}catch{return null}};
+  const safeLocalSet=(key,value)=>{try{localStorage.setItem(key,value)}catch{}};
+
+  const ensureFirstVisitStyles=()=>{
+    if(document.querySelector('[data-first-visit-styles]'))return;
+    const style=document.createElement('style');
+    style.dataset.firstVisitStyles='true';
+    style.textContent=`
+      .concierge-panel:not([hidden]){animation:rr-concierge-arrive .34s cubic-bezier(.2,.8,.2,1) both}
+      @keyframes rr-concierge-arrive{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+      .concierge-launcher{animation:rr-concierge-nudge 5s ease-in-out 2}
+      @keyframes rr-concierge-nudge{0%,72%,100%{transform:translateY(0);box-shadow:0 12px 35px rgba(0,0,0,.2)}80%{transform:translateY(-4px);box-shadow:0 16px 42px rgba(0,0,0,.26)}88%{transform:translateY(0)}}
+      .official-links-backdrop{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:22px;background:rgba(22,20,18,.34);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .22s ease}
+      .official-links-backdrop.is-visible{opacity:1}
+      .official-links-card{position:relative;width:min(470px,100%);max-height:min(680px,calc(100svh - 44px));overflow:auto;border:1px solid rgba(61,51,44,.15);border-radius:30px;background:#f8f3eb;padding:clamp(28px,5vw,42px);box-shadow:0 32px 90px rgba(25,20,17,.28);transform:translateY(12px) scale(.985);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+      .official-links-backdrop.is-visible .official-links-card{transform:translateY(0) scale(1)}
+      .official-links-close{position:absolute;top:15px;right:16px;width:36px;height:36px;border:0;border-radius:50%;background:rgba(31,42,37,.07);color:var(--ink);font:300 25px/1 var(--sans);cursor:pointer}
+      .official-links-card h2{margin:8px 42px 8px 0;font-family:var(--serif);font-size:clamp(2.35rem,6vw,3.35rem);font-weight:400;line-height:.96;letter-spacing:-.035em}
+      .official-links-intro{margin:0 0 22px;max-width:42ch;color:var(--ink-soft);font-size:.84rem;line-height:1.65}
+      .official-links-primary{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 19px;border-radius:18px;background:var(--ink);color:var(--white);text-decoration:none;transition:transform .18s ease,background .18s ease}
+      .official-links-primary:hover{transform:translateY(-2px);background:var(--wine)}
+      .official-links-primary span{display:grid;gap:3px}.official-links-primary small{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;opacity:.68}.official-links-primary strong{font-family:var(--serif);font-size:1.35rem;font-weight:500}.official-links-primary b{font-size:1.2rem;font-weight:400}
+      .official-links-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+      .official-links-grid a{position:relative;min-height:84px;padding:14px 34px 14px 15px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.46);display:flex;flex-direction:column;justify-content:center;text-decoration:none;transition:background .18s ease,transform .18s ease}
+      .official-links-grid a:hover{background:#fff;transform:translateY(-1px)}
+      .official-links-grid span{font-size:.76rem;font-weight:600}.official-links-grid small{margin-top:4px;color:var(--ink-soft);font-size:.66rem}.official-links-grid b{position:absolute;right:13px;top:13px;font-weight:400}
+      .official-links-note{margin:16px 2px 0;color:var(--ink-soft);font-size:.64rem;line-height:1.5}
+      @media(max-width:640px){
+        .concierge-panel{right:10px;bottom:10px;width:calc(100vw - 20px);height:min(560px,calc(100svh - 84px));border-radius:22px 22px 8px 8px;overflow:hidden}
+        .official-links-backdrop{align-items:end;padding:0;background:rgba(22,20,18,.3)}
+        .official-links-card{width:100%;max-height:82svh;border-radius:26px 26px 0 0;border-bottom:0;padding:28px 20px max(24px,env(safe-area-inset-bottom))}
+        .official-links-card h2{font-size:2.65rem}
+        .official-links-grid{grid-template-columns:1fr 1fr}
+      }
+      @media(max-width:390px){.official-links-grid{grid-template-columns:1fr}.official-links-grid a{min-height:68px}}
+      @media(prefers-reduced-motion:reduce){.concierge-panel:not([hidden]),.concierge-launcher,.official-links-card{animation:none!important;transition:none!important}}
+    `;
+    document.head.appendChild(style);
+  };
+  ensureFirstVisitStyles();
+
+  const officialLinksRecentlyShown=()=>{
+    const shownAt=Number(safeLocalGet(RR_OFFICIAL_LINKS_KEY)||0);
+    return Number.isFinite(shownAt)&&shownAt>0&&(Date.now()-shownAt)<RR_OFFICIAL_LINKS_COOLDOWN;
+  };
+  const closeOfficialLinksPopup=()=>{
+    const popup=document.querySelector('[data-official-links-popup]');
+    if(!popup)return;
+    popup.classList.remove('is-visible');
+    window.setTimeout(()=>popup.remove(),220);
+  };
+  const showOfficialLinksPopup=async()=>{
+    if(document.hidden)return false;
+    if(officialLinksRecentlyShown()||document.querySelector('[data-official-links-popup]'))return true;
+    if(!panel?.hidden||document.querySelector('[data-live-modal]'))return false;
+    let data=window.__REBECCA_DATA__;
+    if(!data){
+      try{data=(await import('/data/rebecca-data.js')).REBECCA_DATA}catch{return false}
+    }
+    const contact=data?.contact||{};
+    const primaryUrl=contact.telegramChannelUrl||'https://tinyurl.com/rebecca-afterhours';
+    const links=[
+      {label:'Telegram',detail:contact.telegramHandle||'@forkmerebecca',href:contact.telegramUrl||'https://t.me/forkmerebecca'},
+      {label:'WhatsApp',detail:'Official contact',href:contact.whatsappUrl||'https://wa.me/6585282912'},
+      {label:'X / Twitter',detail:'@risquerebecca',href:'https://twitter.com/risquerebecca'},
+      {label:'Throne',detail:'Wishlist',href:'https://throne.com/risquerebecca'}
+    ].filter((item)=>/^https:\/\//i.test(item.href));
+    const popup=document.createElement('div');
+    popup.className='official-links-backdrop';
+    popup.dataset.officialLinksPopup='true';
+    popup.innerHTML=`<aside class="official-links-card" role="dialog" aria-modal="true" aria-labelledby="official-links-title">
+      <button class="official-links-close" type="button" data-close-official-links aria-label="Close official links">×</button>
+      <span class="page-kicker">Stay close</span>
+      <h2 id="official-links-title">Rebecca Afterhours</h2>
+      <p class="official-links-intro">Occasional tour notes, new public posts and updates from Rebecca — plus her verified ways to stay in touch.</p>
+      <a class="official-links-primary" href="${escapeHtml(primaryUrl)}" target="_blank" rel="noopener noreferrer"><span><small>Telegram channel</small><strong>${escapeHtml(contact.telegramChannelLabel||'Rebecca Afterhours')}</strong></span><b aria-hidden="true">↗</b></a>
+      <div class="official-links-grid">${links.map((item)=>`<a href="${escapeHtml(item.href)}" target="_blank" rel="noopener noreferrer"><span>${escapeHtml(item.label)}</span><small>${escapeHtml(item.detail)}</small><b aria-hidden="true">↗</b></a>`).join('')}</div>
+      <p class="official-links-note">These are Rebecca’s official public links. Instagram is currently suspended.</p>
+    </aside>`;
+    document.body.appendChild(popup);
+    safeLocalSet(RR_OFFICIAL_LINKS_KEY,String(Date.now()));
+    requestAnimationFrame(()=>popup.classList.add('is-visible'));
+    popup.querySelector('[data-close-official-links]')?.addEventListener('click',closeOfficialLinksPopup);
+    popup.addEventListener('click',(event)=>{if(event.target===popup)closeOfficialLinksPopup();});
+    popup.addEventListener('keydown',(event)=>{if(event.key==='Escape')closeOfficialLinksPopup();});
+    return true;
+  };
+  let officialLinksQueueTimer=null;
+  const queueOfficialLinksPopup=(delay=1000,attempt=0)=>{
+    if(officialLinksRecentlyShown()||attempt>18)return;
+    clearTimeout(officialLinksQueueTimer);
+    officialLinksQueueTimer=setTimeout(async()=>{
+      const shown=await showOfficialLinksPopup();
+      if(!shown)queueOfficialLinksPopup(1400,attempt+1);
+    },delay);
+  };
+
+  let firstVisitPromptsStarted=false;
+  const startFirstVisitPrompts=()=>{
+    if(firstVisitPromptsStarted)return;
+    firstVisitPromptsStarted=true;
+    const conciergeAlreadyShown=safeSessionGet(RR_CONCIERGE_AUTO_KEY)==='1';
+    if(conciergeEnabled&&!conciergeAlreadyShown){
+      window.setTimeout(()=>{
+        if(document.hidden){
+          firstVisitPromptsStarted=false;
+          document.addEventListener('visibilitychange',()=>{if(!document.hidden)startFirstVisitPrompts()},{once:true});
+          return;
+        }
+        safeSessionSet(RR_CONCIERGE_AUTO_KEY,'1');
+        setConcierge(true);
+      },900);
+      queueOfficialLinksPopup(9000);
+    }else{
+      queueOfficialLinksPopup(2600);
+    }
+  };
+  document.querySelector('[data-close-concierge]')?.addEventListener('click',()=>queueOfficialLinksPopup(750));
+  if(document.documentElement.dataset.rebeccaContentReady==='true')startFirstVisitPrompts();
+  else{
+    document.addEventListener('rebecca:content-ready',startFirstVisitPrompts,{once:true});
+    window.setTimeout(startFirstVisitPrompts,2200);
+  }
+
   const chatHistory=[];
   const formatChatText=(text='')=>{
     const normalized=String(text)
