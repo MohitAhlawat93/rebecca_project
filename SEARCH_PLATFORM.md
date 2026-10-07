@@ -76,3 +76,38 @@ Do not copy Rebecca-specific values into shared engine files. For a new client:
 7. Run render + validation.
 
 Location hubs, travel pages, schema types and language rollout remain client/market decisions in later SEARCH phases; the technical engine remains shared.
+
+## SEARCH-01 — crawlability and build prerendering
+
+Search-critical content is now rendered during the build by executing the same browser renderer used at runtime. This avoids a second copy of rates, reviews, travel, profile, etiquette, journal, press and other public content.
+
+The build flow is:
+
+```text
+canonical client data
+        ↓
+content.js renderer
+        ↓
+server-side DOM build prerender
+        ↓
+raw crawlable HTML
+        ↓
+SEO metadata/canonical/hreflang render
+        ↓
+runtime hydration from Rebecca Control / public-content API
+```
+
+Only languages marked `searchStatus: approved` are prerendered/indexed as search assets. Existing review-required languages remain available to the application but are kept out of the serious search surface until content quality is approved.
+
+Commands:
+
+```bash
+npm run validate:prerender
+npm run prepare:search
+npm run validate:search:rendered
+npm run vercel-build
+```
+
+GitHub CI runs both the source validation and the future Vercel build command. This lets us verify the generated crawlable HTML without consuming a Vercel preview deployment.
+
+For future clients, keep the prerender engine shared and change the client config: page inventory, approved languages, required crawlable bindings, market/domain settings and renderer entry point.
