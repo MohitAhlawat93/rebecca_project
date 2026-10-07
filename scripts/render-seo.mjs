@@ -5,8 +5,10 @@ import {
   hreflangEntries,
   replaceHreflangCluster,
   replaceHtmlLang,
+  replaceHtmlDirection,
   replaceOrInsertCanonical,
   replaceOrInsertOgUrl,
+  replaceOrInsertOgLocale,
   replaceOrInsertRobots,
   rewriteStructuredDataOrigins,
   robotsContent,
@@ -41,11 +43,14 @@ for (const route of routeIndex(config)) {
     continue;
   }
 
-  const alternateEntries = route.page.localized ? hreflangEntries(config, route.page) : [];
+  const alternateEntries =
+    route.page.localized && route.searchApproved ? hreflangEntries(config, route.page) : [];
   let next = html;
   next = replaceHtmlLang(next, route.language.htmlLang);
+  next = replaceHtmlDirection(next, route.language.direction || 'ltr');
   next = replaceOrInsertCanonical(next, route.canonical);
   next = replaceOrInsertOgUrl(next, route.canonical);
+  next = replaceOrInsertOgLocale(next, route.language.ogLocale);
   next = replaceOrInsertRobots(next, route.indexable, config.seo.maxImagePreview);
   next = replaceHreflangCluster(next, alternateEntries);
   next = rewriteStructuredDataOrigins(next, config);
