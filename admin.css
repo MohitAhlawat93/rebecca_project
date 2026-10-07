@@ -793,3 +793,27 @@ button,a{-webkit-tap-highlight-color:transparent}
   .rc-settings-actions{align-items:stretch;flex-direction:column}
   .rc-settings-actions button{width:100%}
 }
+
+
+/* Canonical Rebecca Control module registry */
+.rc-installed-modules{
+  margin:18px 0 0;border:1px solid var(--rc-line);border-radius:18px;background:#fff;overflow:hidden
+}
+.rc-installed-modules summary{
+  cursor:pointer;padding:15px 17px;font-weight:750;font-size:.78rem;list-style:none
+}
+.rc-installed-modules summary::-webkit-details-marker{display:none}
+.rc-installed-modules summary::after{content:"+";float:right;color:var(--rc-muted)}
+.rc-installed-modules[open] summary::after{content:"−"}
+.rc-installed-module-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0 14px 14px
+}
+.rc-installed-module-grid>div{
+  display:grid;grid-template-columns:64px minmax(0,1fr);gap:9px;align-items:center;
+  padding:10px 11px;border-radius:12px;background:#f8f4ef
+}
+.rc-installed-module-grid strong{font-size:.7rem}
+.rc-installed-module-grid span{font-size:.7rem;line-height:1.35;color:var(--rc-muted)}
+@media(max-width:620px){
+  .rc-installed-module-grid{grid-template-columns:1fr}
+}
