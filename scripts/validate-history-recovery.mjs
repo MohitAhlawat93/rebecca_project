@@ -3,7 +3,7 @@ import fs from 'node:fs';
 
 const admin = fs.readFileSync(new URL('../admin.html', import.meta.url), 'utf8');
 const adminJs = fs.readFileSync(new URL('../admin.js', import.meta.url), 'utf8');
-const api = fs.readFileSync(new URL('../api/admin/system.js', import.meta.url), 'utf8');
+const api = fs.readFileSync(new URL('../server/admin/system.js', import.meta.url), 'utf8');
 const store = fs.readFileSync(new URL('../lib/system-store.js', import.meta.url), 'utf8');
 const schema = fs.readFileSync(new URL('../supabase/rc-09-history-export-recovery.sql', import.meta.url), 'utf8');
 
@@ -26,10 +26,10 @@ assert.match(schema, /security_invoker = true/);
 assert.match(schema, /enable row level security/);
 
 for (const path of [
-  '../api/admin/quick-control.js',
-  '../api/admin/visual-editor.js',
-  '../api/admin/concierge-control.js',
-  '../api/admin/media.js'
+  '../server/admin/quick-control.js',
+  '../server/admin/visual-editor.js',
+  '../server/admin/concierge-control.js',
+  '../server/admin/media.js'
 ]) {
   const text = fs.readFileSync(new URL(path, import.meta.url), 'utf8');
   assert.match(text, /safeCaptureRecoverySnapshot|recordSystemEvent/);

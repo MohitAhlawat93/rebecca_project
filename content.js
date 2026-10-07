@@ -1,5 +1,6 @@
 import { REBECCA_DATA, formatSgd } from './data/rebecca-data.js';
 import { REBECCA_IMAGES, imageVariant, imageSrcset } from './data/rebecca-images.js';
+import { activeNotices, publicPagePath, travelGroups } from './lib/live-content.js';
 
 const esc=(value='')=>String(value)
   .replaceAll('&','&amp;')
@@ -185,20 +186,41 @@ function renderSingapore(){
   });
 }
 
+function travelCardMarkup(item, lifecycle='upcoming'){
+  const badge=lifecycle==='past'?'Past':lifecycle==='current'?'Published window':'Upcoming';
+  return `
+    <article class="travel-card${item.alt?' alt':''}" data-rc-edit="travel:${esc(item.id||item.title)}">
+      <div>
+        <div class="travel-card-status"><span>${esc(badge)}</span><small>${esc(item.dateRange||'Public timing by invitation')}</small></div>
+        <h3>${esc(item.title)}</h3>
+        <p>${esc(item.body)}</p>
+      </div>
+      <div class="travel-meta">${(item.meta||[]).map((value)=>`<span>${esc(value)}</span>`).join('')}</div>
+    </article>`;
+}
+
 function renderTravel(){
   const travel=REBECCA_DATA.travel;
+  const groups=travelGroups(travel);
 
   document.querySelectorAll('[data-travel-calendar]').forEach((el)=>{
-    const cards=travel.calendar.filter((item)=>item.visible!==false).map((item)=>`
-      <article class="travel-card${item.alt?' alt':''}" data-rc-edit="travel:${esc(item.id||item.title)}">
-        <div>
-          <p class="page-kicker" style="color:${item.alt?'#d7ddd2':'#aeb8a7'}">${esc(item.kicker)}</p>
-          <h3>${esc(item.title)}</h3>
-          <p>${esc(item.body)}</p>
-        </div>
-        <div class="travel-meta">${item.meta.map((value)=>`<span>${esc(value)}</span>`).join('')}</div>
-      </article>`).join('');
-    el.innerHTML=`<div class="travel-board">${cards}</div><div class="notice" style="margin-top:18px">${esc(travel.northAmericaNotice)}</div>`;
+    const upcoming=groups.upcoming.length
+      ? groups.upcoming.map((item)=>travelCardMarkup(item,item.lifecycle)).join('')
+      : '<div class="live-empty">No public tour window is currently announced.</div>';
+    const interest=groups.interest.length
+      ? groups.interest.map((item)=>`<article class="travel-interest-card"><span>Expression of interest</span><h3>${esc(item.title||item.region)}</h3><p>${esc(item.body)}</p><div class="travel-meta">${(item.meta||[]).map((value)=>`<span>${esc(value)}</span>`).join('')}</div></article>`).join('')
+      : '<div class="live-empty">No expressions of interest are open right now.</div>';
+    const past=groups.past.length
+      ? groups.past.map((item)=>travelCardMarkup(item,'past')).join('')
+      : '<div class="live-empty">No past public tour dates are stored yet.</div>';
+
+    el.innerHTML=`
+      <div class="travel-intelligence" id="travel-calendar">
+        <section class="travel-lane"><div class="travel-lane-head"><span>Upcoming</span><p>Published windows only. These are not live-location indicators.</p></div><div class="travel-board">${upcoming}</div></section>
+        <section class="travel-lane"><div class="travel-lane-head"><span>Expressions of interest</span><p>Interest can help shape a future tour; no dates are implied.</p></div><div class="travel-interest-board">${interest}</div></section>
+        <section class="travel-lane is-past"><div class="travel-lane-head"><span>Past</span><p>Public archive only; never a statement about where Rebecca is now.</p></div><div class="travel-board">${past}</div></section>
+      </div>
+      <div class="travel-location-safety"><strong>Location privacy</strong><span>Public tour windows are approximate. Exact timing and location are shared privately after the practical steps are complete.</span></div>`;
   });
 
   document.querySelectorAll('[data-fmty-grid]').forEach((el)=>{
@@ -223,6 +245,97 @@ function renderTravel(){
   document.querySelectorAll('[data-travel-practicalities]').forEach((el)=>{
     el.innerHTML=travel.practicalities.map((paragraph)=>`<p>${esc(paragraph)}</p>`).join('');
   });
+}
+
+function liveNoticeDismissKey(notice){
+  return 'rr-live-notice:'+String(notice.id||'notice')+':'+String(notice.startDate||'always');
+}
+
+function noticeWasDismissed(notice){
+  if(notice.dismissible===false)return false;
+  try{return localStorage.getItem(liveNoticeDismissKey(notice))==='1'}catch{return false}
+}
+
+function dismissLiveNotice(notice, element){
+  try{localStorage.setItem(liveNoticeDismissKey(notice),'1')}catch{}
+  element?.remove();
+  if(!document.querySelector('[data-live-announcement]'))document.body.classList.remove('has-live-announcement');
+}
+
+function noticeCta(notice,className='inline-link'){
+  if(!notice.ctaLabel||!notice.ctaUrl)return '';
+  const external=/^https?:\/\//i.test(notice.ctaUrl);
+  return `<a class="${className}" href="${esc(notice.ctaUrl)}"${external?' target="_blank" rel="noreferrer"':''}>${esc(notice.ctaLabel)} <span aria-hidden="true">↗</span></a>`;
+}
+
+function renderLiveNotices(){
+  const notices=activeNotices(REBECCA_DATA.notices||[],{pathname:window.location.pathname}).filter((item)=>!noticeWasDismissed(item));
+  const bar=notices.find((item)=>item.surface==='bar');
+  if(bar&&!document.querySelector('[data-live-announcement]')){
+    const el=document.createElement('aside');
+    el.className='live-announcement';
+    el.dataset.liveAnnouncement=bar.id;
+    el.setAttribute('aria-label','Rebecca update');
+    el.innerHTML=`<div class="live-announcement-inner"><div><strong>${esc(bar.title)}</strong><span>${esc(bar.message)}</span></div>${noticeCta(bar,'live-announcement-link')}${bar.dismissible!==false?'<button type="button" class="live-announcement-dismiss" aria-label="Dismiss announcement">×</button>':''}</div>`;
+    const header=document.querySelector('.site-header');
+    (header||document.body.firstElementChild)?.insertAdjacentElement(header?'beforebegin':'beforebegin',el);
+    el.querySelector('.live-announcement-dismiss')?.addEventListener('click',()=>dismissLiveNotice(bar,el));
+    document.body.classList.add('has-live-announcement');
+  }
+
+  const card=notices.find((item)=>item.surface==='card');
+  document.querySelectorAll('[data-live-notices]').forEach((slot)=>{
+    if(!card){slot.innerHTML='';return;}
+    slot.innerHTML=`<aside class="live-promo-card" data-live-promo="${esc(card.id)}"><div><span class="page-kicker">${esc(card.type==='telegram'?'Rebecca Afterhours':'Rebecca update')}</span><h3>${esc(card.title)}</h3><p>${esc(card.message)}</p></div><div class="live-promo-actions">${noticeCta(card,'button button-outline')}${card.dismissible!==false?'<button type="button" class="live-promo-dismiss">Not now</button>':''}</div></aside>`;
+    slot.querySelector('.live-promo-dismiss')?.addEventListener('click',()=>dismissLiveNotice(card,slot.querySelector('[data-live-promo]')));
+  });
+
+  const modal=notices.find((item)=>item.surface==='modal');
+  if(modal&&!sessionStorage.getItem('rr-live-modal:'+modal.id)){
+    window.setTimeout(()=>{
+      if(noticeWasDismissed(modal)||document.querySelector('[data-live-modal]'))return;
+      const el=document.createElement('aside');
+      el.className='live-mini-modal';el.dataset.liveModal=modal.id;el.setAttribute('role','dialog');el.setAttribute('aria-label',modal.title||'Rebecca update');
+      el.innerHTML=`<button type="button" class="live-mini-close" aria-label="Close">×</button><span class="page-kicker">Rebecca update</span><h3>${esc(modal.title)}</h3><p>${esc(modal.message)}</p>${noticeCta(modal,'button button-dark')}`;
+      document.body.append(el);
+      sessionStorage.setItem('rr-live-modal:'+modal.id,'1');
+      el.querySelector('.live-mini-close')?.addEventListener('click',()=>dismissLiveNotice(modal,el));
+    },5000);
+  }
+}
+
+function renderHomeLiveTravel(){
+  if(publicPagePath(window.location.pathname)!=='/'||document.querySelector('[data-home-live-travel]'))return;
+  const groups=travelGroups(REBECCA_DATA.travel);
+  const anchor=document.querySelector('.authority-preview')||document.querySelector('.site-footer');
+  if(!anchor)return;
+  const section=document.createElement('section');
+  section.className='home-live-travel section-pad';
+  section.dataset.homeLiveTravel='true';
+  const cards=groups.upcoming.slice(0,2).map((item)=>`<article><span>${esc(item.dateRange||'By invitation')}</span><strong>${esc(item.kicker||item.title)}</strong><p>${esc(item.body)}</p></article>`).join('');
+  section.innerHTML=`
+    <div class="section-label"><span>Live</span> Travel desk</div>
+    <div class="home-live-head"><div><h2>Where next?</h2><p>Published travel windows and invitations, without pretending a public calendar is live location tracking.</p></div><a class="inline-link" href="/travel">Travel details <span aria-hidden="true">→</span></a></div>
+    <div class="home-live-grid">${cards||'<div class="live-empty">No public tour window is currently announced.</div>'}</div>
+    <div data-live-notices></div>`;
+  anchor.insertAdjacentElement('beforebegin',section);
+}
+
+function scheduleTravelMap(){
+  const root=document.querySelector('[data-rebecca-travel-map]');
+  if(!root)return;
+  let started=false;
+  const start=()=>{
+    if(started)return;started=true;
+    import('/travel-map.js').then(({mountRebeccaTravelMap})=>mountRebeccaTravelMap(root,REBECCA_DATA)).catch(()=>{
+      root.innerHTML='<div class="rr-map-empty">The travel map could not load. The verified travel calendar below is still available.</div>';
+    });
+  };
+  if(!('IntersectionObserver' in window)){start();return;}
+  const observer=new IntersectionObserver((entries)=>{
+    if(entries.some((entry)=>entry.isIntersecting)){observer.disconnect();start();}
+  },{rootMargin:'240px'});
+  observer.observe(root);
 }
 
 function renderPolicies(){
@@ -507,6 +620,8 @@ function renderStructuredRuntimeContent(){
 }
 
 renderStructuredRuntimeContent();
+renderHomeLiveTravel();
+renderLiveNotices();
 renderPersonality();
 renderReputation();
 renderDateIdeas();
@@ -521,6 +636,7 @@ renderPolicies();
 window.__RC_RENDER_STRUCTURED__=renderStructuredRuntimeContent;
 window.__REBECCA_DATA__=REBECCA_DATA;
 window.__REBECCA_IMAGES__=REBECCA_IMAGES;
+scheduleTravelMap();
 document.documentElement.dataset.rebeccaDataVersion=REBECCA_DATA.meta.dataVersion;
 document.documentElement.dataset.rebeccaContentReady='true';
 document.dispatchEvent(new CustomEvent('rebecca:content-ready'));

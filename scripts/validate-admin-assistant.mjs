@@ -94,8 +94,8 @@ assert.equal(paused.conciergeDraft.enabled,false);
 
 const admin=fs.readFileSync(new URL('../admin.html',import.meta.url),'utf8');
 const adminJs=fs.readFileSync(new URL('../admin.js',import.meta.url),'utf8');
-const proposeApi=fs.readFileSync(new URL('../api/admin/assistant-propose.js',import.meta.url),'utf8');
-const applyApi=fs.readFileSync(new URL('../api/admin/assistant-apply.js',import.meta.url),'utf8');
+const proposeApi=fs.readFileSync(new URL('../server/admin/assistant-propose.js',import.meta.url),'utf8');
+const applyApi=fs.readFileSync(new URL('../server/admin/assistant-apply.js',import.meta.url),'utf8');
 
 assert.match(admin,/data-tab="assistant"/);
 assert.match(admin,/Approval boundary/);

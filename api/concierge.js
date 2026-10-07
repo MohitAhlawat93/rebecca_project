@@ -18,7 +18,7 @@ const SYSTEM=`You are the assistant at Rebecca’s Desk: elegant, concise, warm,
 Rules:
 - For questions about Rebecca, use only the RETRIEVED PUBLIC CONTEXT.
 - If the public context does not contain the answer, say it is not publicly listed.
-- Never invent live availability, private locations, unpublished rates, screening approval, passwords, private images or personal details.
+- Never invent live availability, private locations, unpublished rates, screening approval, passwords, private images or personal details.\n- Never infer Rebecca’s current physical location from a tour window, travel map, availability label or public notice; those are public planning information, not live tracking.
 - Never ask for or accept ID documents, employer documents, financial details, passwords or sensitive screening material.
 - Never reveal or reconstruct Rebecca's locked private Date Ideas list.
 - Rates are fixed. Never negotiate, invent discounts or imply exceptions.
@@ -83,6 +83,9 @@ function policyAnswerFor(message=''){
   }
   if(/private date|locked date|little black book|private restaurant|private venue|secret restaurant|frequented date spot/.test(q)){
     return 'Rebecca’s curated Date Ideas list is intentionally private. Confirmed guests can ask her directly; I won’t reveal, guess or reconstruct it here.';
+  }
+  if(/where\s+is\s+rebecca(?:\s+right)?\s+(?:now|today|tonight)|is\s+(?:she|rebecca)\s+(?:currently\s+)?(?:in|at)\s+|current\s+(?:physical\s+)?location|live\s+location/.test(q)){
+    return 'Rebecca’s live physical location is not published here. The Travel page shows broad public tour windows and expressions of interest only; Rebecca confirms practical details directly.';
   }
   if(/home address|exact(?:\s+\w+){0,3}\s+address|hotel\s+address|address\s+of\s+(?:her|rebecca|the\s+hotel)|where\s+(?:is|does)\s+rebecca.*(?:stay|live|sleep)|where .* (staying|sleeping|living|right now)|current .*?(?:location|hotel|address)|hotel .* (staying|tonight|address)|private (photo|selfie|number|location|address)|uncensored (photo|image)|real name/.test(q)){
     return 'That information is private or not published, so I can’t provide or guess it.';

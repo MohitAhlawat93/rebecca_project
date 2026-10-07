@@ -84,6 +84,7 @@
           <button type="button" data-tab="assistant">AI Assistant</button>
           <button type="button" class="is-active" data-tab="availability">Availability</button>
           <button type="button" data-tab="travel">Travel</button>
+          <button type="button" data-tab="live">Live info</button>
           <button type="button" data-tab="schedule">Schedule</button>
           <button type="button" data-tab="rates">Rates</button>
           <button type="button" data-tab="contact">Contact</button>
@@ -254,6 +255,40 @@
           <div class="rc-stack" data-travel-list></div>
         </section>
 
+        <section class="rc-panel rc-live-panel" data-panel="live" hidden>
+          <div class="rc-panel-intro">
+            <p class="rc-eyebrow">LIVE-01 · Live information</p>
+            <h3>Map, expressions of interest and public notices.</h3>
+            <p>These controls feed the website and Rebecca’s Desk from the same structured data. Never use them to publish a live physical location.</p>
+          </div>
+
+          <section class="rc-live-block">
+            <div class="rc-media-section-title">
+              <div><span class="rc-card-kicker">Expressions of interest</span><strong>Interest before dates exist.</strong></div>
+              <button type="button" class="rc-secondary" data-add-interest>+ Add interest</button>
+            </div>
+            <div class="rc-stack" data-interest-list></div>
+          </section>
+
+          <section class="rc-live-block">
+            <div class="rc-media-section-title">
+              <div><span class="rc-card-kicker">Announcements</span><strong>One reusable notice system.</strong></div>
+              <button type="button" class="rc-secondary" data-add-live-notice>+ Add notice</button>
+            </div>
+            <p class="rc-live-help">Use a bar for time-sensitive travel, a card for Afterhours/newsletter/content promotion, or a small modal only when it is genuinely important. Expired notices stop displaying automatically.</p>
+            <div class="rc-stack" data-live-notice-list></div>
+          </section>
+
+          <section class="rc-live-block">
+            <div class="rc-media-section-title">
+              <div><span class="rc-card-kicker">Travel map</span><strong>Verified locations only.</strong></div>
+              <button type="button" class="rc-secondary" data-add-map-location>+ Add location</button>
+            </div>
+            <p class="rc-live-help">A pin needs public evidence. Country-level favourites may use a country marker; do not add unnamed countries just to reach the “52 countries” total.</p>
+            <div class="rc-stack" data-map-location-list></div>
+          </section>
+        </section>
+
         <section class="rc-panel rc-schedule-panel" data-panel="schedule" hidden>
           <div class="rc-panel-intro rc-panel-intro-row">
             <div>
@@ -266,9 +301,9 @@
 
           <div class="rc-schedule-summary-grid">
             <div><span>Today</span><strong data-schedule-today>—</strong><small>Singapore date</small></div>
-            <div><span>Current trips</span><strong data-schedule-current-count>0</strong><small>automatically active</small></div>
+            <div><span>Active public windows</span><strong data-schedule-current-count>0</strong><small>calendar state, not live location</small></div>
             <div><span>Upcoming trips</span><strong data-schedule-upcoming-count>0</strong><small>waiting to start</small></div>
-            <div><span>Past trips</span><strong data-schedule-past-count>0</strong><small>kept in Control, hidden publicly</small></div>
+            <div><span>Past trips</span><strong data-schedule-past-count>0</strong><small>kept as public history unless unpublished</small></div>
           </div>
 
           <section class="rc-schedule-section">

@@ -11,13 +11,7 @@
     "api/newsletter.js": {
       "maxDuration": 30
     },
-    "api/admin/media-upload.js": {
-      "maxDuration": 30
-    },
-    "api/admin/concierge-test.js": {
-      "maxDuration": 30
-    },
-    "api/admin/assistant-propose.js": {
+    "api/admin/[route].js": {
       "maxDuration": 30
     }
   },

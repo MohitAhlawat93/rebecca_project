@@ -1,7 +1,7 @@
 import { getAdminSession } from '../../lib/admin-auth.js';
 import { getEffectiveRebeccaData } from '../../lib/admin-store.js';
 import { readConciergeControlState } from '../../lib/concierge-control-store.js';
-import { generateConciergeAnswer } from '../concierge.js';
+import { generateConciergeAnswer } from '../../api/concierge.js';
 
 function noCache(res){
   res.setHeader('Cache-Control','private, no-store, max-age=0');

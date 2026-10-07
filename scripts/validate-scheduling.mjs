@@ -72,17 +72,22 @@ const afterTrip = evaluateQuickControlSchedules(defaults, {
   now: new Date('2026-12-08T08:00:00Z')
 });
 assert.equal(afterTrip.state.travel.find((item) => item.id === 'india-nov-2026').lifecycle, 'past');
-assert.equal(afterTrip.state.travel.find((item) => item.id === 'india-nov-2026').publicVisible, false);
+assert.equal(afterTrip.state.travel.find((item) => item.id === 'india-nov-2026').publicVisible, true);
 assert.equal(afterTrip.state.travel.find((item) => item.id === 'london-europe-dec-2026').lifecycle, 'past');
 
 const publicData = applyQuickControlState(REBECCA_DATA, defaults, {
   now: new Date('2026-12-08T08:00:00Z')
 });
-assert.equal(publicData.travel.calendar.find((item) => item.id === 'india-nov-2026').visible, false);
-assert.equal(publicData.travel.calendar.find((item) => item.id === 'london-europe-dec-2026').visible, false);
+assert.equal(publicData.travel.calendar.find((item) => item.id === 'india-nov-2026').visible, true);
+assert.equal(publicData.travel.calendar.find((item) => item.id === 'london-europe-dec-2026').visible, true);
 assert.equal('until' in publicData.availability, false);
 assert.equal('revertStatus' in publicData.availability, false);
-assert.equal('startDate' in publicData.travel.calendar[0], false);
-assert.equal('lifecycle' in publicData.travel.calendar[0], false);
+const indiaPublic = publicData.travel.calendar.find((item) => item.id === 'india-nov-2026');
+const hongKongPublic = publicData.travel.calendar.find((item) => item.id === 'hong-kong-sep-2026');
+assert.equal(indiaPublic.startDate, '2026-11-10');
+assert.equal(indiaPublic.lifecycle, 'past');
+assert.equal(indiaPublic.autoArchived, true);
+assert.equal(hongKongPublic.lifecycle, 'past');
+assert.equal(hongKongPublic.visible, true);
 
-console.log('RC-04 scheduling validation passed.');
+console.log('RC-04 + LIVE-01 scheduling validation passed: completed public windows move to Past history.');

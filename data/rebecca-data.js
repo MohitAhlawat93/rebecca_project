@@ -6,8 +6,8 @@ import { REBECCA_IMAGES } from './rebecca-images.js';
 
 export const REBECCA_DATA = {
   meta: {
-    dataVersion: '2026-10-06.7H',
-    lastVerified: '2026-10-06',
+    dataVersion: '2026-10-07.LIVE01C',
+    lastVerified: '2026-10-07',
     originalPublicSite: 'https://www.risquerebecca.com/',
     reviewDomain: 'https://rebeccaproject.vercel.app'
   },
@@ -48,6 +48,8 @@ export const REBECCA_DATA = {
       { label: 'Heritage', value: 'Chinese-Portuguese Singaporean' },
       { label: 'Languages', value: 'English · Mandarin' },
       { label: 'Education', value: 'BBA + MA' },
+      { label: 'Travel', value: '52 countries · lived, studied & worked across 3 continents' },
+      { label: 'Favourite places', value: 'Uzbekistan · Japan · Bolivia · Czech Republic' },
       { label: 'Style', value: 'Elegant · feminine · quiet luxury' },
       { label: 'Talk to me about', value: 'Books · travel · food · wine · culture · history · F1' }
     ],
@@ -63,7 +65,7 @@ export const REBECCA_DATA = {
       { label: 'Values', value: 'Freedom · balance · openness · curiosity' }
     ],
     fragments: [
-      { label: 'Favourite places', value: 'Uzbekistan · Japan · Argentina · Bolivia · Czech Republic' },
+      { label: 'Favourite places', value: 'Uzbekistan · Japan · Bolivia · Czech Republic' },
       { label: 'Talk to me about', value: 'Books · travel · food · wine · culture · history · economics · F1 + cars' },
       { label: 'Unexpected skills', value: 'Retired student athlete · classically trained pianist' },
       { label: 'How to feed me', value: 'Tasting menus · sushi · steak · fresh seafood · thoughtful pairings' },
@@ -149,6 +151,18 @@ export const REBECCA_DATA = {
   travel: {
     calendar: [
       {
+        id: 'hong-kong-sep-2026',
+        kicker: 'Hong Kong · 23–27 September',
+        dateRange: '23–27 September 2026',
+        startDate: '2026-09-23',
+        endDate: '2026-09-27',
+        title: 'Hong Kong, with Mainland China by invitation.',
+        cities: ['Hong Kong'],
+        body: 'Hong Kong was a published September touring window, with Mainland China invitations also welcomed and Mandarin-friendly communication noted publicly.',
+        meta: ['Past public tour', 'Historical calendar entry'],
+        visible: true
+      },
+      {
         id: 'india-nov-2026',
         kicker: 'India · 10–30 November',
         dateRange: '10–30 November 2026',
@@ -166,12 +180,38 @@ export const REBECCA_DATA = {
         startDate: '2026-12-01',
         endDate: '2026-12-07',
         title: 'London first. Europe by invitation.',
+        cities: ['London'],
         body: 'From London, invitations to Greater UK and major European cities begin from 6 hours plus travel.',
         meta: ['Early enquiries encouraged', 'Screening + deposit'],
         alt: true
       }
     ],
     northAmericaNotice: 'North America: currently accepting expressions of interest for selected cities. Public dates are always approximate; exact details are shared after screening and deposit.',
+    expressionsOfInterest: [
+      {
+        id: 'north-america-eoi-2026',
+        region: 'North America',
+        title: 'Selected North America cities',
+        body: 'Rebecca is accepting expressions of interest. No public dates or current location are implied; a strong invitation can help shape a future tour.',
+        meta: ['Expressions of interest', 'Exact details only after screening + deposit'],
+        visible: true
+      }
+    ],
+    mapLocations: [
+      { id: 'singapore-base', name: 'Singapore', country: 'Singapore', lat: 1.3521, lng: 103.8198, categories: ['lived-studied-worked'], summary: 'Rebecca’s verified public base in Asia.', evidence: 'Public profile: Singapore-based.', enabled: true },
+      { id: 'fav-uzbekistan', name: 'Uzbekistan', country: 'Uzbekistan', lat: 41.3775, lng: 64.5853, categories: ['visited', 'favourite'], summary: 'Named by Rebecca among her favourite countries visited.', evidence: 'Original public profile.', enabled: true },
+      { id: 'fav-japan', name: 'Japan', country: 'Japan', lat: 36.2048, lng: 138.2529, categories: ['visited', 'favourite'], summary: 'Named by Rebecca among her favourite countries visited.', evidence: 'Original public profile.', enabled: true },
+      { id: 'fav-bolivia', name: 'Bolivia', country: 'Bolivia', lat: -16.2902, lng: -63.5887, categories: ['visited', 'favourite'], summary: 'Named by Rebecca among her favourite countries visited.', evidence: 'Original public profile.', enabled: true },
+      { id: 'fav-czech-republic', name: 'Czech Republic', country: 'Czech Republic', lat: 49.8175, lng: 15.4730, categories: ['visited', 'favourite'], summary: 'Named by Rebecca among her favourite countries visited.', evidence: 'Current original public profile.', enabled: true },
+      { id: 'hong-kong-history', name: 'Hong Kong', country: 'Hong Kong', lat: 22.3193, lng: 114.1694, categories: ['visited'], summary: 'A verified published September 2026 touring stop and a place Rebecca publicly references as an occasional base.', evidence: 'Current public profile + touring calendar.', tourId: 'hong-kong-sep-2026', enabled: true },
+      { id: 'tour-bangalore-2026', name: 'Bangalore', country: 'India', lat: 12.9716, lng: 77.5946, categories: ['upcoming-tour'], summary: 'Published India touring city for the November 2026 window.', evidence: 'Public 2026 touring calendar.', tourId: 'india-nov-2026', enabled: true },
+      { id: 'tour-chennai-2026', name: 'Chennai', country: 'India', lat: 13.0827, lng: 80.2707, categories: ['upcoming-tour'], summary: 'Published India touring city for the November 2026 window.', evidence: 'Public 2026 touring calendar.', tourId: 'india-nov-2026', enabled: true },
+      { id: 'tour-delhi-2026', name: 'Delhi', country: 'India', lat: 28.6139, lng: 77.2090, categories: ['upcoming-tour'], summary: 'Published India touring city for the November 2026 window.', evidence: 'Public 2026 touring calendar.', tourId: 'india-nov-2026', enabled: true },
+      { id: 'tour-hyderabad-2026', name: 'Hyderabad', country: 'India', lat: 17.3850, lng: 78.4867, categories: ['upcoming-tour'], summary: 'Published India touring city for the November 2026 window.', evidence: 'Public 2026 touring calendar.', tourId: 'india-nov-2026', enabled: true },
+      { id: 'tour-kolkata-2026', name: 'Kolkata', country: 'India', lat: 22.5726, lng: 88.3639, categories: ['upcoming-tour'], summary: 'Published India touring city for the November 2026 window.', evidence: 'Public 2026 touring calendar.', tourId: 'india-nov-2026', enabled: true },
+      { id: 'tour-mumbai-2026', name: 'Mumbai', country: 'India', lat: 19.0760, lng: 72.8777, categories: ['upcoming-tour'], summary: 'Published India touring city for the November 2026 window.', evidence: 'Public 2026 touring calendar.', tourId: 'india-nov-2026', enabled: true },
+      { id: 'tour-london-2026', name: 'London', country: 'United Kingdom', lat: 51.5074, lng: -0.1278, categories: ['upcoming-tour'], summary: 'Published London touring base for the December 2026 window.', evidence: 'Public 2026 touring calendar.', tourId: 'london-europe-dec-2026', enabled: true }
+    ],
     fmty: [
       {
         id: 'selected-asia',
@@ -248,11 +288,58 @@ export const REBECCA_DATA = {
       }
     },
     practicalities: [
-      'Tour dates shown publicly are estimates. Once screening is complete and a deposit is in place, I’ll share exact timing and location privately.',
-      'When touring, I host only in impeccable four- or five-star hotels. If you want to see me somewhere that is not listed, send the city and proposed dates anyway; I am very open to making a good invitation work.',
-      'For unlisted countries, use my Singapore rates converted into local currency and rounded up as a starting point.'
+      'Tour dates shown publicly are estimates rather than live-location updates. Exact timing and location are shared privately after the practical steps are complete.',
+      'For unlisted countries, use my Singapore rates converted into local currency and rounded up as a starting point. For side trips from a published touring base, use the public minimum-duration guidance and add travel expenses where applicable.'
     ]
   },
+
+  notices: [
+    {
+      id: 'india-tour-2026',
+      type: 'travel',
+      title: 'India · 10–30 November',
+      message: 'Bangalore, Chennai, Delhi, Hyderabad, Kolkata and Mumbai are on Rebecca’s published November touring window.',
+      ctaLabel: 'See travel details',
+      ctaUrl: '/travel#travel-calendar',
+      startDate: '2026-10-01',
+      expiryDate: '2026-11-30',
+      priority: 100,
+      enabled: true,
+      dismissible: true,
+      pages: ['/', '/travel'],
+      surface: 'bar'
+    },
+    {
+      id: 'london-tour-2026',
+      type: 'travel',
+      title: 'London & Europe · 1–7 December',
+      message: 'London is the published base, with Greater UK and major Europe by invitation.',
+      ctaLabel: 'View December travel',
+      ctaUrl: '/travel#travel-calendar',
+      startDate: '2026-11-25',
+      expiryDate: '2026-12-07',
+      priority: 90,
+      enabled: true,
+      dismissible: true,
+      pages: ['/', '/travel'],
+      surface: 'bar'
+    },
+    {
+      id: 'rebecca-afterhours',
+      type: 'telegram',
+      title: 'Rebecca Afterhours',
+      message: 'Join Rebecca’s public Telegram channel for occasional updates, tour notes and new public posts.',
+      ctaLabel: 'Open Telegram',
+      ctaUrl: 'https://tinyurl.com/rebecca-afterhours',
+      startDate: null,
+      expiryDate: null,
+      priority: 50,
+      enabled: true,
+      dismissible: true,
+      pages: ['/', '/travel', '/journal', '/gallery', '/contact'],
+      surface: 'card'
+    }
+  ],
 
   policies: {
     screening: {
@@ -283,7 +370,6 @@ export const REBECCA_DATA = {
       { title: 'Inclusivity & accessibility', body: 'Rebecca welcomes respectful adults from varied backgrounds. If you need an accessibility accommodation, include it in the initial enquiry so logistics can be planned properly.' },
       { title: 'Privacy & discretion', body: 'Public tour dates and locations remain deliberately broad. Exact logistics are shared privately after screening and the required deposit.' },
       { title: 'References', body: 'Reference requests require Rebecca’s prior permission and should only be made when the relationship is recent enough for her to vouch accurately.' },
-      { title: 'Touring standards', body: 'When hosting on tour, Rebecca uses high-standard four- or five-star hotels and shares exact locations only close to the confirmed date.' }
     ],
     boundaries: [
       'My rates are not negotiated. A boundary should never need to be stated twice. Private conversations, contact information and anything shared in confidence stay between us.',

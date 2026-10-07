@@ -4,7 +4,7 @@ import { buildOwnerInsights } from '../lib/owner-insights.js';
 
 const admin=fs.readFileSync(new URL('../admin.html',import.meta.url),'utf8');
 const adminJs=fs.readFileSync(new URL('../admin.js',import.meta.url),'utf8');
-const api=fs.readFileSync(new URL('../api/admin/insights.js',import.meta.url),'utf8');
+const api=fs.readFileSync(new URL('../server/admin/insights.js',import.meta.url),'utf8');
 const engine=fs.readFileSync(new URL('../lib/owner-insights.js',import.meta.url),'utf8');
 
 assert.match(admin,/data-tab="insights"/);

@@ -7,9 +7,9 @@ import {
 
 const admin=fs.readFileSync(new URL('../admin.html',import.meta.url),'utf8');
 const adminJs=fs.readFileSync(new URL('../admin.js',import.meta.url),'utf8');
-const systemApi=fs.readFileSync(new URL('../api/admin/system.js',import.meta.url),'utf8');
-const propose=fs.readFileSync(new URL('../api/admin/assistant-propose.js',import.meta.url),'utf8');
-const apply=fs.readFileSync(new URL('../api/admin/assistant-apply.js',import.meta.url),'utf8');
+const systemApi=fs.readFileSync(new URL('../server/admin/system.js',import.meta.url),'utf8');
+const propose=fs.readFileSync(new URL('../server/admin/assistant-propose.js',import.meta.url),'utf8');
+const apply=fs.readFileSync(new URL('../server/admin/assistant-apply.js',import.meta.url),'utf8');
 const needs=fs.readFileSync(new URL('../lib/needs-rebecca-store.js',import.meta.url),'utf8');
 const system=fs.readFileSync(new URL('../lib/system-store.js',import.meta.url),'utf8');
 const schema=fs.readFileSync(new URL('../supabase/rc-11-settings-safety.sql',import.meta.url),'utf8');

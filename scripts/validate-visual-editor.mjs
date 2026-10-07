@@ -5,7 +5,7 @@ const content = fs.readFileSync(new URL('../content.js', import.meta.url), 'utf8
 const editor = fs.readFileSync(new URL('../visual-editor.js', import.meta.url), 'utf8');
 const admin = fs.readFileSync(new URL('../admin.html', import.meta.url), 'utf8');
 const store = fs.readFileSync(new URL('../lib/admin-store.js', import.meta.url), 'utf8');
-const api = fs.readFileSync(new URL('../api/admin/visual-editor.js', import.meta.url), 'utf8');
+const api = fs.readFileSync(new URL('../server/admin/visual-editor.js', import.meta.url), 'utf8');
 
 assert.match(content, /rcEdit=['\"]availability['\"]/);
 assert.match(content, /data-rc-edit="rate:/);

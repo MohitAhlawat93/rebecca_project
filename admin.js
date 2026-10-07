@@ -252,16 +252,16 @@ function travelCard(item, index) {
   const lifecycle = item.lifecycle || 'manual';
   const lifecycleLabel = {
     upcoming: 'Upcoming',
-    current: 'Current',
+    current: 'Public window',
     past: 'Past',
     manual: 'Manual'
   }[lifecycle] || 'Manual';
   const lifecycleNote = lifecycle === 'past'
-    ? 'Automatically hidden from the public Travel page.'
+    ? 'Retained in the public Past archive unless you unpublish it.'
     : lifecycle === 'current'
-      ? 'This trip is currently active.'
+      ? 'This public date window is in progress. It is not a live-location signal.'
       : lifecycle === 'upcoming'
-        ? 'This trip will become Current automatically.'
+        ? 'This trip will become an active public window automatically.'
         : 'Add both start and end dates to automate this trip.';
 
   return `
@@ -297,6 +297,118 @@ function renderTravel() {
   list.innerHTML = quickState.travel.length
     ? quickState.travel.map(travelCard).join('')
     : '<div class="rc-empty">No public travel windows. Use “Add trip” when you need one.</div>';
+}
+
+
+function interestCard(item,index){
+  return `
+    <article class="rc-edit-card" data-interest-index="${index}">
+      <div class="rc-edit-card-head">
+        <div><span class="rc-card-kicker">Expression ${index+1}</span><strong>${esc(item.title||item.region||'New expression of interest')}</strong></div>
+        <div class="rc-inline-actions">
+          <label class="rc-toggle"><input type="checkbox" data-interest-visible ${item.visible!==false?'checked':''}><span>Published</span></label>
+          <button type="button" class="rc-danger-link" data-remove-interest>Remove</button>
+        </div>
+      </div>
+      <div class="rc-form-grid">
+        <label class="rc-field"><span>Region</span><input data-interest="region" value="${esc(item.region||'')}" maxlength="120"></label>
+        <label class="rc-field"><span>Headline</span><input data-interest="title" value="${esc(item.title||'')}" maxlength="180"></label>
+        <label class="rc-field rc-field-wide"><span>Public description</span><textarea data-interest="body" rows="3" maxlength="800">${esc(item.body||'')}</textarea></label>
+        <label class="rc-field rc-field-wide"><span>Notes <small>comma separated</small></span><input data-interest="meta" value="${esc((item.meta||[]).join(', '))}" maxlength="500"></label>
+      </div>
+    </article>`;
+}
+
+function liveNoticeCard(item,index){
+  return `
+    <article class="rc-edit-card" data-live-notice-index="${index}">
+      <div class="rc-edit-card-head">
+        <div><span class="rc-card-kicker">${esc((item.type||'campaign').replaceAll('-',' '))} · priority ${esc(item.priority??0)}</span><strong>${esc(item.title||'New notice')}</strong></div>
+        <div class="rc-inline-actions">
+          <label class="rc-toggle"><input type="checkbox" data-live-notice-enabled ${item.enabled!==false?'checked':''}><span>Enabled</span></label>
+          <label class="rc-toggle"><input type="checkbox" data-live-notice-dismissible ${item.dismissible!==false?'checked':''}><span>Dismissible</span></label>
+          <button type="button" class="rc-danger-link" data-remove-live-notice>Remove</button>
+        </div>
+      </div>
+      <div class="rc-form-grid">
+        <label class="rc-field"><span>Type</span><input data-live-notice="type" value="${esc(item.type||'campaign')}" maxlength="60" placeholder="travel, telegram, journal…"></label>
+        <label class="rc-field"><span>Surface</span><select data-live-notice="surface"><option value="bar" ${item.surface==='bar'?'selected':''}>Top bar</option><option value="card" ${item.surface==='card'?'selected':''}>Inline card</option><option value="modal" ${item.surface==='modal'?'selected':''}>Small modal</option></select></label>
+        <label class="rc-field rc-field-wide"><span>Title</span><input data-live-notice="title" value="${esc(item.title||'')}" maxlength="140"></label>
+        <label class="rc-field rc-field-wide"><span>Short message</span><textarea data-live-notice="message" rows="3" maxlength="500">${esc(item.message||'')}</textarea></label>
+        <label class="rc-field"><span>CTA label</span><input data-live-notice="ctaLabel" value="${esc(item.ctaLabel||'')}" maxlength="80"></label>
+        <label class="rc-field"><span>CTA URL or path</span><input data-live-notice="ctaUrl" value="${esc(item.ctaUrl||'')}" maxlength="500"></label>
+        <label class="rc-field"><span>Starts</span><input type="date" data-live-notice="startDate" value="${esc(item.startDate||'')}"></label>
+        <label class="rc-field"><span>Expires</span><input type="date" data-live-notice="expiryDate" value="${esc(item.expiryDate||'')}"></label>
+        <label class="rc-field"><span>Priority <small>higher wins</small></span><input type="number" min="0" max="1000000" step="1" data-live-notice="priority" value="${esc(item.priority??0)}"></label>
+        <label class="rc-field rc-field-wide"><span>Pages <small>comma separated; use * for all</small></span><input data-live-notice="pages" value="${esc((item.pages||['*']).join(', '))}" maxlength="1000" placeholder="/, /travel"></label>
+      </div>
+    </article>`;
+}
+
+function mapLocationCard(item,index){
+  const categories=[
+    ['visited','Visited'],
+    ['favourite','Favourite'],
+    ['upcoming-tour','Upcoming tour'],
+    ['lived-studied-worked','Lived / studied / worked']
+  ];
+  const tripOptions=(quickState?.travel||[]).map((trip)=>`<option value="${esc(trip.id)}" ${item.tourId===trip.id?'selected':''}>${esc(trip.title||trip.id)}</option>`).join('');
+  return `
+    <article class="rc-edit-card" data-map-index="${index}">
+      <div class="rc-edit-card-head">
+        <div><span class="rc-card-kicker">Verified location ${index+1}</span><strong>${esc(item.name||'New location')}</strong></div>
+        <div class="rc-inline-actions">
+          <label class="rc-toggle"><input type="checkbox" data-map-enabled ${item.enabled!==false?'checked':''}><span>Published</span></label>
+          <button type="button" class="rc-danger-link" data-remove-map-location>Remove</button>
+        </div>
+      </div>
+      <div class="rc-form-grid">
+        <label class="rc-field"><span>Place name</span><input data-map-location="name" value="${esc(item.name||'')}" maxlength="120"></label>
+        <label class="rc-field"><span>Country</span><input data-map-location="country" value="${esc(item.country||'')}" maxlength="120"></label>
+        <label class="rc-field"><span>Latitude</span><input type="number" min="-90" max="90" step="0.0001" data-map-location="lat" value="${esc(item.lat??'')}"></label>
+        <label class="rc-field"><span>Longitude</span><input type="number" min="-180" max="180" step="0.0001" data-map-location="lng" value="${esc(item.lng??'')}"></label>
+        <div class="rc-field rc-field-wide"><span>Verified categories</span><div class="rc-map-category-row">${categories.map(([key,label])=>`<label><input type="checkbox" data-map-category="${key}" ${(item.categories||[]).includes(key)?'checked':''}>${label}</label>`).join('')}</div></div>
+        <label class="rc-field rc-field-wide"><span>Public summary</span><textarea data-map-location="summary" rows="2" maxlength="320">${esc(item.summary||'')}</textarea></label>
+        <label class="rc-field rc-field-wide"><span>Evidence note <small>owner-facing provenance</small></span><input data-map-location="evidence" value="${esc(item.evidence||'')}" maxlength="220"></label>
+        <label class="rc-field rc-field-wide"><span>Linked tour <small>optional; hides upcoming-only pin after the window passes</small></span><select data-map-location="tourId"><option value="">None</option>${tripOptions}</select></label>
+      </div>
+    </article>`;
+}
+
+function renderLive(){
+  if(!quickState)return;
+  const interests=document.querySelector('[data-interest-list]');
+  if(interests) interests.innerHTML=(quickState.travelInterests||[]).length
+    ? quickState.travelInterests.map(interestCard).join('')
+    : '<div class="rc-empty">No expressions of interest are published.</div>';
+  const notices=document.querySelector('[data-live-notice-list]');
+  if(notices) notices.innerHTML=(quickState.notices||[]).length
+    ? quickState.notices.map(liveNoticeCard).join('')
+    : '<div class="rc-empty">No live notices. Add one when there is something worth surfacing.</div>';
+  const locations=document.querySelector('[data-map-location-list]');
+  if(locations) locations.innerHTML=(quickState.mapLocations||[]).length
+    ? quickState.mapLocations.map(mapLocationCard).join('')
+    : '<div class="rc-empty">No verified map pins are published.</div>';
+}
+
+function collectLive(){
+  const travelInterests=[...document.querySelectorAll('[data-interest-index]')].map((card,index)=>{
+    const previous=quickState.travelInterests?.[index]||{};
+    const get=(name)=>card.querySelector('[data-interest="'+name+'"]')?.value||'';
+    return {...previous,region:get('region').trim(),title:get('title').trim(),body:get('body').trim(),meta:csv(get('meta')),visible:Boolean(card.querySelector('[data-interest-visible]')?.checked)};
+  });
+  const notices=[...document.querySelectorAll('[data-live-notice-index]')].map((card,index)=>{
+    const previous=quickState.notices?.[index]||{};
+    const get=(name)=>card.querySelector('[data-live-notice="'+name+'"]')?.value||'';
+    const priorityRaw=get('priority');
+    return {...previous,type:get('type').trim(),surface:get('surface'),title:get('title').trim(),message:get('message').trim(),ctaLabel:get('ctaLabel').trim(),ctaUrl:get('ctaUrl').trim(),startDate:get('startDate')||null,expiryDate:get('expiryDate')||null,priority:priorityRaw===''?0:Number(priorityRaw),pages:csv(get('pages')),enabled:Boolean(card.querySelector('[data-live-notice-enabled]')?.checked),dismissible:Boolean(card.querySelector('[data-live-notice-dismissible]')?.checked)};
+  });
+  const mapLocations=[...document.querySelectorAll('[data-map-index]')].map((card,index)=>{
+    const previous=quickState.mapLocations?.[index]||{};
+    const get=(name)=>card.querySelector('[data-map-location="'+name+'"]')?.value||'';
+    return {...previous,name:get('name').trim(),country:get('country').trim(),lat:get('lat')===''?null:Number(get('lat')),lng:get('lng')===''?null:Number(get('lng')),categories:[...card.querySelectorAll('[data-map-category]:checked')].map((input)=>input.dataset.mapCategory),summary:get('summary').trim(),evidence:get('evidence').trim(),tourId:get('tourId')||null,enabled:Boolean(card.querySelector('[data-map-enabled]')?.checked)};
+  });
+  return {travelInterests,notices,mapLocations};
 }
 
 function scheduleEventCard(event, mode = 'next') {
@@ -391,6 +503,7 @@ function renderProfile() {
 function renderAll() {
   renderAvailability();
   renderTravel();
+  renderLive();
   renderSchedule();
   renderRates();
   renderContact();
@@ -445,6 +558,8 @@ function collectState() {
     contact[input.dataset.contact] = input.value.trim();
   });
 
+  const live = collectLive();
+
   return {
     availability: {
       ...quickState.availability,
@@ -456,6 +571,9 @@ function collectState() {
       revertMessage: ''
     },
     travel: collectTravel(),
+    travelInterests: live.travelInterests,
+    mapLocations: live.mapLocations,
+    notices: live.notices,
     rates: collectRates(),
     profile,
     contact
@@ -2257,6 +2375,40 @@ document.addEventListener('click', (event) => {
     return;
   }
 
+  if (event.target.closest('[data-add-interest]') && quickState) {
+    quickState.travelInterests = quickState.travelInterests || [];
+    quickState.travelInterests.push({id:'interest-'+Date.now(),region:'',title:'New expression of interest',body:'',meta:[],visible:true});
+    renderLive();setDirty(true);return;
+  }
+  const removeInterest=event.target.closest('[data-remove-interest]');
+  if(removeInterest&&quickState){
+    const card=removeInterest.closest('[data-interest-index]'),index=Number(card?.dataset.interestIndex);
+    if(Number.isInteger(index)&&window.confirm('Remove this expression of interest?')){quickState.travelInterests.splice(index,1);renderLive();setDirty(true);}
+    return;
+  }
+  if (event.target.closest('[data-add-live-notice]') && quickState) {
+    quickState.notices = quickState.notices || [];
+    quickState.notices.push({id:'notice-'+Date.now(),type:'campaign',title:'New notice',message:'',ctaLabel:'',ctaUrl:'',startDate:null,expiryDate:null,priority:50,enabled:true,dismissible:true,pages:['*'],surface:'card'});
+    renderLive();setDirty(true);return;
+  }
+  const removeNotice=event.target.closest('[data-remove-live-notice]');
+  if(removeNotice&&quickState){
+    const card=removeNotice.closest('[data-live-notice-index]'),index=Number(card?.dataset.liveNoticeIndex);
+    if(Number.isInteger(index)&&window.confirm('Remove this notice?')){quickState.notices.splice(index,1);renderLive();setDirty(true);}
+    return;
+  }
+  if (event.target.closest('[data-add-map-location]') && quickState) {
+    quickState.mapLocations = quickState.mapLocations || [];
+    quickState.mapLocations.push({id:'location-'+Date.now(),name:'New location',country:'',lat:null,lng:null,categories:['visited'],summary:'',evidence:'',tourId:null,enabled:true});
+    renderLive();setDirty(true);return;
+  }
+  const removeMap=event.target.closest('[data-remove-map-location]');
+  if(removeMap&&quickState){
+    const card=removeMap.closest('[data-map-index]'),index=Number(card?.dataset.mapIndex);
+    if(Number.isInteger(index)&&window.confirm('Remove this verified map location?')){quickState.mapLocations.splice(index,1);renderLive();setDirty(true);}
+    return;
+  }
+
   if (event.target.closest('[data-add-trip]') && quickState) {
     const id = 'trip-' + Date.now();
     quickState.travel.push({
@@ -2291,7 +2443,7 @@ document.addEventListener('click', (event) => {
 
 document.addEventListener('input', (event) => {
   if (
-    event.target.matches('[data-availability-message], [data-availability-until], [data-trip], [data-rate], [data-contact], [data-profile]')
+    event.target.matches('[data-availability-message], [data-availability-until], [data-trip], [data-rate], [data-contact], [data-profile], [data-interest], [data-live-notice], [data-map-location]')
   ) {
     setDirty(true);
   }
@@ -2314,7 +2466,7 @@ document.addEventListener('change', (event) => {
     renderMediaSchedule();
   }
 
-  if (event.target.matches('[data-trip-visible], [data-rate-visible], [data-rate-featured], [data-availability-until], [data-availability-revert]')) {
+  if (event.target.matches('[data-trip-visible], [data-rate-visible], [data-rate-featured], [data-availability-until], [data-availability-revert], [data-interest-visible], [data-live-notice-enabled], [data-live-notice-dismissible], [data-map-enabled], [data-map-category], [data-live-notice="surface"], [data-map-location="tourId"]')) {
     setDirty(true);
     if (event.target.matches('[data-availability-until], [data-availability-revert]')) {
       updateAvailabilityExpirySummary();

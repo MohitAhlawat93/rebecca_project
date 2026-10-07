@@ -817,3 +817,15 @@ button,a{-webkit-tap-highlight-color:transparent}
 @media(max-width:620px){
   .rc-installed-module-grid{grid-template-columns:1fr}
 }
+
+
+/* LIVE-01 */
+.rc-live-panel{display:grid;gap:22px}
+.rc-live-block{border-top:1px solid var(--rc-line);padding-top:22px;display:grid;gap:14px}
+.rc-live-help{margin:0;max-width:78ch;color:var(--rc-muted);font-size:.76rem;line-height:1.6}
+.rc-live-panel .rc-edit-card{background:rgba(255,255,255,.78)}
+.rc-map-category-row{display:flex;gap:8px;flex-wrap:wrap}
+.rc-map-category-row label{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--rc-line);border-radius:999px;padding:7px 10px;font-size:.7rem;background:#fff}
+.rc-map-category-row input{accent-color:#2f473d}
+.rc-live-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(max-width:700px){.rc-live-meta{grid-template-columns:1fr}.rc-live-block .rc-media-section-title{align-items:flex-start;flex-direction:column}}
