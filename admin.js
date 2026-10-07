@@ -30,6 +30,11 @@ const conciergeTestInput = document.querySelector('[data-concierge-test-input]')
 const conciergeTestPage = document.querySelector('[data-concierge-test-page]');
 const conciergeTestThread = document.querySelector('[data-concierge-test-thread]');
 const conciergeTestSend = document.querySelector('[data-concierge-test-send]');
+const assistantPrompt = document.querySelector('[data-assistant-prompt]');
+const assistantProposeButton = document.querySelector('[data-assistant-propose]');
+const assistantResults = document.querySelector('[data-assistant-results]');
+const assistantProposalList = document.querySelector('[data-assistant-proposal-list]');
+const assistantUnsupported = document.querySelector('[data-assistant-unsupported]');
 
 const startupParams = new URLSearchParams(window.location.search);
 const requestedTab = startupParams.get('tab');
@@ -67,6 +72,8 @@ let needsSummary = { open: 0, drafted: 0, closed: 0, recurring: 0, total: 0 };
 let needsPersistent = false;
 let needsLoaded = false;
 let needsFilter = 'open';
+let assistantProposal = null;
+let assistantBusy = false;
 
 const STATUS_LABELS = {
   accepting: 'Accepting enquiries',
@@ -198,7 +205,7 @@ function activateTab(name) {
     panel.hidden = !selected;
     panel.classList.toggle('is-active', selected);
   });
-  if (quickSavebar) quickSavebar.hidden = ['media','concierge','concierge-test','needs-rebecca'].includes(name);
+  if (quickSavebar) quickSavebar.hidden = ['assistant','media','concierge','concierge-test','needs-rebecca'].includes(name);
   if (name === 'media' && !mediaLoaded) loadMedia();
   if ((name === 'concierge' || name === 'concierge-test') && !conciergeLoaded) loadConcierge();
   if (name === 'needs-rebecca' && !needsLoaded) loadNeedsRebecca();
@@ -684,6 +691,133 @@ function renderMedia() {
 }
 
 
+
+
+function renderAssistantProposal() {
+  if (!assistantResults || !assistantProposalList) return;
+  const proposal = assistantProposal?.proposal || null;
+  const changes = proposal?.changes || [];
+
+  assistantResults.hidden = false;
+  setText('[data-assistant-summary]', proposal?.summary || 'Review before applying');
+
+  if (!changes.length) {
+    assistantProposalList.innerHTML = '<div class="rc-empty">No safe supported Draft change was prepared. Refine the request and try again.</div>';
+  } else {
+    assistantProposalList.innerHTML = changes.map((change, index) => `
+      <article class="rc-assistant-card${change.target === 'concierge' ? ' is-concierge' : ''}" data-assistant-change-index="${index}">
+        <div class="rc-assistant-card-main">
+          <div class="rc-assistant-card-head">
+            <span class="rc-assistant-target">${change.target === 'concierge' ? 'Concierge Draft' : 'Website Draft'}</span>
+            <span class="rc-card-kicker">Proposal ${index + 1}</span>
+          </div>
+          <h4>${esc(change.summary || 'Proposed Draft change')}</h4>
+          <div class="rc-assistant-diff">
+            <div><span>Before</span><p>${esc(change.before || 'Not set')}</p></div>
+            <b class="rc-assistant-arrow" aria-hidden="true">→</b>
+            <div><span>Proposed</span><p>${esc(change.after || '—')}</p></div>
+          </div>
+        </div>
+        <div class="rc-assistant-card-actions">
+          <button type="button" class="rc-primary" data-assistant-apply="${index}">Apply to Draft</button>
+          <small>Nothing goes live.</small>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  const unsupported = proposal?.unsupported || '';
+  if (assistantUnsupported) {
+    assistantUnsupported.hidden = !unsupported;
+    assistantUnsupported.textContent = unsupported;
+  }
+}
+
+async function prepareAssistantProposal() {
+  const prompt = String(assistantPrompt?.value || '').trim();
+  if (!prompt || assistantBusy) return;
+
+  assistantBusy = true;
+  assistantProposal = null;
+  if (assistantResults) assistantResults.hidden = true;
+  if (assistantProposeButton) {
+    assistantProposeButton.disabled = true;
+    assistantProposeButton.textContent = 'Preparing…';
+  }
+  setText('[data-assistant-status]', 'Reading the current private Drafts and preparing a proposal. Nothing is being changed.');
+
+  try {
+    const response = await fetch('/api/admin/assistant-propose', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      showLogin('Your owner session expired. Please sign in again.');
+      return;
+    }
+    if (!response.ok) throw new Error(data.error || 'Could not prepare a safe proposal.');
+
+    assistantProposal = data;
+    renderAssistantProposal();
+    setText('[data-assistant-status]', (data.proposal?.changes?.length || 0)
+      ? 'Proposal ready. Review every Before → Proposed change before applying.'
+      : 'No Draft change was prepared. Nothing changed.');
+  } catch (error) {
+    setText('[data-assistant-status]', error?.message || 'Could not prepare a proposal. Nothing changed.');
+  } finally {
+    assistantBusy = false;
+    if (assistantProposeButton) {
+      assistantProposeButton.disabled = false;
+      assistantProposeButton.textContent = 'Prepare Proposal';
+    }
+  }
+}
+
+async function applyAssistantProposal(index) {
+  const change = assistantProposal?.proposal?.changes?.[index];
+  const card = document.querySelector('[data-assistant-change-index="' + index + '"]');
+  const button = card?.querySelector('[data-assistant-apply]');
+  if (!change || !card || !button || button.disabled) return;
+
+  button.disabled = true;
+  button.textContent = 'Applying…';
+
+  try {
+    const response = await fetch('/api/admin/assistant-apply', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ change })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      showLogin('Your owner session expired. Please sign in again.');
+      return;
+    }
+    if (!response.ok) {
+      if (data.stale) {
+        card.classList.add('is-stale');
+        button.textContent = 'Proposal stale';
+        setText('[data-assistant-status]', data.error || 'The Draft changed. Generate a fresh proposal.');
+        return;
+      }
+      throw new Error(data.error || 'Could not apply this proposal.');
+    }
+
+    card.classList.add('is-applied');
+    button.textContent = 'Applied to ' + (data.target === 'concierge' ? 'Concierge Draft' : 'Website Draft');
+    setText('[data-assistant-status]', data.message || 'Applied to Draft only. Nothing was published.');
+
+    if (data.target === 'concierge') conciergeLoaded = false;
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = 'Apply to Draft';
+    setText('[data-assistant-status]', error?.message || 'Could not apply that proposal. Nothing was published.');
+  }
+}
 
 function needsStatusLabel(status) {
   return {
@@ -1663,6 +1797,8 @@ logoutButton?.addEventListener('click', async () => {
     needsPersistent = false;
     needsLoaded = false;
     needsFilter = 'open';
+    assistantProposal = null;
+    assistantBusy = false;
     showLogin('Signed out.');
   }
 });
@@ -1816,6 +1952,28 @@ document.addEventListener('change', (event) => {
   }
 });
 
+
+document.addEventListener('click', async (event) => {
+  const example = event.target.closest('[data-assistant-example]');
+  if (example && assistantPrompt) {
+    assistantPrompt.value = example.dataset.assistantExample || '';
+    assistantPrompt.focus();
+    return;
+  }
+
+  const apply = event.target.closest('[data-assistant-apply]');
+  if (apply) {
+    await applyAssistantProposal(Number(apply.dataset.assistantApply));
+  }
+});
+
+assistantProposeButton?.addEventListener('click', prepareAssistantProposal);
+assistantPrompt?.addEventListener('keydown', (event) => {
+  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+    event.preventDefault();
+    prepareAssistantProposal();
+  }
+});
 
 document.addEventListener('click', async (event) => {
   const filter = event.target.closest('[data-needs-filter]');
