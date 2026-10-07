@@ -62,6 +62,11 @@ let conciergeLoaded = false;
 let conciergePublishedVersion = 0;
 let conciergePublishedAt = null;
 let conciergeTestHistory = [];
+let needsItems = [];
+let needsSummary = { open: 0, drafted: 0, closed: 0, recurring: 0, total: 0 };
+let needsPersistent = false;
+let needsLoaded = false;
+let needsFilter = 'open';
 
 const STATUS_LABELS = {
   accepting: 'Accepting enquiries',
@@ -193,9 +198,10 @@ function activateTab(name) {
     panel.hidden = !selected;
     panel.classList.toggle('is-active', selected);
   });
-  if (quickSavebar) quickSavebar.hidden = ['media','concierge','concierge-test'].includes(name);
+  if (quickSavebar) quickSavebar.hidden = ['media','concierge','concierge-test','needs-rebecca'].includes(name);
   if (name === 'media' && !mediaLoaded) loadMedia();
   if ((name === 'concierge' || name === 'concierge-test') && !conciergeLoaded) loadConcierge();
+  if (name === 'needs-rebecca' && !needsLoaded) loadNeedsRebecca();
 }
 
 function renderAvailability() {
@@ -678,6 +684,202 @@ function renderMedia() {
 }
 
 
+
+function needsStatusLabel(status) {
+  return {
+    open: 'Open',
+    drafted: 'Answer drafted',
+    resolved: 'Resolved',
+    ignored: 'Ignored'
+  }[status] || 'Open';
+}
+
+function renderNeedsRebecca() {
+  setText('[data-needs-connection]', needsPersistent ? 'Connected' : 'Safe fallback');
+  setText('[data-needs-open-count]', String(needsSummary.open || 0));
+  setText('[data-needs-recurring-count]', String(needsSummary.recurring || 0));
+  setText('[data-needs-drafted-count]', String(needsSummary.drafted || 0));
+
+  document.querySelectorAll('[data-needs-filter]').forEach((button) => {
+    button.classList.toggle('is-selected', button.dataset.needsFilter === needsFilter);
+  });
+
+  const holder = document.querySelector('[data-needs-list]');
+  if (!holder) return;
+
+  const filtered = needsItems.filter((item) => {
+    if (needsFilter === 'all') return true;
+    if (needsFilter === 'closed') return ['resolved', 'ignored'].includes(item.status);
+    return ['open', 'drafted'].includes(item.status);
+  });
+
+  if (!filtered.length) {
+    holder.innerHTML = '<div class="rc-empty">' +
+      (needsFilter === 'closed'
+        ? 'No closed questions.'
+        : needsFilter === 'all'
+          ? 'No Needs Rebecca questions yet.'
+          : 'Nothing needs Rebecca right now.') +
+      '</div>';
+    return;
+  }
+
+  holder.innerHTML = filtered.map((item) => {
+    const recurring = Number(item.count) > 1;
+    const meta = [
+      item.page && item.page !== '/' ? 'Asked from ' + item.page : 'Asked from homepage',
+      'Last seen ' + friendlyDate(item.lastSeen)
+    ].join(' · ');
+
+    let actions = '';
+    if (item.status === 'open') {
+      actions = `
+        <button type="button" class="rc-primary" data-needs-draft-answer="${esc(item.id)}">Draft Answer</button>
+        <button type="button" class="rc-secondary" data-needs-status-id="${esc(item.id)}" data-needs-status-value="resolved">Resolve</button>
+        <button type="button" class="rc-secondary" data-needs-status-id="${esc(item.id)}" data-needs-status-value="ignored">Ignore</button>
+      `;
+    } else if (item.status === 'drafted') {
+      actions = `
+        <button type="button" class="rc-primary" data-needs-draft-answer="${esc(item.id)}">Open Answer Draft</button>
+        <button type="button" class="rc-secondary" data-needs-status-id="${esc(item.id)}" data-needs-status-value="resolved">Resolve</button>
+        <button type="button" class="rc-secondary" data-needs-status-id="${esc(item.id)}" data-needs-status-value="ignored">Ignore</button>
+      `;
+    } else {
+      actions = `
+        <button type="button" class="rc-secondary" data-needs-status-id="${esc(item.id)}" data-needs-status-value="open">Reopen</button>
+        <button type="button" class="rc-danger-link" data-needs-delete="${esc(item.id)}">Delete</button>
+      `;
+    }
+
+    return `
+      <article class="rc-needs-card">
+        <div class="rc-needs-card-main">
+          <div class="rc-needs-card-meta">
+            <span class="rc-needs-pill is-${esc(item.status)}">${esc(needsStatusLabel(item.status))}</span>
+            <span class="rc-needs-pill">${recurring ? esc(item.count) + ' asks' : 'Asked once'}</span>
+            ${recurring ? '<span class="rc-needs-pill is-open">Recurring</span>' : ''}
+          </div>
+          <h4>${esc(item.question)}</h4>
+          <small>${esc(meta)}</small>
+        </div>
+        <div class="rc-needs-actions">${actions}</div>
+      </article>
+    `;
+  }).join('');
+}
+
+function applyNeedsPayload(data) {
+  needsItems = data.items || [];
+  needsSummary = data.summary || { open: 0, drafted: 0, closed: 0, recurring: 0, total: needsItems.length };
+  needsPersistent = Boolean(data.persistent);
+  needsLoaded = true;
+  renderNeedsRebecca();
+}
+
+async function loadNeedsRebecca() {
+  try {
+    const response = await fetch('/api/admin/needs-rebecca', {
+      method: 'GET',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { Accept: 'application/json' }
+    });
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      showLogin('Your owner session expired. Please sign in again.');
+      return false;
+    }
+    if (!response.ok) throw new Error(data.error || 'Could not load Needs Rebecca.');
+    applyNeedsPayload(data);
+    return true;
+  } catch (error) {
+    needsPersistent = false;
+    needsLoaded = false;
+    setText('[data-needs-connection]', 'Unavailable');
+    const holder = document.querySelector('[data-needs-list]');
+    if (holder) holder.innerHTML = '<div class="rc-empty">' + esc(error?.message || 'Needs Rebecca is unavailable.') + '</div>';
+    return false;
+  }
+}
+
+async function needsAction(payload, { quiet = false } = {}) {
+  try {
+    const response = await fetch('/api/admin/needs-rebecca', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Could not update Needs Rebecca.');
+    applyNeedsPayload(data);
+    return true;
+  } catch (error) {
+    if (!quiet) {
+      const holder = document.querySelector('[data-needs-list]');
+      if (holder) holder.insertAdjacentHTML('afterbegin', '<div class="rc-empty">' + esc(error?.message || 'Could not update Needs Rebecca.') + '</div>');
+    }
+    return false;
+  }
+}
+
+async function draftNeedsRebeccaAnswer(id) {
+  const item = needsItems.find((entry) => entry.id === id);
+  if (!item) return;
+
+  if (!conciergeLoaded) {
+    const loaded = await loadConcierge();
+    if (!loaded) return;
+  }
+
+  const answerId = 'needs-' + item.id;
+  conciergeState.trustedAnswers = conciergeState.trustedAnswers || [];
+  let index = conciergeState.trustedAnswers.findIndex((entry) => entry.id === answerId);
+
+  if (index < 0) {
+    conciergeState.trustedAnswers.push({
+      id: answerId,
+      question: item.question,
+      answer: '',
+      keywords: [],
+      linkPath: '',
+      linkLabel: '',
+      enabled: true
+    });
+    index = conciergeState.trustedAnswers.length - 1;
+    renderConcierge();
+    setConciergeDirty(true);
+  }
+
+  await needsAction({ action: 'status', id: item.id, status: 'drafted' }, { quiet: true });
+  activateTab('concierge');
+  setText('[data-concierge-save-state]', 'Trusted Answer started from Needs Rebecca');
+  setText('[data-concierge-save-detail]', 'Write Rebecca’s public answer, Save Draft, test it, then publish.');
+
+  window.setTimeout(() => {
+    const card = document.querySelector('[data-concierge-answer-index="' + index + '"]');
+    card?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card?.querySelector('[data-concierge-answer-field="answer"]')?.focus();
+  }, 80);
+}
+
+async function resolveNeedsFromPublishedAnswers(answers = []) {
+  const ids = (answers || [])
+    .map((item) => String(item?.id || ''))
+    .filter((id) => id.startsWith('needs-'))
+    .map((id) => id.slice(6));
+
+  if (!ids.length) return;
+  if (!needsLoaded) await loadNeedsRebecca();
+
+  for (const id of ids) {
+    const item = needsItems.find((entry) => entry.id === id);
+    if (item && ['open', 'drafted'].includes(item.status)) {
+      await needsAction({ action: 'status', id, status: 'resolved' }, { quiet: true });
+    }
+  }
+}
+
 function setConciergeDirty(value = true) {
   conciergeDirty = value;
   if (conciergeSaveButton) conciergeSaveButton.disabled = !conciergePersistent || !conciergeDirty;
@@ -906,6 +1108,7 @@ async function publishConcierge() {
     conciergePublishedAt = data.publishedAt || new Date().toISOString();
     conciergeDirty = false;
     renderConcierge();
+    await resolveNeedsFromPublishedAnswers(data.published?.trustedAnswers || []);
     setText('[data-concierge-save-state]', 'Concierge published');
     setText('[data-concierge-save-detail]', 'Visitors now use this version.');
   } catch (error) {
@@ -1455,6 +1658,11 @@ logoutButton?.addEventListener('click', async () => {
     conciergeDirty = false;
     conciergeDraftAhead = false;
     conciergeTestHistory = [];
+    needsItems = [];
+    needsSummary = { open: 0, drafted: 0, closed: 0, recurring: 0, total: 0 };
+    needsPersistent = false;
+    needsLoaded = false;
+    needsFilter = 'open';
     showLogin('Signed out.');
   }
 });
@@ -1608,6 +1816,43 @@ document.addEventListener('change', (event) => {
   }
 });
 
+
+document.addEventListener('click', async (event) => {
+  const filter = event.target.closest('[data-needs-filter]');
+  if (filter) {
+    needsFilter = filter.dataset.needsFilter || 'open';
+    renderNeedsRebecca();
+    return;
+  }
+
+  const draft = event.target.closest('[data-needs-draft-answer]');
+  if (draft) {
+    await draftNeedsRebeccaAnswer(draft.dataset.needsDraftAnswer);
+    return;
+  }
+
+  const status = event.target.closest('[data-needs-status-id]');
+  if (status) {
+    await needsAction({
+      action: 'status',
+      id: status.dataset.needsStatusId,
+      status: status.dataset.needsStatusValue
+    });
+    return;
+  }
+
+  const remove = event.target.closest('[data-needs-delete]');
+  if (remove && window.confirm('Delete this closed question from Needs Rebecca?')) {
+    await needsAction({ action: 'delete', id: remove.dataset.needsDelete });
+    return;
+  }
+
+  if (event.target.closest('[data-needs-clear-closed]')) {
+    if (needsSummary.closed > 0 && window.confirm('Clear all resolved and ignored Needs Rebecca questions?')) {
+      await needsAction({ action: 'clearClosed' });
+    }
+  }
+});
 
 document.addEventListener('click', (event) => {
   const status = event.target.closest('[data-concierge-status]');
