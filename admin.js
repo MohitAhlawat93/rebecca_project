@@ -23,11 +23,16 @@ const mediaScheduleCancelButton = document.querySelector('[data-media-cancel-sch
 const mediaScheduleCommitButton = document.querySelector('[data-media-commit-schedule]');
 const mediaSchedulePreviewButton = document.querySelector('[data-media-preview-scheduled]');
 
+const startupParams = new URLSearchParams(window.location.search);
+const requestedTab = startupParams.get('tab');
+const requestedPlacement = startupParams.get('placement');
+const visualReturn = startupParams.get('visualReturn');
+
 let quickState = null;
 let scheduleState = null;
 let persistentStore = false;
 let dirty = false;
-let activeTab = 'availability';
+let activeTab = requestedTab || 'availability';
 let mediaState = null;
 let mediaPublished = null;
 let mediaPlacements = [];
@@ -38,7 +43,7 @@ let mediaDraftAhead = false;
 let mediaSchedule = null;
 let mediaSchedulePhase = 'none';
 let mediaLoaded = false;
-let activeMediaPlacement = 'hero';
+let activeMediaPlacement = requestedPlacement || 'hero';
 
 const STATUS_LABELS = {
   accepting: 'Accepting enquiries',
@@ -671,6 +676,9 @@ async function loadMedia() {
     mediaState = data.draft;
     mediaPublished = data.published;
     mediaPlacements = data.placements || [];
+    if (!mediaPlacements.some((item) => item.key === activeMediaPlacement)) {
+      activeMediaPlacement = mediaPlacements[0]?.key || 'hero';
+    }
     mediaHistory = data.history || [];
     mediaSchedule = data.schedule || null;
     mediaSchedulePhase = data.schedulePhase || 'none';
@@ -985,6 +993,14 @@ async function loadSession() {
     if (response.ok && data.authenticated) {
       showApp(data);
       await loadQuickControl();
+      const validTab = document.querySelector('[data-tab="' + esc(activeTab) + '"]')
+        ? activeTab
+        : 'availability';
+      activateTab(validTab);
+      if (visualReturn) {
+        const editLink = document.querySelector('[data-edit-website]');
+        if (editLink) editLink.href = visualReturn;
+      }
       return;
     }
 

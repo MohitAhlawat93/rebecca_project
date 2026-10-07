@@ -101,6 +101,7 @@ function renderAvailability(){
   };
   document.querySelectorAll('[data-availability-status]').forEach((el)=>{
     el.dataset.status=availability.status||'accepting';
+    el.dataset.rcEdit='availability';
     el.innerHTML=`<span class="availability-dot" aria-hidden="true"></span><span>${esc(availability.label||'Availability')}</span>`;
     el.setAttribute('title',availability.message||availability.label||'Availability');
   });
@@ -135,6 +136,9 @@ function renderProfile(){
   document.querySelectorAll('[data-profile-faq]').forEach((el)=>{
     el.innerHTML=p.faq.map((item,index)=>`<details${index===0?' open':''}><summary>${esc(item.question)}</summary><div class="detail-body"><p>${esc(item.answer)}</p></div></details>`).join('');
   });
+  document.querySelectorAll('[data-profile-base-eyebrow],[data-profile-hero-meta],[data-profile-home-facts],[data-profile-about-facts]').forEach((el)=>{
+    el.dataset.rcEdit='profile';
+  });
 }
 
 function singaporeTermRows(){
@@ -154,7 +158,7 @@ function renderSingapore(){
 
   document.querySelectorAll('[data-singapore-rates]').forEach((el)=>{
     el.innerHTML=sg.rates.filter((rate)=>rate.visible!==false).map((rate)=>`
-      <article class="rate-card${rate.featured?' featured':''}">
+      <article class="rate-card${rate.featured?' featured':''}" data-rc-edit="rate:${esc(rate.id||rate.short||rate.label)}">
         <small>${esc(rate.category)}</small>
         <div>
           <h3>${esc(rate.label)}</h3>
@@ -186,7 +190,7 @@ function renderTravel(){
 
   document.querySelectorAll('[data-travel-calendar]').forEach((el)=>{
     const cards=travel.calendar.filter((item)=>item.visible!==false).map((item)=>`
-      <article class="travel-card${item.alt?' alt':''}">
+      <article class="travel-card${item.alt?' alt':''}" data-rc-edit="travel:${esc(item.id||item.title)}">
         <div>
           <p class="page-kicker" style="color:${item.alt?'#d7ddd2':'#aeb8a7'}">${esc(item.kicker)}</p>
           <h3>${esc(item.title)}</h3>
@@ -406,7 +410,7 @@ function renderPagePhotoHeroes(){
   const images=REBECCA_IMAGES.curated[cfg.key]||[];
   if(images.length<2)return;
   hero.classList.add('page-hero-photo');
-  hero.insertAdjacentHTML('afterbegin','<div class="page-photo-rotator" data-page-photo-hero data-image-rotator>'+rotatingImagesMarkup(images,cfg.role,cfg.alt)+'</div>');
+  hero.insertAdjacentHTML('afterbegin','<div class="page-photo-rotator" data-page-photo-hero data-image-rotator data-rc-media-placement="'+esc(cfg.key)+'">'+rotatingImagesMarkup(images,cfg.role,cfg.alt)+'</div>');
 }
 
 function renderPageEditorialRotators(){
@@ -418,6 +422,7 @@ function renderPageEditorialRotators(){
   document.querySelectorAll('.page-editorial-shot').forEach((figure)=>{
     if(figure.dataset.imageRotatorReady)return;
     figure.dataset.imageRotatorReady='true';
+    figure.dataset.rcMediaPlacement=key;
     figure.setAttribute('data-image-rotator','');
     figure.innerHTML=rotatingImagesMarkup(images,'page-editorial','Rebecca editorial portrait');
   });
@@ -433,7 +438,7 @@ function renderGalleryCardRotators(){
   ].forEach(({selector,key,alt})=>{
     const card=document.querySelector(selector),images=REBECCA_IMAGES.curated[key]||[];
     if(!card||images.length<2||card.querySelector('[data-gallery-card-rotator]'))return;
-    card.insertAdjacentHTML('afterbegin','<span class="archive-card-rotator" data-gallery-card-rotator data-image-rotator>'+rotatingImagesMarkup(images,'gallery-choice',alt)+'</span>');
+    card.insertAdjacentHTML('afterbegin','<span class="archive-card-rotator" data-gallery-card-rotator data-image-rotator data-rc-media-placement="'+esc(key)+'">'+rotatingImagesMarkup(images,'gallery-choice',alt)+'</span>');
   });
 }
 
@@ -456,7 +461,7 @@ function renderEditorialBreaks(){
   const el=document.createElement('section');
   el.className='editorial-motion-break';el.dataset.editorialBreak=item.key;el.setAttribute('aria-label','Rebecca editorial interlude');
   const media=images.map((url,index)=>`<img data-rotating-image class="editorial-motion-slide${index===0?' is-active':''}" src="${esc(imageVariant(url,1000))}" srcset="${esc(imageSrcset(url,[500,750,1000,1500]))}" sizes="100vw" alt="Rebecca editorial portrait" loading="lazy" decoding="async" data-image-role="editorial-motion">`).join('');
-  el.innerHTML=`<div class="editorial-motion-media${item.rotate?' is-rotating':''}" ${item.rotate?'data-image-rotator data-editorial-rotator':''} data-parallax>${media}</div><div class="editorial-motion-copy" data-reveal><p class="page-kicker">${esc(item.kicker)}</p><h2>${esc(item.title)}</h2><p>${esc(item.body)}</p></div>`;
+  el.innerHTML=`<div class="editorial-motion-media${item.rotate?' is-rotating':''}" ${item.rotate?'data-image-rotator data-editorial-rotator':''} data-rc-media-placement="${esc(item.key)}" data-parallax>${media}</div><div class="editorial-motion-copy" data-reveal><p class="page-kicker">${esc(item.kicker)}</p><h2>${esc(item.title)}</h2><p>${esc(item.body)}</p></div>`;
   if(item.placement==='after')section.insertAdjacentElement('afterend',el);else section.insertAdjacentElement('beforebegin',el);
 }
 
@@ -465,6 +470,7 @@ function renderContact(){
   const policies=REBECCA_DATA.policies;
 
   document.querySelectorAll('[data-contact-channels]').forEach((el)=>{
+    el.dataset.rcEdit='contact';
     el.innerHTML=`
       <div class="contact-channel"><span>WhatsApp / iMessage / Signal</span><a href="${esc(contact.whatsappUrl)}" target="_blank" rel="noreferrer">${esc(contact.phoneDisplay)} ↗</a></div>
       <div class="contact-channel"><span>Telegram</span><a href="${esc(contact.telegramUrl)}" target="_blank" rel="noreferrer">${esc(contact.telegramHandle)} ↗</a></div>
@@ -488,7 +494,19 @@ function renderContact(){
 
 await Promise.all([hydrateRuntimeData(),hydrateRuntimeMedia()]);
 
-renderProfile();
+document.querySelectorAll('[data-hero-rotator]').forEach((el)=>{
+  el.dataset.rcMediaPlacement='hero';
+});
+
+function renderStructuredRuntimeContent(){
+  renderProfile();
+  renderSingapore();
+  renderTravel();
+  renderContact();
+  renderAvailability();
+}
+
+renderStructuredRuntimeContent();
 renderPersonality();
 renderReputation();
 renderDateIdeas();
@@ -498,14 +516,15 @@ renderPagePhotoHeroes();
 renderPageEditorialRotators();
 renderGalleryCardRotators();
 renderEditorialBreaks();
-renderSingapore();
-renderTravel();
 renderPolicies();
-renderContact();
-renderAvailability();
 
+window.__RC_RENDER_STRUCTURED__=renderStructuredRuntimeContent;
 window.__REBECCA_DATA__=REBECCA_DATA;
 window.__REBECCA_IMAGES__=REBECCA_IMAGES;
 document.documentElement.dataset.rebeccaDataVersion=REBECCA_DATA.meta.dataVersion;
 document.documentElement.dataset.rebeccaContentReady='true';
 document.dispatchEvent(new CustomEvent('rebecca:content-ready'));
+
+if(new URLSearchParams(window.location.search).get('rc_edit')==='1'){
+  import('/visual-editor.js').catch(()=>{});
+}
