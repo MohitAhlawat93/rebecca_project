@@ -87,6 +87,25 @@ export default {
       includeInHreflang: false
     }
   ],
+  prerender: {
+    enabled: true,
+    entry: 'content.js',
+    runtimeHydration: true,
+    approvedLanguagesOnly: true,
+    requiredBindingsByPage: {
+      'index.html': ['data-profile-hero-meta', 'data-profile-home-facts', 'data-home-trust'],
+      'about.html': ['data-profile-about-facts', 'data-profile-philosophy', 'data-profile-interview', 'data-profile-faq'],
+      'rates.html': ['data-singapore-rates', 'data-singapore-terms'],
+      'travel.html': ['data-travel-calendar', 'data-fmty-grid', 'data-touring-rates', 'data-travel-practicalities'],
+      'reviews.html': ['data-reputation-proof', 'data-reputation-reviews'],
+      'journal.html': ['data-journal-entries'],
+      'press.html': ['data-press-appearances'],
+      'etiquette.html': ['data-screening-policy', 'data-deposit-grid', 'data-cancellation-policy', 'data-boundaries-policy'],
+      'date-ideas.html': ['data-date-categories', 'data-wishlist-categories', 'data-wishlist-details'],
+      'favourites.html': ['data-favourites-table', 'data-favourites-things', 'data-favourites-interests'],
+      'contact.html': ['data-contact-channels', 'data-duration-options', 'data-screening-options']
+    }
+  },
   pages: [
     { id: 'home', path: '/', file: 'index.html', localized: true, priority: 1.0 },
     { id: 'about', path: '/about', file: 'about.html', localized: true, priority: 0.9 },
