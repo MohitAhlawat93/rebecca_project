@@ -5,6 +5,7 @@ import {
   writeQuickControlState
 } from '../../lib/admin-store.js';
 import { evaluateQuickControlSchedules } from '../../lib/schedule-engine.js';
+import { recordSystemEvent, safeCaptureRecoverySnapshot } from '../../lib/system-store.js';
 
 function noCache(res) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -40,7 +41,16 @@ export default async function handler(req, res) {
   if (req.method === 'PUT') {
     const body = readBody(req);
     try {
+      await safeCaptureRecoverySnapshot('Before Quick Control Save & apply','Quick Control');
       const saved = await writeQuickControlState(body.state, 'Rebecca');
+      try {
+        await recordSystemEvent({
+          area:'Website',
+          type:'publish',
+          summary:'Quick Control changes were applied to the live website and concierge data.',
+          source:'Quick Control'
+        });
+      } catch {}
       const evaluated = evaluateQuickControlSchedules(saved.state);
       return res.status(200).json({
         ok: true,

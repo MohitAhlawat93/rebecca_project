@@ -8,6 +8,7 @@ import {
   saveConciergeDraft
 } from '../../lib/concierge-control-store.js';
 import { applyAssistantChange } from '../../lib/admin-assistant.js';
+import { recordSystemEvent } from '../../lib/system-store.js';
 
 function noCache(res){
   res.setHeader('Cache-Control','private, no-store, max-age=0');
@@ -48,6 +49,7 @@ export default async function handler(req,res){
 
     if(applied.change.target==='website'){
       const saved=await saveVisualEditorDraft(applied.websiteDraft,'Rebecca AI Admin Assistant');
+      try{await recordSystemEvent({area:'Website',type:'draft',summary:'AI Admin Assistant applied a proposal to Website Draft only.',source:'AI Admin Assistant'});}catch{}
       return res.status(200).json({
         ok:true,
         target:'website',
@@ -58,6 +60,7 @@ export default async function handler(req,res){
     }
 
     const saved=await saveConciergeDraft(applied.conciergeDraft,'Rebecca AI Admin Assistant');
+    try{await recordSystemEvent({area:'Concierge',type:'draft',summary:'AI Admin Assistant applied a proposal to Concierge Draft only.',source:'AI Admin Assistant'});}catch{}
     return res.status(200).json({
       ok:true,
       target:'concierge',

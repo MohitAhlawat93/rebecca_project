@@ -569,3 +569,76 @@ Portable schema:
 `supabase/rc-07-needs-rebecca.sql`
 
 The inbox is capped to the most relevant 100 grouped questions rather than growing without bound.
+
+
+## Rebecca Control — RC-09 History, Export & Recovery
+
+RC-09 adds owner-readable history, portable backups and recovery points without exposing GitHub, Vercel or database internals.
+
+### History
+
+Important owner actions can create readable events such as:
+
+- Website publish
+- Concierge publish
+- Media publish / schedule
+- AI Admin Assistant applied to Draft
+- Recovery point created
+- Recovery restored to Draft
+
+The private system ledger keeps the most recent 250 events.
+
+### Recovery points
+
+Before important live-changing publishes, Rebecca Control attempts to create a protected recovery snapshot containing the current Website, Concierge and Media configuration.
+
+A rolling maximum of 10 recovery points is kept.
+
+Restoring a recovery point always means:
+
+```text
+Recovery point
+      ↓
+Website Draft
+Concierge Draft
+Media Draft
+      ↓
+Rebecca reviews
+      ↓
+Rebecca explicitly publishes if desired
+```
+
+Recovery never changes the live website immediately.
+
+### Export
+
+**Export & Recovery → Download backup** produces a portable JSON document:
+
+```text
+format: rebecca-control-backup
+version: 1
+```
+
+The backup includes Rebecca-managed Website, Concierge and Media configuration. The privacy-minimized **Needs Rebecca** visitor-question inbox is intentionally excluded.
+
+### Import safety
+
+A downloaded Rebecca Control backup can be selected in **Export & Recovery** and restored only to Draft after validation.
+
+Import cannot:
+- publish
+- deploy code
+- change credentials
+- modify database schema
+- alter GitHub or Vercel
+
+### Storage
+
+RC-09 adds:
+
+`public.rebecca_system_state`
+
+with the same existing RLS + `x-rc-control-secret` authorization model.
+
+Portable schema:
+`supabase/rc-09-history-export-recovery.sql`
