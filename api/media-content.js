@@ -1,5 +1,5 @@
 import { getAdminSession } from '../lib/admin-auth.js';
-import { mediaHasDraftChanges, readMediaState } from '../lib/media-store.js';
+import { getEffectiveMediaState, mediaHasDraftChanges, readMediaState } from '../lib/media-store.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Use GET.' });
@@ -11,15 +11,17 @@ export default async function handler(req, res) {
   }
 
   const state = await readMediaState();
+  const effective = getEffectiveMediaState(state);
   res.setHeader(
     'Cache-Control',
     preview ? 'private, no-store, max-age=0' : 'public, max-age=0, s-maxage=30, stale-while-revalidate=120'
   );
 
   return res.status(200).json({
-    state: preview ? state.draft : state.published,
-    version: preview ? state.version : state.publishedVersion,
-    publishedAt: state.publishedAt,
+    state: preview ? state.draft : effective.state,
+    version: preview ? state.version : effective.effectiveVersion,
+    publishedAt: preview ? state.publishedAt : effective.effectivePublishedAt,
+    schedulePhase: preview ? undefined : effective.phase,
     preview,
     hasDraftChanges: preview ? mediaHasDraftChanges(state) : undefined
   });
