@@ -395,3 +395,27 @@ The daily sync uses a 35-day finalized rolling window. Overlap is safe because m
 Actual Google/Bing collection remains in `needs-connection` state until the relevant provider OAuth client and verified site/property credentials are added. Missing connection is never represented as zero traffic.
 
 See `SEARCH_MEASUREMENT.md` for the complete OAuth, persistence, cron and future-client configuration.
+
+
+## SEARCH-09 — Search Intelligence inside Rebecca Control
+
+SEARCH-09 exposes the SEARCH-07 intelligence and SEARCH-08 historical sync layer through a simple authenticated owner dashboard.
+
+The new Control tab provides:
+
+- Google/Bing connection state
+- last-sync health
+- current-vs-previous clicks, impressions, CTR and AI citation signals
+- prioritized evidence-backed opportunities
+- top pages and queries
+- discovery-surface breakdown
+- manual sync
+- CSV/JSON import for export-only AI/multimodal reports
+
+The owner UI is isolated in `admin-search.js` and `admin-search.css` to avoid coupling search logic to the main Rebecca Control editor.
+
+The dashboard displays missing connections as missing connections, not zero traffic. It cannot auto-publish SEO changes.
+
+SEARCH-09 also corrects Bing measurement accuracy by separating query rollups from page rollups and excluding duplicate query rollups from overall traffic totals.
+
+Rebecca can choose Search Intelligence as her default Rebecca Control start tab. Future clients can reuse the same data/UI contract with their own client identity and provider configuration.
