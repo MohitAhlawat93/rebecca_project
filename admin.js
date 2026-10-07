@@ -22,6 +22,14 @@ const mediaScheduleExpireInput = document.querySelector('[data-media-schedule-ex
 const mediaScheduleCancelButton = document.querySelector('[data-media-cancel-schedule]');
 const mediaScheduleCommitButton = document.querySelector('[data-media-commit-schedule]');
 const mediaSchedulePreviewButton = document.querySelector('[data-media-preview-scheduled]');
+const conciergeSaveButton = document.querySelector('[data-concierge-save]');
+const conciergePublishButton = document.querySelector('[data-concierge-publish]');
+const conciergeDiscardButton = document.querySelector('[data-concierge-discard]');
+const conciergeTestForm = document.querySelector('[data-concierge-test-form]');
+const conciergeTestInput = document.querySelector('[data-concierge-test-input]');
+const conciergeTestPage = document.querySelector('[data-concierge-test-page]');
+const conciergeTestThread = document.querySelector('[data-concierge-test-thread]');
+const conciergeTestSend = document.querySelector('[data-concierge-test-send]');
 
 const startupParams = new URLSearchParams(window.location.search);
 const requestedTab = startupParams.get('tab');
@@ -44,6 +52,16 @@ let mediaSchedule = null;
 let mediaSchedulePhase = 'none';
 let mediaLoaded = false;
 let activeMediaPlacement = requestedPlacement || 'hero';
+let conciergeState = null;
+let conciergePublished = null;
+let conciergeHistory = [];
+let conciergePersistent = false;
+let conciergeDirty = false;
+let conciergeDraftAhead = false;
+let conciergeLoaded = false;
+let conciergePublishedVersion = 0;
+let conciergePublishedAt = null;
+let conciergeTestHistory = [];
 
 const STATUS_LABELS = {
   accepting: 'Accepting enquiries',
@@ -175,8 +193,9 @@ function activateTab(name) {
     panel.hidden = !selected;
     panel.classList.toggle('is-active', selected);
   });
-  if (quickSavebar) quickSavebar.hidden = name === 'media';
+  if (quickSavebar) quickSavebar.hidden = ['media','concierge','concierge-test'].includes(name);
   if (name === 'media' && !mediaLoaded) loadMedia();
+  if ((name === 'concierge' || name === 'concierge-test') && !conciergeLoaded) loadConcierge();
 }
 
 function renderAvailability() {
@@ -658,6 +677,370 @@ function renderMedia() {
   renderMediaSchedule();
 }
 
+
+function setConciergeDirty(value = true) {
+  conciergeDirty = value;
+  if (conciergeSaveButton) conciergeSaveButton.disabled = !conciergePersistent || !conciergeDirty;
+  if (conciergeDiscardButton) conciergeDiscardButton.disabled = !conciergePersistent || (!conciergeDirty && !conciergeDraftAhead);
+  if (conciergePublishButton) conciergePublishButton.disabled = !conciergePersistent || (!conciergeDirty && !conciergeDraftAhead);
+
+  setText('[data-concierge-save-state]', conciergeDirty
+    ? 'Unsaved AI Control edits'
+    : (conciergeDraftAhead ? 'Draft ready to test or publish' : 'No Concierge changes'));
+  setText('[data-concierge-save-detail]', conciergeDirty
+    ? 'Save Draft before testing or publishing.'
+    : (conciergeDraftAhead ? 'Visitors still see the previous published version.' : 'Draft and live version match.'));
+}
+
+function conciergeAnswerCard(item, index) {
+  return `
+    <article class="rc-concierge-answer" data-concierge-answer-index="${index}">
+      <div class="rc-concierge-answer-head">
+        <div>
+          <span class="rc-card-kicker">Trusted answer ${index + 1}</span>
+          <strong>${esc(item.question || 'New public question')}</strong>
+          <small>Used only when the visitor’s wording matches this question or its keywords.</small>
+        </div>
+        <div class="rc-inline-actions">
+          <label class="rc-toggle"><input type="checkbox" data-concierge-answer-enabled ${item.enabled !== false ? 'checked' : ''}><span>Enabled</span></label>
+          <button type="button" class="rc-danger-link" data-concierge-remove-answer>Remove</button>
+        </div>
+      </div>
+      <div class="rc-form-grid">
+        <label class="rc-field rc-field-wide"><span>Question visitors may ask</span><input data-concierge-answer-field="question" value="${esc(item.question || '')}" maxlength="220" placeholder="e.g. How quickly does Rebecca usually reply?"></label>
+        <label class="rc-field rc-field-wide"><span>Rebecca-approved answer</span><textarea data-concierge-answer-field="answer" maxlength="1200" rows="4" placeholder="Public answer only.">${esc(item.answer || '')}</textarea></label>
+        <label class="rc-field rc-field-wide"><span>Matching words or phrases <small>comma separated</small></span><input data-concierge-answer-field="keywords" value="${esc((item.keywords || []).join(', '))}" maxlength="500" placeholder="reply time, response time, how fast"></label>
+        <label class="rc-field"><span>Optional website path</span><input data-concierge-answer-field="linkPath" value="${esc(item.linkPath || '')}" maxlength="160" placeholder="/contact"></label>
+        <label class="rc-field"><span>Optional button label</span><input data-concierge-answer-field="linkLabel" value="${esc(item.linkLabel || '')}" maxlength="80" placeholder="Contact Rebecca"></label>
+      </div>
+    </article>
+  `;
+}
+
+function collectConciergeState() {
+  if (!conciergeState) return null;
+  const next = JSON.parse(JSON.stringify(conciergeState));
+
+  document.querySelectorAll('[data-concierge-field]').forEach((input) => {
+    next[input.dataset.conciergeField] = input.value;
+  });
+
+  const selectedStatus = document.querySelector('[data-concierge-status].is-selected')?.dataset.conciergeStatus;
+  next.enabled = selectedStatus !== 'paused';
+
+  next.trustedAnswers = [...document.querySelectorAll('[data-concierge-answer-index]')].map((card) => {
+    const index = Number(card.dataset.conciergeAnswerIndex);
+    const base = conciergeState.trustedAnswers?.[index] || {};
+    const value = (name) => card.querySelector('[data-concierge-answer-field="' + name + '"]')?.value || '';
+    return {
+      ...base,
+      question: value('question'),
+      answer: value('answer'),
+      keywords: csv(value('keywords')),
+      linkPath: value('linkPath'),
+      linkLabel: value('linkLabel'),
+      enabled: Boolean(card.querySelector('[data-concierge-answer-enabled]')?.checked)
+    };
+  });
+
+  return next;
+}
+
+function renderConciergeHistory() {
+  setText('[data-concierge-history-count]', String(conciergeHistory.length));
+  const holder = document.querySelector('[data-concierge-history]');
+  if (!holder) return;
+  if (!conciergeHistory.length) {
+    holder.innerHTML = '<div class="rc-empty">Published versions will appear here after the second Concierge publish.</div>';
+    return;
+  }
+  holder.innerHTML = conciergeHistory.map((entry) => `
+    <article class="rc-history-row">
+      <div>
+        <strong>Published version ${esc(entry.version)}</strong>
+        <small>${esc(friendlyDate(entry.publishedAt))}</small>
+      </div>
+      <button type="button" class="rc-secondary" data-concierge-restore="${esc(entry.version)}">Restore to Draft</button>
+    </article>
+  `).join('');
+}
+
+function renderConcierge() {
+  if (!conciergeState) return;
+
+  document.querySelectorAll('[data-concierge-status]').forEach((button) => {
+    const live = button.dataset.conciergeStatus === 'live';
+    button.classList.toggle('is-selected', live === (conciergeState.enabled !== false));
+  });
+
+  document.querySelectorAll('[data-concierge-field]').forEach((input) => {
+    input.value = conciergeState[input.dataset.conciergeField] || '';
+  });
+
+  const answers = document.querySelector('[data-concierge-answers]');
+  if (answers) {
+    answers.innerHTML = conciergeState.trustedAnswers?.length
+      ? conciergeState.trustedAnswers.map(conciergeAnswerCard).join('')
+      : '<div class="rc-empty">No custom Trusted Answers yet. The concierge still uses Rebecca’s website data and existing safety rules.</div>';
+  }
+
+  setText('[data-concierge-connection]', conciergePersistent ? 'Connected' : 'Safe fallback');
+  setText('[data-concierge-live-version]', 'v' + conciergePublishedVersion);
+  setText('[data-concierge-published-at]', conciergePublishedAt ? friendlyDate(conciergePublishedAt) : 'Bundled defaults');
+  setText('[data-concierge-answer-count]', String((conciergeState.trustedAnswers || []).filter((item) => item.enabled !== false).length));
+  setText('[data-concierge-draft-status]', conciergeDirty ? 'Unsaved edits' : (conciergeDraftAhead ? 'Ahead of live' : 'Matches live'));
+  setText('[data-concierge-draft-detail]', conciergeDirty
+    ? 'Save Draft before testing.'
+    : (conciergeDraftAhead ? 'Test privately, then publish when ready.' : 'No unpublished Concierge changes.'));
+
+  renderConciergeHistory();
+  setConciergeDirty(conciergeDirty);
+}
+
+async function loadConcierge() {
+  try {
+    const response = await fetch('/api/admin/concierge-control', {
+      method: 'GET',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { Accept: 'application/json' }
+    });
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      showLogin('Your owner session expired. Please sign in again.');
+      return false;
+    }
+    if (!response.ok) throw new Error(data.error || 'Could not load Concierge Control.');
+
+    conciergeState = data.draft;
+    conciergePublished = data.published;
+    conciergeHistory = data.history || [];
+    conciergePersistent = Boolean(data.persistent && data.configured);
+    conciergeDraftAhead = Boolean(data.hasDraftChanges);
+    conciergePublishedVersion = Number(data.publishedVersion) || 0;
+    conciergePublishedAt = data.publishedAt || null;
+    conciergeDirty = false;
+    conciergeLoaded = true;
+    renderConcierge();
+    return true;
+  } catch (error) {
+    conciergePersistent = false;
+    conciergeLoaded = false;
+    setText('[data-concierge-connection]', 'Unavailable');
+    setText('[data-concierge-draft-status]', 'Could not load');
+    setText('[data-concierge-draft-detail]', error?.message || 'Concierge Control is unavailable.');
+    return false;
+  }
+}
+
+async function saveConciergeDraft({ quiet = false } = {}) {
+  if (!conciergePersistent || !conciergeState) return false;
+  if (!conciergeDirty && !quiet) return true;
+
+  const nextState = collectConciergeState();
+  if (!nextState) return false;
+
+  if (conciergeSaveButton) {
+    conciergeSaveButton.disabled = true;
+    conciergeSaveButton.textContent = 'Saving…';
+  }
+
+  try {
+    const response = await fetch('/api/admin/concierge-control', {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ state: nextState })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Could not save the Concierge Draft.');
+
+    conciergeState = data.draft;
+    conciergePublished = data.published;
+    conciergeHistory = data.history || [];
+    conciergeDraftAhead = Boolean(data.hasDraftChanges);
+    conciergePublishedVersion = Number(data.publishedVersion) || 0;
+    conciergePublishedAt = data.publishedAt || null;
+    conciergeDirty = false;
+    renderConcierge();
+    return true;
+  } catch (error) {
+    setText('[data-concierge-save-state]', 'Draft not saved');
+    setText('[data-concierge-save-detail]', error?.message || 'Nothing changed publicly.');
+    return false;
+  } finally {
+    if (conciergeSaveButton) conciergeSaveButton.textContent = 'Save Draft';
+    setConciergeDirty(conciergeDirty);
+  }
+}
+
+async function publishConcierge() {
+  if (!conciergePersistent) return;
+  if (conciergeDirty) {
+    const saved = await saveConciergeDraft({ quiet: true });
+    if (!saved) return;
+  }
+  if (!conciergeDraftAhead) return;
+  if (!window.confirm('Publish this Concierge Draft to visitors now?')) return;
+
+  if (conciergePublishButton) {
+    conciergePublishButton.disabled = true;
+    conciergePublishButton.textContent = 'Publishing…';
+  }
+
+  try {
+    const response = await fetch('/api/admin/concierge-control', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ action: 'publish' })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Could not publish Concierge Control.');
+
+    conciergeState = data.draft;
+    conciergePublished = data.published;
+    conciergeHistory = data.history || [];
+    conciergeDraftAhead = false;
+    conciergePublishedVersion = Number(data.publishedVersion) || conciergePublishedVersion + 1;
+    conciergePublishedAt = data.publishedAt || new Date().toISOString();
+    conciergeDirty = false;
+    renderConcierge();
+    setText('[data-concierge-save-state]', 'Concierge published');
+    setText('[data-concierge-save-detail]', 'Visitors now use this version.');
+  } catch (error) {
+    setText('[data-concierge-save-state]', 'Not published');
+    setText('[data-concierge-save-detail]', error?.message || 'The live Concierge was not changed.');
+  } finally {
+    if (conciergePublishButton) conciergePublishButton.textContent = 'Publish Concierge';
+    setConciergeDirty(conciergeDirty);
+  }
+}
+
+async function discardConcierge() {
+  if (!conciergePersistent || (!conciergeDirty && !conciergeDraftAhead)) return;
+  if (!window.confirm('Discard the Concierge Draft and return to the current live version?')) return;
+
+  try {
+    const response = await fetch('/api/admin/concierge-control', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ action: 'discard' })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Could not discard the Concierge Draft.');
+
+    conciergeState = data.draft;
+    conciergePublished = data.published;
+    conciergeHistory = data.history || [];
+    conciergeDraftAhead = false;
+    conciergeDirty = false;
+    renderConcierge();
+  } catch (error) {
+    setText('[data-concierge-save-state]', 'Draft not discarded');
+    setText('[data-concierge-save-detail]', error?.message || 'Try again.');
+  }
+}
+
+async function restoreConcierge(version) {
+  if (!conciergePersistent) return;
+  try {
+    const response = await fetch('/api/admin/concierge-control', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ action: 'restore', version })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Could not restore that Concierge version.');
+
+    conciergeState = data.draft;
+    conciergePublished = data.published;
+    conciergeHistory = data.history || [];
+    conciergeDraftAhead = Boolean(data.hasDraftChanges);
+    conciergeDirty = false;
+    renderConcierge();
+    activateTab('concierge');
+    setText('[data-concierge-save-state]', 'Old version restored to Draft');
+    setText('[data-concierge-save-detail]', 'Test it before publishing.');
+  } catch (error) {
+    setText('[data-concierge-save-state]', 'Restore failed');
+    setText('[data-concierge-save-detail]', error?.message || 'Try again.');
+  }
+}
+
+function addConciergeTestMessage(role, text, meta = '') {
+  if (!conciergeTestThread) return;
+  const item = document.createElement('div');
+  item.className = 'rc-test-message ' + role;
+  const who = role === 'user' ? 'Test visitor' : 'Rebecca’s Desk · Draft';
+  item.innerHTML = '<span>' + esc(who) + '</span><p>' + esc(text) + '</p>' +
+    (meta ? '<small>' + esc(meta) + '</small>' : '');
+  conciergeTestThread.appendChild(item);
+  conciergeTestThread.scrollTop = conciergeTestThread.scrollHeight;
+  return item;
+}
+
+async function runConciergeTest(message) {
+  const q = String(message || '').trim();
+  if (!q) return;
+
+  if (!conciergeLoaded) {
+    const loaded = await loadConcierge();
+    if (!loaded) return;
+  }
+  if (conciergeDirty) {
+    const saved = await saveConciergeDraft({ quiet: true });
+    if (!saved) {
+      setText('[data-concierge-test-note]', 'Could not save the Draft, so the test was not run.');
+      return;
+    }
+  }
+
+  addConciergeTestMessage('user', q);
+  conciergeTestHistory.push({ role: 'user', content: q });
+  const pending = addConciergeTestMessage('assistant', 'Testing the saved Draft…');
+
+  if (conciergeTestSend) {
+    conciergeTestSend.disabled = true;
+    conciergeTestSend.textContent = 'Testing…';
+  }
+
+  try {
+    const response = await fetch('/api/admin/concierge-test', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        message: q,
+        page: conciergeTestPage?.value || '/',
+        history: conciergeTestHistory.slice(0, -1)
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+    pending?.remove();
+    if (!response.ok) throw new Error(data.error || 'Could not test the Concierge Draft.');
+
+    addConciergeTestMessage('assistant', data.answer || 'No answer returned.', data.mode || 'draft');
+    conciergeTestHistory.push({ role: 'assistant', content: data.answer || '' });
+    conciergeTestHistory = conciergeTestHistory.slice(-8);
+    setText('[data-concierge-test-note]', data.needsRebecca
+      ? 'This answer is a candidate for the future “Needs Rebecca” inbox.'
+      : 'Draft test completed. Nothing was published.');
+  } catch (error) {
+    pending?.remove();
+    addConciergeTestMessage('assistant', error?.message || 'Test failed.', 'error');
+    setText('[data-concierge-test-note]', 'Nothing was published.');
+  } finally {
+    if (conciergeTestSend) {
+      conciergeTestSend.disabled = false;
+      conciergeTestSend.textContent = 'Ask Draft';
+    }
+    if (conciergeTestInput) conciergeTestInput.value = '';
+  }
+}
+
 async function loadMedia() {
   try {
     const response = await fetch('/api/admin/media', {
@@ -1065,6 +1448,13 @@ logoutButton?.addEventListener('click', async () => {
     mediaSchedule = null;
     mediaSchedulePhase = 'none';
     mediaLoaded = false;
+    conciergeState = null;
+    conciergePublished = null;
+    conciergeHistory = [];
+    conciergeLoaded = false;
+    conciergeDirty = false;
+    conciergeDraftAhead = false;
+    conciergeTestHistory = [];
     showLogin('Signed out.');
   }
 });
@@ -1218,6 +1608,79 @@ document.addEventListener('change', (event) => {
   }
 });
 
+
+document.addEventListener('click', (event) => {
+  const status = event.target.closest('[data-concierge-status]');
+  if (status && conciergeState) {
+    document.querySelectorAll('[data-concierge-status]').forEach((button) => button.classList.remove('is-selected'));
+    status.classList.add('is-selected');
+    setConciergeDirty(true);
+    return;
+  }
+
+  if (event.target.closest('[data-concierge-add-answer]') && conciergeState) {
+    conciergeState.trustedAnswers = conciergeState.trustedAnswers || [];
+    conciergeState.trustedAnswers.push({
+      id: 'answer-' + Date.now(),
+      question: '',
+      answer: '',
+      keywords: [],
+      linkPath: '',
+      linkLabel: '',
+      enabled: true
+    });
+    renderConcierge();
+    setConciergeDirty(true);
+    return;
+  }
+
+  const remove = event.target.closest('[data-concierge-remove-answer]');
+  if (remove && conciergeState) {
+    const card = remove.closest('[data-concierge-answer-index]');
+    const index = Number(card?.dataset.conciergeAnswerIndex);
+    if (Number.isInteger(index) && window.confirm('Remove this Trusted Answer from the Draft?')) {
+      conciergeState.trustedAnswers.splice(index, 1);
+      renderConcierge();
+      setConciergeDirty(true);
+    }
+    return;
+  }
+
+  const restore = event.target.closest('[data-concierge-restore]');
+  if (restore) {
+    restoreConcierge(Number(restore.dataset.conciergeRestore));
+    return;
+  }
+
+  if (event.target.closest('[data-concierge-test-clear]')) {
+    conciergeTestHistory = [];
+    if (conciergeTestThread) {
+      conciergeTestThread.innerHTML = '<div class="rc-test-message assistant"><span>Rebecca’s Desk · Draft</span><p>Test cleared. Ask another visitor question when you are ready.</p></div>';
+    }
+    setText('[data-concierge-test-note]', 'Uses Draft—not the live concierge.');
+  }
+});
+
+document.addEventListener('input', (event) => {
+  if (event.target.matches('[data-concierge-field],[data-concierge-answer-field]')) {
+    setConciergeDirty(true);
+  }
+});
+
+document.addEventListener('change', (event) => {
+  if (event.target.matches('[data-concierge-answer-enabled]')) {
+    setConciergeDirty(true);
+  }
+});
+
+conciergeSaveButton?.addEventListener('click', () => saveConciergeDraft());
+conciergePublishButton?.addEventListener('click', publishConcierge);
+conciergeDiscardButton?.addEventListener('click', discardConcierge);
+conciergeTestForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  await runConciergeTest(conciergeTestInput?.value);
+});
+
 saveButton?.addEventListener('click', async () => {
   if (!persistentStore || !quickState || !dirty) return;
 
@@ -1289,7 +1752,7 @@ document.addEventListener('rc:media-uploaded', async (event) => {
 });
 
 window.addEventListener('beforeunload', (event) => {
-  if (!dirty && !mediaDirty) return;
+  if (!dirty && !mediaDirty && !conciergeDirty) return;
   event.preventDefault();
   event.returnValue = '';
 });
