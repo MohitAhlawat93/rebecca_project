@@ -17,7 +17,7 @@ export default async function handler(req, res) {
   if (req.query?.error) {
     return redirect(
       res,
-      state.returnPath + '?search=connection-denied&provider=' + encodeURIComponent(state.provider)
+      addQuery(state.returnPath, 'search=connection-denied&provider=' + encodeURIComponent(state.provider))
     );
   }
 
@@ -49,17 +49,24 @@ export default async function handler(req, res) {
 
     return redirect(
       res,
-      state.returnPath + '?search=connected&provider=' + encodeURIComponent(state.provider)
+      addQuery(state.returnPath, 'search=connected&provider=' + encodeURIComponent(state.provider))
     );
   } catch (error) {
     console.error('SEARCH-08 OAuth callback failed:', error);
     return redirect(
       res,
-      state.returnPath + '?search=connection-error&provider=' +
-        encodeURIComponent(state.provider) +
-        '&code=' + encodeURIComponent(String(error?.code || 'oauth_failed'))
+      addQuery(
+        state.returnPath,
+        'search=connection-error&provider=' +
+          encodeURIComponent(state.provider) +
+          '&code=' + encodeURIComponent(String(error?.code || 'oauth_failed'))
+      )
     );
   }
+}
+
+function addQuery(path, query) {
+  return path + (path.includes('?') ? '&' : '?') + query;
 }
 
 function redirect(res, destination) {
