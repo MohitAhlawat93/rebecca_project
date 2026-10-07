@@ -212,9 +212,10 @@ function render() {
   }
 
   const surfaces = document.querySelector('[data-search-surfaces]');
+  const visibleSurfaces = (state.surfaces || []).filter((item) => !String(item.surface || '').endsWith('-query'));
   if (surfaces) {
-    surfaces.innerHTML = state.surfaces?.length
-      ? state.surfaces.map((item) => {
+    surfaces.innerHTML = visibleSurfaces.length
+      ? visibleSurfaces.map((item) => {
           return '<article class="rc-search-surface">' +
             '<span>' + esc(item.source || 'search') + '</span>' +
             '<strong>' + esc(String(item.surface || 'web').replaceAll('-', ' ')) + '</strong>' +
@@ -494,6 +495,20 @@ if (panel) {
     if (!panel.hidden && !loaded) load();
   });
   observer.observe(panel, { attributes: true, attributeFilter: ['hidden', 'class'] });
+}
+
+const appView = document.querySelector('[data-app-view]');
+if (appView) {
+  const appObserver = new MutationObserver(() => {
+    if (appView.hidden) {
+      state = null;
+      loaded = false;
+      importRows = null;
+    } else if (panel && !panel.hidden && !loaded) {
+      load();
+    }
+  });
+  appObserver.observe(appView, { attributes: true, attributeFilter: ['hidden'] });
 }
 
 window.addEventListener('DOMContentLoaded', () => {
