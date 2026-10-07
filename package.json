@@ -1,6 +1,6 @@
 {
   "name": "risque-rebecca",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -8,8 +8,8 @@
   },
   "scripts": {
     "validate:data": "node scripts/validate-data.mjs",
-    "validate:syntax": "node --check data/rebecca-images.js && node --check data/rebecca-data.js && node --check lib/rebecca-knowledge.js && node --check lib/concierge-planner.js && node --check lib/concierge-control-store.js && node --check lib/admin-auth.js && node --check lib/admin-store.js && node --check lib/schedule-engine.js && node --check lib/media-store.js && node --check lib/media-schedule.js && node --check api/concierge.js && node --check api/concierge-config.js && node --check api/translate.js && node --check api/newsletter.js && node --check api/admin/login.js && node --check api/admin/logout.js && node --check api/admin/session.js && node --check api/admin/quick-control.js && node --check api/admin/media.js && node --check api/admin/media-upload.js && node --check api/admin/visual-editor.js && node --check api/admin/concierge-control.js && node --check api/admin/concierge-test.js && node --check api/public-content.js && node --check visual-editor.js && node --check api/media-content.js && node --check content.js && node --check script.js && node --check admin.js",
-    "validate": "npm run validate:syntax && npm run validate:data && npm run validate:images && npm run validate:concierge && npm run validate:i18n && npm run validate:admin && npm run validate:quick-control && npm run validate:media && npm run validate:schedule && npm run validate:scheduled-publishing && npm run validate:visual-editor && npm run validate:concierge-control",
+    "validate:syntax": "node --check data/rebecca-images.js && node --check data/rebecca-data.js && node --check lib/rebecca-knowledge.js && node --check lib/concierge-planner.js && node --check lib/concierge-control-store.js && node --check lib/needs-rebecca-store.js && node --check lib/admin-auth.js && node --check lib/admin-store.js && node --check lib/schedule-engine.js && node --check lib/media-store.js && node --check lib/media-schedule.js && node --check api/concierge.js && node --check api/concierge-config.js && node --check api/translate.js && node --check api/newsletter.js && node --check api/admin/login.js && node --check api/admin/logout.js && node --check api/admin/session.js && node --check api/admin/quick-control.js && node --check api/admin/media.js && node --check api/admin/media-upload.js && node --check api/admin/visual-editor.js && node --check api/admin/concierge-control.js && node --check api/admin/concierge-test.js && node --check api/admin/needs-rebecca.js && node --check api/public-content.js && node --check visual-editor.js && node --check api/media-content.js && node --check content.js && node --check script.js && node --check admin.js",
+    "validate": "npm run validate:syntax && npm run validate:data && npm run validate:images && npm run validate:concierge && npm run validate:i18n && npm run validate:admin && npm run validate:quick-control && npm run validate:media && npm run validate:schedule && npm run validate:scheduled-publishing && npm run validate:visual-editor && npm run validate:concierge-control && npm run validate:needs-rebecca",
     "validate:images": "node scripts/validate-images.mjs",
     "validate:concierge": "node scripts/validate-concierge.mjs",
     "validate:i18n": "node scripts/validate-navigation-i18n.mjs",
@@ -20,7 +20,8 @@
     "validate:schedule": "node scripts/validate-scheduling.mjs",
     "validate:scheduled-publishing": "node scripts/validate-scheduled-publishing.mjs",
     "validate:visual-editor": "node scripts/validate-visual-editor.mjs",
-    "validate:concierge-control": "node scripts/validate-concierge-control.mjs"
+    "validate:concierge-control": "node scripts/validate-concierge-control.mjs",
+    "validate:needs-rebecca": "node scripts/validate-needs-rebecca.mjs"
   },
   "dependencies": {
     "@vercel/blob": "2.8.1"

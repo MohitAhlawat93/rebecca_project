@@ -461,3 +461,111 @@ Portable schema:
 ### Future Needs Rebecca integration
 
 Concierge responses now include an internal `needsRebecca` signal for genuinely unresolved public questions. RC-07 can use this signal to build an owner inbox without storing visitor identity, IP address or raw session metadata.
+
+
+## Rebecca Control — RC-07 Needs Rebecca
+
+RC-07 turns genuinely unresolved public concierge questions into a small owner inbox without building a visitor CRM.
+
+### Flow
+
+```text
+Visitor asks a public question
+        ↓
+Concierge uses website data + published Trusted Answers
+        ↓
+Answer is still genuinely unresolved
+        ↓
+Privacy filter
+        ↓
+Needs Rebecca
+        ↓
+Rebecca chooses Draft Answer
+        ↓
+AI Control opens a pre-filled Trusted Answer
+        ↓
+Save Draft → Test Concierge → Publish
+        ↓
+Matching Needs Rebecca item resolves automatically
+```
+
+### Privacy model
+
+Needs Rebecca intentionally stores only the minimum information needed to improve the public concierge:
+
+- sanitized public question
+- broad website page where it was asked
+- how many times a similar question was asked
+- first / last seen timestamps
+- workflow status
+- answer mode that produced the unresolved result
+
+It does **not intentionally store**:
+
+- visitor name or account
+- IP address
+- email address
+- phone number
+- user-agent
+- cookie / session identifier
+- raw chat history
+- screening documents
+- employer documents
+- financial details
+- private addresses or live locations
+
+Questions containing those kinds of sensitive values are rejected by the privacy filter before inbox storage.
+
+### Grouping
+
+Similar unresolved questions are fingerprinted and grouped rather than creating one row per visitor interaction.
+
+An item can be:
+
+- **Open**
+- **Answer drafted**
+- **Resolved**
+- **Ignored**
+
+If a resolved or ignored question starts appearing again, it reopens automatically and its count continues to increase.
+
+### Owner actions
+
+Rebecca can:
+
+- filter Needs attention / All / Closed
+- see recurring questions
+- Draft Answer
+- Resolve
+- Ignore
+- Reopen
+- delete a closed item
+- clear all closed items
+
+**Draft Answer** creates a Trusted Answer Draft in RC-06 AI Control. Nothing becomes public until the normal Concierge Draft is tested and published.
+
+### Public API boundary
+
+The internal `needsRebecca` decision is removed before `/api/concierge` responds to a visitor. Visitors never see inbox state, capture decisions, counts or owner workflow metadata.
+
+### Storage
+
+Protected aggregate state:
+
+```text
+public.rebecca_needs_state
+public.rebecca_needs_api
+```
+
+The store uses:
+
+- explicit Data API grants
+- RLS
+- `security_invoker = true`
+- the existing server-side `RC_STORE_SECRET`
+- optimistic version checks for concurrent captures
+
+Portable schema:
+`supabase/rc-07-needs-rebecca.sql`
+
+The inbox is capped to the most relevant 100 grouped questions rather than growing without bound.

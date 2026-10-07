@@ -39,7 +39,7 @@
     <section class="rc-app" data-app-view hidden>
       <header class="rc-topbar">
         <div>
-          <p class="rc-eyebrow">Rebecca Control · RC-06</p>
+          <p class="rc-eyebrow">Rebecca Control · RC-07</p>
           <h1>Good to see you, Rebecca.</h1>
         </div>
         <div class="rc-top-actions">
@@ -87,6 +87,7 @@
           <button type="button" data-tab="contact">Contact</button>
           <button type="button" data-tab="profile">Profile</button>
           <button type="button" data-tab="concierge">AI Control</button>
+          <button type="button" data-tab="needs-rebecca">Needs Rebecca</button>
           <button type="button" data-tab="concierge-test">Test Concierge</button>
           <button type="button" data-tab="media">Media & Publish</button>
         </nav>
@@ -305,6 +306,41 @@
           </details>
         </section>
 
+        <section class="rc-panel rc-needs-panel" data-panel="needs-rebecca" hidden>
+          <div class="rc-panel-intro rc-panel-intro-row">
+            <div>
+              <p class="rc-eyebrow">Needs Rebecca</p>
+              <h3>The questions your concierge could not confidently answer.</h3>
+              <p>Similar questions are grouped together. No visitor identity, IP address, contact details, chat history or screening documents are shown or intentionally stored here.</p>
+            </div>
+            <span class="rc-phase-pill" data-needs-connection>Loading…</span>
+          </div>
+
+          <div class="rc-needs-summary-grid">
+            <div><span>Open</span><strong data-needs-open-count>0</strong><small>waiting for Rebecca</small></div>
+            <div><span>Recurring</span><strong data-needs-recurring-count>0</strong><small>asked more than once</small></div>
+            <div><span>Answer drafted</span><strong data-needs-drafted-count>0</strong><small>waiting to publish / close</small></div>
+          </div>
+
+          <div class="rc-needs-toolbar">
+            <div class="rc-needs-filters" role="group" aria-label="Needs Rebecca filters">
+              <button type="button" class="is-selected" data-needs-filter="open">Needs attention</button>
+              <button type="button" data-needs-filter="all">All</button>
+              <button type="button" data-needs-filter="closed">Closed</button>
+            </div>
+            <button type="button" class="rc-secondary" data-needs-clear-closed>Clear closed</button>
+          </div>
+
+          <div class="rc-needs-privacy-note">
+            <strong>Privacy by design.</strong>
+            <span>Questions containing contact details, long number strings, links, screening/document terms, private addresses/locations or financial details are filtered out before this inbox.</span>
+          </div>
+
+          <div class="rc-needs-list" data-needs-list>
+            <div class="rc-empty">Loading unresolved questions…</div>
+          </div>
+        </section>
+
         <section class="rc-panel rc-concierge-test-panel" data-panel="concierge-test" hidden>
           <div class="rc-panel-intro rc-panel-intro-row">
             <div>
@@ -459,7 +495,7 @@
       </div>
 
       <footer class="rc-footer">
-        <span>Rebecca Control · RC-06</span>
+        <span>Rebecca Control · RC-07</span>
         <span>Owner access only</span>
       </footer>
     </section>
