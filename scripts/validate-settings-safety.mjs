@@ -39,10 +39,10 @@ assert.match(admin,/Automatic recovery points/);
 assert.match(adminJs,/saveSettings/);
 assert.match(adminJs,/dashboardStartTab/);
 assert.match(systemApi,/action==='saveSettings'/);
-assert.match(propose,/aiAssistantEnabled===false/);
-assert.match(apply,/aiAssistantEnabled===false/);
+assert.match(propose,/aiAssistantEnabled\s*===\s*false/);
+assert.match(apply,/aiAssistantEnabled\s*===\s*false/);
 assert.match(needs,/needsRebeccaCaptureEnabled === false/);
-assert.match(system,/automaticRecoveryEnabled===false/);
+assert.match(system,/automaticRecoveryEnabled\s*===\s*false/);
 assert.match(schema,/settings jsonb/);
 assert.match(schema,/security_invoker = true/);
 
