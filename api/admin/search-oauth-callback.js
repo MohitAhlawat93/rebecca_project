@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).send('Use GET.');
 
   const state = verifySearchOAuthState(req.query?.state);
-  if (!state) return redirect(res, '/admin.html?search=oauth-state-invalid');
+  if (!state) return redirect(res, '/admin.html?tab=search&search=oauth-state-invalid');
 
   if (req.query?.error) {
     return redirect(
