@@ -6,6 +6,11 @@ import {
   formatFmtySummary
 } from '../data/rebecca-data.js';
 import { getEffectiveRebeccaData } from '../lib/admin-store.js';
+import {
+  buildDefaultConciergeControl,
+  getPublishedConciergeControl,
+  normalizeConciergeControl
+} from '../lib/concierge-control-store.js';
 
 const SYSTEM=`You are the assistant at Rebecca’s Desk: elegant, concise, warm, discreet and useful.
 
@@ -78,7 +83,7 @@ function policyAnswerFor(message=''){
   if(/private date|locked date|little black book|private restaurant|private venue|secret restaurant|frequented date spot/.test(q)){
     return 'Rebecca’s curated Date Ideas list is intentionally private. Confirmed guests can ask her directly; I won’t reveal, guess or reconstruct it here.';
   }
-  if(/home address|exact address|where .* (staying|sleeping|living|right now)|current location|hotel .* (staying|tonight)|private (photo|selfie|number|location)|uncensored (photo|image)|real name/.test(q)){
+  if(/home address|exact(?:\s+\w+){0,3}\s+address|hotel\s+address|address\s+of\s+(?:her|rebecca|the\s+hotel)|where\s+(?:is|does)\s+rebecca.*(?:stay|live|sleep)|where .* (staying|sleeping|living|right now)|current .*?(?:location|hotel|address)|hotel .* (staying|tonight|address)|private (photo|selfie|number|location|address)|uncensored (photo|image)|real name/.test(q)){
     return 'That information is private or not published, so I can’t provide or guess it.';
   }
   return null;
@@ -143,6 +148,185 @@ function fallbackFor(message='',data){
   return 'I can help with Rebecca’s public profile, rates, travel, etiquette, reviews, favourites, press, journal and enquiry process. For anything private or live, please use her official contact channels.';
 }
 
+function matchText(value=''){
+  return String(value)
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^a-z0-9\s]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function trustedAnswerFor(message='',control){
+  const q=matchText(message);
+  if(!q) return null;
+
+  const qTokens=new Set(q.split(' ').filter((token)=>token.length>2));
+  let best=null;
+
+  for(const item of control?.trustedAnswers||[]){
+    if(item?.enabled===false) continue;
+    const question=matchText(item?.question);
+    const keywords=(item?.keywords||[]).map(matchText).filter(Boolean);
+    let score=0;
+
+    if(question&&q===question) score+=100;
+    if(question&&q.includes(question)) score+=45;
+
+    for(const keyword of keywords){
+      if(!keyword) continue;
+      if(q===keyword) score+=35;
+      else if(q.includes(keyword)) score+=20;
+    }
+
+    const questionTokens=question.split(' ').filter((token)=>token.length>2);
+    for(const token of questionTokens) if(qTokens.has(token)) score+=2;
+
+    if(!best||score>best.score) best={item,score};
+  }
+
+  if(!best||best.score<6) return null;
+
+  return {
+    answer:best.item.answer,
+    mode:'trusted-answer',
+    suggestion:best.item.linkPath
+      ? {path:best.item.linkPath,label:best.item.linkLabel||'Learn more'}
+      : null,
+    actions:[],
+    needsRebecca:false
+  };
+}
+
+function fallbackNeedsRebecca(message=''){
+  const q=message.toLowerCase();
+  return !/rate|price|cost|how much|sgd|screen|verify|id|privacy|travel|tour|fly|city|india|hong kong|dubai|tokyo|london|contact|book|enquir|available|availability|meet|etiquette|deposit|cancel|rule|boundary/.test(q);
+}
+
+export async function generateConciergeAnswer({
+  message='',
+  history=[],
+  page='',
+  language='en',
+  currentData,
+  control
+}={}){
+  const languageNames={en:'English','zh-CN':'Simplified Chinese',hi:'Hindi',fr:'French',es:'Spanish'};
+  const safeLanguage=languageNames[language]?language:'en';
+  const safeControl=normalizeConciergeControl(control||buildDefaultConciergeControl());
+
+  if(!safeControl.enabled){
+    return {
+      answer:safeControl.pausedMessage,
+      mode:'paused',
+      suggestion:{path:'/contact',label:'Contact Rebecca'},
+      actions:[],
+      needsRebecca:false
+    };
+  }
+
+  if(isPromptInjection(message)){
+    return {
+      answer:'I can’t reveal or override private instructions. I can still help with Rebecca’s public information.',
+      mode:'guardrail',
+      suggestion:null,
+      actions:[],
+      needsRebecca:false
+    };
+  }
+
+  const policyAnswer=policyAnswerFor(message);
+  if(policyAnswer){
+    return {
+      answer:policyAnswer,
+      mode:'guardrail',
+      suggestion:suggestionFor(message),
+      actions:[],
+      needsRebecca:false
+    };
+  }
+
+  const trusted=trustedAnswerFor(message,safeControl);
+  if(trusted) return trusted;
+
+  const planned=conciergePlan(message,history,page,currentData);
+  if(planned){
+    return {
+      ...planned,
+      mode:'grounded-planner',
+      suggestion:null,
+      needsRebecca:false
+    };
+  }
+
+  const directAnswer=directAnswerFor(message,currentData);
+  if(directAnswer){
+    return {
+      answer:directAnswer,
+      mode:'grounded-direct',
+      suggestion:suggestionFor(message),
+      actions:[],
+      needsRebecca:false
+    };
+  }
+
+  const recentUserContext=history
+    .filter((item)=>item.role==='user')
+    .slice(-2)
+    .map((item)=>item.content)
+    .join(' ');
+  const retrievalQuery=recentUserContext?`${recentUserContext} ${message}`:message;
+  const context=formatRebeccaContext(retrieveRebeccaKnowledge(retrievalQuery,4,currentData));
+
+  if(!process.env.GROQ_API_KEY){
+    return {
+      answer:fallbackFor(message,currentData),
+      mode:'grounded-fallback',
+      suggestion:suggestionFor(message),
+      actions:[],
+      needsRebecca:fallbackNeedsRebecca(message)
+    };
+  }
+
+  try{
+    const response=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{Authorization:`Bearer ${process.env.GROQ_API_KEY}`,'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:process.env.GROQ_MODEL||'openai/gpt-oss-20b',
+        temperature:0.35,
+        max_completion_tokens:280,
+        messages:[
+          {role:'system',content:`${SYSTEM}\nPreferred response language: ${languageNames[safeLanguage]}.`},
+          ...history,
+          {role:'user',content:`VISITOR QUESTION:\n${message}\n\nRETRIEVED PUBLIC CONTEXT:\n${context}`}
+        ]
+      })
+    });
+
+    if(!response.ok) throw new Error(`Groq request failed: ${response.status}`);
+    const data=await response.json();
+    const answer=data?.choices?.[0]?.message?.content?.trim();
+    if(!answer) throw new Error('Empty Groq response');
+
+    return {
+      answer,
+      mode:'rag-groq',
+      suggestion:suggestionFor(message),
+      actions:[],
+      needsRebecca:false
+    };
+  }catch{
+    return {
+      answer:fallbackFor(message,currentData),
+      mode:'grounded-fallback',
+      suggestion:suggestionFor(message),
+      actions:[],
+      needsRebecca:fallbackNeedsRebecca(message)
+    };
+  }
+}
+
 export default async function handler(req,res){
   res.setHeader('Cache-Control','no-store');
   if(req.method!=='POST') return res.status(405).json({error:'Use POST for concierge messages.'});
@@ -164,49 +348,20 @@ export default async function handler(req,res){
   const language=languageNames[body.language]?body.language:'en';
 
   if(!message) return res.status(400).json({error:'Please enter a message.'});
-  if(isPromptInjection(message)) return res.status(200).json({answer:'I can’t reveal or override private instructions. I can still help with Rebecca’s public information.',mode:'guardrail',suggestion:null});
 
-  const effective=await getEffectiveRebeccaData();
-  const currentData=effective.data;
+  const [effective,control]=await Promise.all([
+    getEffectiveRebeccaData(),
+    getPublishedConciergeControl()
+  ]);
 
-  const policyAnswer=policyAnswerFor(message);
-  if(policyAnswer) return res.status(200).json({answer:policyAnswer,mode:'guardrail',suggestion:suggestionFor(message),actions:[]});
+  const result=await generateConciergeAnswer({
+    message,
+    history,
+    page,
+    language,
+    currentData:effective.data,
+    control
+  });
 
-  const planned=conciergePlan(message,history,page,currentData);
-  if(planned) return res.status(200).json({...planned,mode:'grounded-planner',suggestion:null});
-
-  const directAnswer=directAnswerFor(message,currentData);
-  if(directAnswer) return res.status(200).json({answer:directAnswer,mode:'grounded-direct',suggestion:suggestionFor(message),actions:[]});
-
-  const recentUserContext=history.filter((item)=>item.role==='user').slice(-2).map((item)=>item.content).join(' ');
-  const retrievalQuery=recentUserContext?`${recentUserContext} ${message}`:message;
-  const context=formatRebeccaContext(retrieveRebeccaKnowledge(retrievalQuery,4,currentData));
-
-  if(!process.env.GROQ_API_KEY) return res.status(200).json({answer:fallbackFor(message,currentData),mode:'grounded-fallback',suggestion:suggestionFor(message),actions:[]});
-
-  try{
-    const response=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',
-      headers:{Authorization:`Bearer ${process.env.GROQ_API_KEY}`,'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:process.env.GROQ_MODEL||'openai/gpt-oss-20b',
-        temperature:0.35,
-        max_completion_tokens:280,
-        messages:[
-          {role:'system',content:`${SYSTEM}\nPreferred response language: ${languageNames[language]}.`},
-          ...history,
-          {role:'user',content:`VISITOR QUESTION:\n${message}\n\nRETRIEVED PUBLIC CONTEXT:\n${context}`}
-        ]
-      })
-    });
-
-    if(!response.ok) throw new Error(`Groq request failed: ${response.status}`);
-    const data=await response.json();
-    const answer=data?.choices?.[0]?.message?.content?.trim();
-    if(!answer) throw new Error('Empty Groq response');
-
-    return res.status(200).json({answer,mode:'rag-groq',suggestion:suggestionFor(message),actions:[]});
-  }catch{
-    return res.status(200).json({answer:fallbackFor(message,currentData),mode:'grounded-fallback',suggestion:suggestionFor(message),actions:[]});
-  }
+  return res.status(200).json(result);
 }

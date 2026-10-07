@@ -370,3 +370,94 @@ A normal Quick Control **Save & apply** also clears any stored visual draft so t
 - Public content and concierge continue reading only the published Quick Control payload.
 - Edit mode is not enabled just because someone adds `?rc_edit=1`; the owner session is required.
 - No Supabase credentials or editor state are exposed to browser code.
+
+
+## Rebecca Control — RC-06 Concierge Control
+
+RC-06 gives Rebecca owner-friendly control over the public AI concierge without exposing prompts, model settings, retrieval internals or database details.
+
+### Owner workflow
+
+```text
+Rebecca Control
+      ↓
+AI Control
+      ↓
+Edit presentation / Trusted Answers
+      ↓
+Save Draft
+      ↓
+Test Concierge
+      ↓
+Publish Concierge
+```
+
+### AI Control
+
+Rebecca can manage:
+
+- Concierge Live / Paused state
+- public display name
+- subtitle
+- welcome line
+- homepage introduction
+- paused message
+- owner-approved **Trusted Answers**
+- optional internal website link for each Trusted Answer
+
+Trusted Answers are ordinary public question/answer cards. Fixed privacy and safety guardrails execute **before** Trusted Answers, so a custom answer cannot override protected private-location, screening-data, prompt-security or rate-negotiation boundaries.
+
+### Draft / Test / Publish
+
+Concierge settings use a separate protected state:
+
+```text
+public.rebecca_concierge_state
+```
+
+with:
+
+- `draft`
+- `published`
+- `published_version`
+- `history`
+- publish timestamps
+
+**Test Concierge** always uses the saved Draft plus the current effective website data. Tests do not publish and do not enter visitor analytics.
+
+### Public behavior
+
+`/api/concierge-config` returns only safe presentation fields:
+
+- enabled
+- display name
+- subtitle
+- welcome
+- default introduction
+- paused message
+
+It never returns Trusted Answers, history, owner metadata, store secrets or raw internal configuration.
+
+The visitor concierge itself reads only the **published** Concierge Control version.
+
+### Pause behavior
+
+Paused mode keeps Rebecca’s Desk visible, displays the owner-approved pause message and points visitors to Contact. New AI conversations are disabled in the public UI.
+
+### Storage security
+
+RC-06 follows the same least-privilege pattern as other Rebecca Control stores:
+
+- Supabase publishable key
+- high-entropy `RC_STORE_SECRET`
+- explicit Data API grants
+- RLS
+- `security_invoker = true` API view
+- no service-role key in the application
+
+Portable schema:
+`supabase/rc-06-concierge-control.sql`
+
+### Future Needs Rebecca integration
+
+Concierge responses now include an internal `needsRebecca` signal for genuinely unresolved public questions. RC-07 can use this signal to build an owner inbox without storing visitor identity, IP address or raw session metadata.

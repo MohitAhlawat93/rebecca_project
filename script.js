@@ -1,4 +1,4 @@
-(() => {
+(async() => {
   const header=document.querySelector('[data-header]');
   const onScroll=()=>header?.classList.toggle('is-scrolled',window.scrollY>24);
   onScroll(); window.addEventListener('scroll',onScroll,{passive:true});
@@ -226,6 +226,23 @@
   document.querySelector('[data-review-next]')?.addEventListener('click',()=>showReview(current+1)); showReview(0);
 
   const escapeHtml=(text)=>{const d=document.createElement('div');d.textContent=text;return d.innerHTML};
+  const conciergePublicDefaults={
+    enabled:true,
+    displayName:'Rebecca’s Desk',
+    subtitle:'Plans, rates & practicalities.',
+    welcome:'Hi ✦ I’m Rebecca’s Desk assistant.',
+    defaultIntro:'Ask me about Rebecca’s public rates, travel, etiquette or how to enquire.',
+    pausedMessage:'Rebecca’s Desk is taking a short pause. Please use the Contact page for anything time-sensitive.'
+  };
+  let conciergePublic={...conciergePublicDefaults};
+  try{
+    const response=await fetch('/api/concierge-config',{headers:{Accept:'application/json'},cache:'no-store'});
+    const payload=await response.json();
+    if(response.ok&&payload?.config) conciergePublic={...conciergePublicDefaults,...payload.config};
+  }catch{
+    // Keep the bundled public-safe concierge presentation if owner controls are unavailable.
+  }
+
   const conciergePageConfig={
     '/about':{intro:'I can help you get a quick sense of Rebecca before you read the full page.',prompts:[['At a glance','Tell me about Rebecca in a few lines.'],['Interests','What does Rebecca enjoy talking about?'],['First meeting','What should I know before a first meeting?']]},
     '/reviews':{intro:'I can help you navigate Rebecca’s public review history and reputation.',prompts:[['Recent reviews','What do Rebecca’s recent public reviews say?'],['Review sources','Where are Rebecca’s reviews from?'],['Since 2015','How long has Rebecca been established?']]},
@@ -238,19 +255,21 @@
     '/etiquette':{intro:'I can make the practical rules easier to understand.',prompts:[['Screening','Explain screening simply.'],['Deposits','Explain Rebecca’s deposits.'],['Cancellations','Explain Rebecca’s cancellation policy.']]},
     '/contact':{intro:'I can help turn your details into a complete enquiry.',prompts:[['Draft enquiry','Help me draft a complete enquiry.'],['What to include','What should I include in my enquiry?'],['Screening','How does screening work?']]}
   };
-  const conciergeConfig=conciergePageConfig[currentPath]||{intro:'Ask me about Rebecca’s public rates, travel, etiquette or how to enquire.',prompts:[['Singapore rates',"What are Rebecca's Singapore rates?"],['Screening','How does screening work?'],['Travel','Can Rebecca travel to me?']]};
+  const conciergeConfig=conciergePageConfig[currentPath]||{intro:conciergePublic.defaultIntro,prompts:[['Singapore rates',"What are Rebecca's Singapore rates?"],['Screening','How does screening work?'],['Travel','Can Rebecca travel to me?']]};
+  const conciergeEnabled=conciergePublic.enabled!==false;
+  const conciergeIntro=conciergeEnabled?conciergeConfig.intro:conciergePublic.pausedMessage;
   document.body.insertAdjacentHTML('beforeend',`
-    <button class="concierge-launcher" type="button" data-open-concierge aria-label="Open Rebecca's Desk" aria-expanded="false" aria-controls="rebecca-concierge"><span class="spark" aria-hidden="true">✦</span><span>Rebecca’s Desk</span></button>
+    <button class="concierge-launcher" type="button" data-open-concierge aria-label="Open ${escapeHtml(conciergePublic.displayName)}" aria-expanded="false" aria-controls="rebecca-concierge"><span class="spark" aria-hidden="true">✦</span><span>${escapeHtml(conciergePublic.displayName)}</span></button>
     <aside class="concierge-panel" id="rebecca-concierge" data-concierge-panel hidden role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="rebecca-concierge-title">
-      <div class="concierge-panel-head"><div><strong id="rebecca-concierge-title">Rebecca’s Desk</strong><small>Plans, rates & practicalities.</small></div><button class="concierge-close" type="button" data-close-concierge aria-label="Close Rebecca's Desk">×</button></div>
-      <div class="concierge-thread" data-concierge-thread aria-live="polite"><div class="chat-message assistant"><p>Hi ✦ I’m Rebecca’s Desk assistant.</p><p>${escapeHtml(conciergeConfig.intro)}</p></div></div>
-      <div class="concierge-chips" data-concierge-chips></div>
-      <form class="concierge-form" data-concierge-form><input type="text" maxlength="600" autocomplete="off" placeholder="Ask something discreetly…" aria-label="Message Rebecca's Desk" required><button class="concierge-send" type="submit" aria-label="Send">↗</button></form>
-      <p class="concierge-disclaimer">Please don’t send ID documents, employer details or other sensitive screening information here. Use Rebecca’s official channels for screening.</p>
+      <div class="concierge-panel-head"><div><strong id="rebecca-concierge-title">${escapeHtml(conciergePublic.displayName)}</strong><small>${escapeHtml(conciergePublic.subtitle)}</small></div><button class="concierge-close" type="button" data-close-concierge aria-label="Close concierge">×</button></div>
+      <div class="concierge-thread" data-concierge-thread aria-live="polite"><div class="chat-message assistant"><p>${escapeHtml(conciergePublic.welcome)}</p><p>${escapeHtml(conciergeIntro)}</p></div></div>
+      <div class="concierge-chips" data-concierge-chips${conciergeEnabled?'':' hidden'}></div>
+      <form class="concierge-form" data-concierge-form${conciergeEnabled?'':' hidden'}><input type="text" maxlength="600" autocomplete="off" placeholder="Ask something discreetly…" aria-label="Message concierge" required><button class="concierge-send" type="submit" aria-label="Send">↗</button></form>
+      <p class="concierge-disclaimer">${conciergeEnabled?'Please don’t send ID documents, employer details or other sensitive screening information here. Use Rebecca’s official channels for screening.':'For anything time-sensitive, please use Rebecca’s official Contact page.'}</p>
     </aside>`);
 
   const panel=document.querySelector('[data-concierge-panel]'),thread=document.querySelector('[data-concierge-thread]'),form=document.querySelector('[data-concierge-form]'),input=form?.querySelector('input'),send=form?.querySelector('[type="submit"]'),chips=document.querySelector('[data-concierge-chips]');let conciergeReturnFocus=null;
-  conciergeConfig.prompts.forEach(([label,prompt])=>{const button=document.createElement('button');button.className='concierge-chip';button.type='button';button.textContent=label;button.setAttribute('data-chat-prompt',prompt);chips?.appendChild(button);});
+  if(conciergeEnabled) conciergeConfig.prompts.forEach(([label,prompt])=>{const button=document.createElement('button');button.className='concierge-chip';button.type='button';button.textContent=label;button.setAttribute('data-chat-prompt',prompt);chips?.appendChild(button);});
   const setConcierge=(open)=>{if(!panel)return;const launcher=document.querySelector('.concierge-launcher');if(open)conciergeReturnFocus=document.activeElement;panel.hidden=!open;panel.setAttribute('aria-hidden',String(!open));launcher?.toggleAttribute('hidden',open);launcher?.setAttribute('aria-expanded',String(open));document.body.classList.toggle('concierge-open',open);if(open&&!window.matchMedia('(max-width: 640px)').matches)setTimeout(()=>input?.focus(),60);else if(!open&&conciergeReturnFocus instanceof HTMLElement)conciergeReturnFocus.focus()};
   document.querySelectorAll('[data-open-concierge]').forEach(b=>b.addEventListener('click',()=>setConcierge(true)));
   document.querySelector('[data-close-concierge]')?.addEventListener('click',()=>setConcierge(false));

@@ -39,7 +39,7 @@
     <section class="rc-app" data-app-view hidden>
       <header class="rc-topbar">
         <div>
-          <p class="rc-eyebrow">Rebecca Control · RC-05</p>
+          <p class="rc-eyebrow">Rebecca Control · RC-06</p>
           <h1>Good to see you, Rebecca.</h1>
         </div>
         <div class="rc-top-actions">
@@ -86,6 +86,8 @@
           <button type="button" data-tab="rates">Rates</button>
           <button type="button" data-tab="contact">Contact</button>
           <button type="button" data-tab="profile">Profile</button>
+          <button type="button" data-tab="concierge">AI Control</button>
+          <button type="button" data-tab="concierge-test">Test Concierge</button>
           <button type="button" data-tab="media">Media & Publish</button>
         </nav>
 
@@ -225,6 +227,126 @@
           </div>
         </section>
 
+        <section class="rc-panel rc-concierge-panel" data-panel="concierge" hidden>
+          <div class="rc-panel-intro rc-panel-intro-row">
+            <div>
+              <p class="rc-eyebrow">AI Control</p>
+              <h3>Control what Rebecca’s Desk says—without editing prompts.</h3>
+              <p>Prepare changes in Draft, test them privately, then publish only when you are happy. Website facts such as rates and travel still come from their existing single source of truth.</p>
+            </div>
+            <span class="rc-phase-pill" data-concierge-connection>Loading…</span>
+          </div>
+
+          <div class="rc-concierge-status-grid">
+            <div><span>Live version</span><strong data-concierge-live-version>—</strong><small data-concierge-published-at>Not published here yet</small></div>
+            <div><span>Draft</span><strong data-concierge-draft-status>Loading…</strong><small data-concierge-draft-detail>Checking Concierge Control</small></div>
+            <div><span>Trusted answers</span><strong data-concierge-answer-count>0</strong><small>owner-approved answers</small></div>
+          </div>
+
+          <section class="rc-concierge-block">
+            <div class="rc-media-section-title">
+              <div>
+                <span class="rc-card-kicker">Status</span>
+                <strong>Should Rebecca’s Desk be available?</strong>
+              </div>
+              <small>Pausing shows a polite message and sends visitors to Contact.</small>
+            </div>
+            <div class="rc-concierge-status-choices">
+              <button type="button" data-concierge-status="live"><strong>Live</strong><span>Visitors can ask questions.</span></button>
+              <button type="button" data-concierge-status="paused"><strong>Paused</strong><span>Keep the desk visible, but stop new AI conversations.</span></button>
+            </div>
+          </section>
+
+          <section class="rc-concierge-block">
+            <div class="rc-media-section-title">
+              <div>
+                <span class="rc-card-kicker">Presentation</span>
+                <strong>What visitors see first</strong>
+              </div>
+              <small>These are public-facing labels only—not hidden AI instructions.</small>
+            </div>
+            <div class="rc-form-grid">
+              <label class="rc-field"><span>Name</span><input data-concierge-field="displayName" maxlength="80"></label>
+              <label class="rc-field"><span>Subtitle</span><input data-concierge-field="subtitle" maxlength="120"></label>
+              <label class="rc-field rc-field-wide"><span>Welcome line</span><input data-concierge-field="welcome" maxlength="220"></label>
+              <label class="rc-field rc-field-wide"><span>Homepage introduction</span><textarea data-concierge-field="defaultIntro" maxlength="300" rows="3"></textarea></label>
+              <label class="rc-field rc-field-wide"><span>Message while paused</span><textarea data-concierge-field="pausedMessage" maxlength="300" rows="3"></textarea></label>
+            </div>
+          </section>
+
+          <section class="rc-concierge-block">
+            <div class="rc-media-section-title">
+              <div>
+                <span class="rc-card-kicker">Trusted Answers</span>
+                <strong>Answers Rebecca explicitly approves</strong>
+              </div>
+              <button type="button" class="rc-secondary" data-concierge-add-answer>+ Add answer</button>
+            </div>
+            <p class="rc-concierge-help">Use this for public questions that deserve Rebecca’s exact wording. Do not put private screening details, private locations, passwords or unpublished information here.</p>
+            <div class="rc-stack" data-concierge-answers></div>
+          </section>
+
+          <div class="rc-concierge-actions">
+            <div>
+              <strong data-concierge-save-state>No Concierge changes</strong>
+              <span data-concierge-save-detail>Draft and live version match.</span>
+            </div>
+            <div>
+              <button type="button" class="rc-secondary" data-concierge-discard disabled>Discard Draft</button>
+              <button type="button" class="rc-secondary" data-concierge-save disabled>Save Draft</button>
+              <button type="button" class="rc-primary" data-concierge-publish disabled>Publish Concierge</button>
+            </div>
+          </div>
+
+          <details class="rc-media-history rc-concierge-history">
+            <summary>Published concierge history <span data-concierge-history-count>0</span></summary>
+            <p>Restore sends an old version back to Draft first. It never goes live automatically.</p>
+            <div class="rc-stack" data-concierge-history></div>
+          </details>
+        </section>
+
+        <section class="rc-panel rc-concierge-test-panel" data-panel="concierge-test" hidden>
+          <div class="rc-panel-intro rc-panel-intro-row">
+            <div>
+              <p class="rc-eyebrow">Test Concierge</p>
+              <h3>Ask the Draft what a visitor would ask.</h3>
+              <p>Tests use the saved Concierge Draft plus the current website data. They do not publish anything and are not added to visitor analytics.</p>
+            </div>
+            <span class="rc-phase-pill">Private test</span>
+          </div>
+
+          <div class="rc-test-concierge">
+            <div class="rc-test-thread" data-concierge-test-thread>
+              <div class="rc-test-message assistant">
+                <span>Rebecca’s Desk · Draft</span>
+                <p>Ask a real visitor question below. If you have unsaved AI Control edits, they will be saved to Draft before the test runs.</p>
+              </div>
+            </div>
+            <form class="rc-test-form" data-concierge-test-form>
+              <label class="rc-field">
+                <span>Test as if the visitor is on</span>
+                <select data-concierge-test-page>
+                  <option value="/">Homepage</option>
+                  <option value="/about">About</option>
+                  <option value="/rates">Rates</option>
+                  <option value="/travel">Travel</option>
+                  <option value="/etiquette">Etiquette</option>
+                  <option value="/contact">Contact</option>
+                </select>
+              </label>
+              <label class="rc-field rc-field-wide">
+                <span>Visitor question</span>
+                <textarea data-concierge-test-input maxlength="600" rows="3" placeholder="e.g. Can Rebecca visit Tokyo next month?"></textarea>
+              </label>
+              <div class="rc-concierge-test-actions">
+                <button type="button" class="rc-secondary" data-concierge-test-clear>Clear test</button>
+                <button type="submit" class="rc-primary" data-concierge-test-send>Ask Draft</button>
+              </div>
+              <p class="rc-concierge-test-note" data-concierge-test-note>Uses Draft—not the live concierge.</p>
+            </form>
+          </div>
+        </section>
+
         <section class="rc-panel rc-media-panel" data-panel="media" hidden>
           <div class="rc-panel-intro rc-panel-intro-row">
             <div>
@@ -337,7 +459,7 @@
       </div>
 
       <footer class="rc-footer">
-        <span>Rebecca Control · RC-05</span>
+        <span>Rebecca Control · RC-06</span>
         <span>Owner access only</span>
       </footer>
     </section>

@@ -22,7 +22,7 @@ assert.match(editor, /rc_edit/);
 assert.match(editor, /adminMediaUrl/);
 assert.match(editor, /data-rc-media-placement/);
 
-assert.match(admin, /Rebecca Control · RC-05/);
+assert.match(admin, /Rebecca Control · RC-0[5-9]/);
 assert.match(admin, /Edit Website ↗/);
 assert.match(admin, /\?rc_edit=1/);
 
