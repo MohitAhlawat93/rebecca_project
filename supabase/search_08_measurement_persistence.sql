@@ -115,71 +115,71 @@ grant select, insert, update on table public.search_sync_state to anon;
 drop policy if exists search_provider_connections_read on public.search_provider_connections;
 create policy search_provider_connections_read on public.search_provider_connections
 for select to anon using (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 );
 drop policy if exists search_provider_connections_insert on public.search_provider_connections;
 create policy search_provider_connections_insert on public.search_provider_connections
 for insert to anon with check (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 );
 drop policy if exists search_provider_connections_update on public.search_provider_connections;
 create policy search_provider_connections_update on public.search_provider_connections
 for update to anon using (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 ) with check (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 );
 
 drop policy if exists search_metric_rows_read on public.search_metric_rows;
 create policy search_metric_rows_read on public.search_metric_rows
 for select to anon using (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 );
 drop policy if exists search_metric_rows_insert on public.search_metric_rows;
 create policy search_metric_rows_insert on public.search_metric_rows
 for insert to anon with check (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 );
 drop policy if exists search_metric_rows_update on public.search_metric_rows;
 create policy search_metric_rows_update on public.search_metric_rows
 for update to anon using (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 ) with check (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 );
 
 drop policy if exists search_sync_runs_read on public.search_sync_runs;
 create policy search_sync_runs_read on public.search_sync_runs
 for select to anon using (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 );
 drop policy if exists search_sync_runs_insert on public.search_sync_runs;
 create policy search_sync_runs_insert on public.search_sync_runs
 for insert to anon with check (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 );
 drop policy if exists search_sync_runs_update on public.search_sync_runs;
 create policy search_sync_runs_update on public.search_sync_runs
 for update to anon using (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 ) with check (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 );
 
 drop policy if exists search_sync_state_read on public.search_sync_state;
 create policy search_sync_state_read on public.search_sync_state
 for select to anon using (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 );
 drop policy if exists search_sync_state_insert on public.search_sync_state;
 create policy search_sync_state_insert on public.search_sync_state
 for insert to anon with check (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 );
 drop policy if exists search_sync_state_update on public.search_sync_state;
 create policy search_sync_state_update on public.search_sync_state
 for update to anon using (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 ) with check (
-  encode(digest(coalesce((current_setting('request.headers', true)::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
+  encode(digest(coalesce(((select current_setting('request.headers', true))::jsonb ->> 'x-search-store-secret'), ''), 'sha256'), 'hex') = secret_hash
 );
