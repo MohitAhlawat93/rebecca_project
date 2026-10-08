@@ -5,7 +5,7 @@ import { resolve, extname, sep } from 'node:path';
 const root = process.cwd();
 const files = new Set([
   '/admin.html', '/admin.css', '/admin-search.css',
-  '/admin.js', '/admin-guide.js', '/admin-publishing.js',
+  '/admin.js', '/admin-guide.js', '/admin-publishing.js', '/admin-launch.js',
   '/admin-media-upload.js', '/admin-search.js', '/favicon.svg'
 ]);
 const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.svg':'image/svg+xml' };
