@@ -766,3 +766,21 @@ Manual recovery points remain available even when automatic recovery is disabled
 
 Portable schema update:
 `supabase/rc-11-settings-safety.sql`
+
+## RC-QA-02 — Six-area Rebecca Control navigation
+
+Rebecca Control now has **Home, Website, Photos, Concierge, Growth and Settings** as its only main navigation areas, with the original feature workflows intact.
+
+- **Home** → Overview (operational Insights, upcoming changes and recommended actions).
+- **Website** → Availability, Travel Plans, Announcements & Map, Automatic Changes, Rates, Contact Methods and Profile; the private Visual Editor remains accessible through **Edit Website**.
+- **Photos** → existing Media & Publishing workspace, including its protected Draft, Preview, Publish and Scheduled Publishing logic.
+- **Concierge** → AI Concierge, Test AI and Questions for Rebecca.
+- **Growth** → Search Intelligence, including provider setup/sync/report imports.
+- **Settings** → Account & Settings, Activity History and History & Backups.
+- **Ask Control** → a header action that opens the existing RC-08 proposal-only assistant and offers a return to the previous admin section.
+
+**Backward compatibility:** Existing `/admin?tab=availability`, `?tab=media`, `?tab=search`, `?tab=needs-rebecca` and other feature routes remain valid; owner start-tab preferences continue to be read from the stored system settings. Short links using `?tab=website` or another main area name also open that area's first section. Navigation remembers the last subtab visited in each area for the duration of the session.
+
+The consolidation changes layout, labeling and navigation only. There is no new database schema, change in public website content, or merging of independent Website, Media and Concierge drafts.
+
+Run `npm run validate:rc-qa-02` for navigation mappings and interaction regression checks.
