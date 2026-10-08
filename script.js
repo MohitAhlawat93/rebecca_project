@@ -262,7 +262,7 @@
   document.body.insertAdjacentHTML('beforeend',`
     <button class="concierge-launcher" type="button" data-open-concierge aria-label="Open ${escapeHtml(conciergePublic.displayName)}" aria-expanded="false" aria-controls="rebecca-concierge"><span class="spark" aria-hidden="true">✦</span><span>${escapeHtml(conciergePublic.displayName)}</span></button>
     <aside class="concierge-panel" id="rebecca-concierge" data-concierge-panel hidden role="dialog" aria-modal="false" aria-hidden="true" aria-labelledby="rebecca-concierge-title">
-      <div class="concierge-panel-head"><div><strong id="rebecca-concierge-title">${escapeHtml(conciergePublic.displayName)}</strong><small>${escapeHtml(conciergePublic.subtitle)}</small></div><div class="concierge-head-actions"><button class="concierge-size-toggle" type="button" data-chat-size-toggle aria-expanded="false" aria-controls="rebecca-chat-size" aria-label="Resize Rebecca’s Desk">Size</button><button class="concierge-close" type="button" data-close-concierge aria-label="Close concierge">×</button></div></div>
+      <div class="concierge-panel-head"><div><strong id="rebecca-concierge-title">${escapeHtml(conciergePublic.displayName)}</strong><small>${escapeHtml(conciergePublic.subtitle)}</small></div><div class="concierge-head-actions"><button class="concierge-size-toggle" type="button" data-chat-size-toggle aria-expanded="false" aria-controls="rebecca-chat-size" aria-label="Resize Rebecca’s Desk">Size</button><button class="concierge-minimize" type="button" data-minimize-concierge aria-label="Minimize Rebecca’s Desk" title="Minimize chat">−</button><button class="concierge-close" type="button" data-close-concierge aria-label="Close concierge">×</button></div></div>
       <div class="concierge-size-popover" id="rebecca-chat-size" data-chat-size-popover hidden>
         <div class="concierge-size-row"><span>Width</span><button type="button" data-chat-width="-1" aria-label="Make chat narrower">−</button><button type="button" data-chat-width="1" aria-label="Make chat wider">+</button></div>
         <div class="concierge-size-row"><span>Height</span><button type="button" data-chat-height="-1" aria-label="Make chat shorter">−</button><button type="button" data-chat-height="1" aria-label="Make chat taller">+</button></div>
@@ -304,6 +304,7 @@
     if(!conciergeEnabled&&!panel.hidden)setConcierge(false);
   });
   document.querySelectorAll('[data-open-concierge]').forEach(b=>b.addEventListener('click',()=>setConcierge(true)));
+  document.querySelector('[data-minimize-concierge]')?.addEventListener('click',()=>{setConcierge(false);document.querySelector('[data-open-concierge]')?.focus({preventScroll:true});});
   document.querySelector('[data-close-concierge]')?.addEventListener('click',()=>setConcierge(false));
   panel?.addEventListener('keydown',(event)=>{if(event.key!=='Tab'||window.matchMedia('(max-width: 640px)').matches)return;const focusable=[...panel.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')];if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}});
 
@@ -421,7 +422,7 @@
       .official-links-grid span{font-size:.76rem;font-weight:600}.official-links-grid small{margin-top:4px;color:var(--ink-soft);font-size:.66rem;overflow-wrap:anywhere}.official-links-grid b{position:absolute;right:13px;top:13px;font-weight:400}
       .official-links-note{margin:16px 2px 0;color:var(--ink-soft);font-size:.64rem;line-height:1.5}
       @media(max-width:640px){
-        .concierge-panel{left:auto;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));width:min(310px,calc(100vw - 52px));height:min(43svh,355px);min-width:0;min-height:0;border-radius:18px;overflow:hidden}
+        .concierge-panel{left:auto;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));width:min(280px,calc(100vw - 64px));height:min(39svh,310px);min-width:0;min-height:0;border-radius:18px;overflow:hidden}
         .afterhours-launcher{left:14px;bottom:14px;padding-right:11px}.afterhours-launcher small{display:none}.afterhours-launcher strong{font-size:.9rem}
         .official-links-backdrop{align-items:end;padding:0;background:rgba(22,20,18,.3)}
         .official-links-card{width:100%;max-height:82svh;border-radius:26px 26px 0 0;border-bottom:0;padding:28px 20px max(24px,env(safe-area-inset-bottom))}

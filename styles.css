@@ -1005,3 +1005,18 @@ body.rr-floating-controls-ready .concierge-launcher:not([hidden]){opacity:1;visi
   body.concierge-open .concierge-form,
   body.concierge-open .concierge-disclaimer{flex-shrink:0}
 }
+
+
+/* UX-MINIMIZE: desktop + mobile header control, compact phone chat */
+.concierge-minimize{appearance:none;flex:0 0 auto;display:grid;place-items:center;width:34px;height:34px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--ink);font:400 24px/1 var(--sans);cursor:pointer}
+.concierge-minimize:hover,.concierge-minimize:focus-visible{background:rgba(78,45,49,.09);outline-offset:2px}
+@media(max-width:640px){
+  .concierge-head-actions{display:flex;align-items:center;gap:2px}
+  .concierge-minimize{width:36px;height:36px;font-size:22px}
+  body.concierge-open .concierge-panel{width:min(280px,calc(100vw - 64px))!important;max-width:calc(100vw - 64px)!important;height:min(39svh,310px)!important;max-height:calc(100dvh - 155px)!important}
+  body.concierge-open .concierge-panel-head{flex-shrink:0}
+  body.concierge-open .concierge-panel-head>div:first-child{min-width:0}
+  body.concierge-open .concierge-panel-head strong{font-size:17px}
+  body.concierge-open .concierge-panel-head small{font-size:8px}
+  body.concierge-open .concierge-form input{min-width:0}
+}
