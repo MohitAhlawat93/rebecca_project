@@ -20,6 +20,9 @@
     "validate:rc-qa-02": "node scripts/validate-rc-qa-02.mjs",
     "validate:rc-qa-03": "node scripts/validate-rc-qa-03.mjs",
     "validate:rc-qa-04": "node scripts/validate-rc-qa-04.mjs",
+    "test:admin:browser": "playwright test --config=playwright.config.mjs",
+    "test:admin:browser:desktop": "playwright test --config=playwright.config.mjs --project=desktop-chromium",
+    "test:admin:browser:phone": "playwright test --config=playwright.config.mjs --project=phone-chromium",
     "validate:media": "node scripts/validate-media.mjs",
     "validate:schedule": "node scripts/validate-scheduling.mjs",
     "validate:scheduled-publishing": "node scripts/validate-scheduled-publishing.mjs",
@@ -60,5 +63,8 @@
   "dependencies": {
     "@vercel/blob": "2.8.1",
     "linkedom": "0.18.13"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
   }
 }

@@ -818,3 +818,20 @@ The workspace provides **Refresh status** after changing one of the independent 
 **Scope of editable text:** The existing Quick Control/Visual Editor covers structured public profile, availability, travel descriptions, notices, rates and contact text; the Concierge editor covers trusted answers and assistant presentation. This release does **not** create a free-form editorial CMS for whole homepage sections, Journal, Press, Reviews or SEO metadata. Those require a future editorial data model with authenticated draft/publish and a public rendering strategy.
 
 Compatibility: old tab routes remain supported; the existing Supabase schema and owner authentication are unchanged. Run `npm run validate:rc-qa-04` to check routing, protected API, draft aggregation, scheduled photo lifecycle and readonly UI behavior.
+
+## RC-QA-05 — Safe automated owner browser testing
+
+This release adds **real headless Chromium** smoke tests in GitHub Actions at desktop (1365×850) and phone (390×844) dimensions. Unlike the existing source and DOM unit tests, these interact with the rendered admin interface, real buttons and browser confirmation dialogs.
+
+The test harness lives in `tests/admin/` and `playwright.config.mjs`. It serves a short explicit allowlist of static admin assets locally and **intercepts every `/api/admin/*` request in memory**; unexpected requests are refused. It never logs into a deployed Rebecca Control instance, opens an actual Supabase account, uses production credentials or changes public content. The fixture ID and password (`demo-owner` / `test-only-password`) are dummy strings accepted only by that in-memory mock and are not owner credentials.
+
+Scenarios include unauthenticated access and invalid sign-in, six-area navigation and older deep links, first-use help, Publishing Center read-only status, versioned Quick Control saves and stale/Visual-Draft conflicts, photo Draft/Publish confirmation and schedule locking, Concierge Draft/Test/Publish, recovery confirmation and logout. Both viewport projects run against the **same actual frontend scripts**, but their API responses and publication state are fake and isolated per test.
+
+To run locally:
+1. `npm install --ignore-scripts`
+2. `npx playwright install chromium` (on Linux CI use `npx playwright install --with-deps chromium`)
+3. `npm run test:admin:browser` (or `npm run test:admin:browser:desktop` / `npm run test:admin:browser:phone`)
+
+GitHub Actions now requires the full `npm run validate`, both browser test projects, and `npm run vercel-build` to pass before merge. Failure traces and screenshots are stored only in the local/CI workspace unless explicitly shared; no real private content is used. The test server is restricted to `127.0.0.1` and a set of allowlisted admin files.
+
+**Not covered by simulated browser tests:** production owner credentials, actual Supabase connectivity/RLS policy, real email/integration provider connections, Vercel-authenticated owner login, physical device quirks, and real recovery against owner content. Those remain for RC-QA-06/07 and a supervised owner acceptance session; avoid entering production passwords into automated tests.

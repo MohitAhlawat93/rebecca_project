@@ -15,4 +15,8 @@ jobs:
           node-version: 22
       - run: npm install --ignore-scripts
       - run: npm run validate
+      # Chromium tests use a local fixture server and mock ALL /api/admin/* calls.
+      # No production Vercel URL, Supabase credentials or owner password is needed.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:admin:browser
       - run: npm run vercel-build
