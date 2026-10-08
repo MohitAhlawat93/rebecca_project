@@ -10,6 +10,13 @@ const RC_OWNER_HELP = {
     publishing: 'Read-only overview: no public changes.',
     caution: 'Search traffic and rankings live in Growth, not this overview.'
   },
+  launch: {
+    title: 'Check whether launch can be approved',
+    summary: 'The launch dashboard shows read-only operational signals and a separate owner acceptance worksheet. It does not sign off or publish changes.',
+    steps: ['Refresh operational status; resolve all blocked connections.', 'Review each owner-only checkbox on Rebecca’s real phone and laptop, with the owner present.', 'Copy the review notes and obtain a separately signed acceptance record before any domain or indexing switch.'],
+    publishing: 'Nothing publishes here. A completed on-screen worksheet is not launch authorization.',
+    caution: 'A green CI or READY deployment is not proof of owner acceptance, live AI quality, legal compliance or production search visibility.'
+  },
   publishing: {
     title: 'Review everything before it goes live',
     summary: 'Publishing Center shows saved draft and live status across your website, photos and AI concierge without publishing anything itself.',
