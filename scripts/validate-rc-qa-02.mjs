@@ -54,9 +54,17 @@ const functionBody = [
   source.slice(navStart,navEnd),
   "return { activateTab, activateArea, active: () => activeTab, previous: () => lastRegularTab };"
 ].join('\n');
-const createNavigation = new Function('document','setText','quickSavebar','loadMedia','loadConcierge','loadNeedsRebecca','loadSystem','loadInsights', functionBody);
+// This DOM harness requires events from linkedom's own realm, not Node 22's
+// global CustomEvent (whose readonly eventPhase is incompatible with linkedom).
+class LinkedomCustomEvent extends document.defaultView.Event {
+  constructor(type, options = {}) {
+    super(type);
+    this.detail = options.detail;
+  }
+}
+const createNavigation = new Function('document','setText','quickSavebar','loadMedia','loadConcierge','loadNeedsRebecca','loadSystem','loadInsights','CustomEvent', functionBody);
 const ui = createNavigation(document,setText,document.querySelector('[data-quick-savebar]'),
-  () => hits.media++, () => hits.concierge++, () => hits.needs++, () => hits.system++, () => hits.insights++
+  () => hits.media++, () => hits.concierge++, () => hits.needs++, () => hits.system++, () => hits.insights++, LinkedomCustomEvent
 );
 const activeArea = () => document.querySelector('[data-control-area].is-active')?.dataset.controlArea;
 const visiblePanels = () => [...document.querySelectorAll('[data-panel].is-active')].map(x => x.dataset.panel);
