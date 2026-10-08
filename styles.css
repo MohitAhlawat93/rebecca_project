@@ -983,3 +983,69 @@ body.concierge-open .page-scroll-rail,body.gallery-lightbox-open .page-scroll-ra
     resize: none;
   }
 }
+
+/* FINAL-01 — responsive concierge improvements retained alongside SEARCH styles */
+/* Rebecca's Desk — explicit desktop resizing */
+@media(min-width:641px){
+  .concierge-panel{min-width:340px;min-height:360px;max-width:min(760px,calc(100vw - 40px));max-height:calc(100svh - 40px);resize:none}
+  .concierge-head-actions{display:flex;align-items:center;gap:5px}
+  .concierge-size-toggle{border:1px solid rgba(78,45,49,.16);background:rgba(255,255,255,.45);color:var(--ink);border-radius:999px;padding:7px 10px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+  .concierge-size-toggle:hover,.concierge-size-toggle[aria-expanded="true"]{background:#fff}
+  .concierge-size-popover{position:absolute;z-index:7;top:56px;right:12px;width:198px;padding:11px;border:1px solid var(--line);border-radius:15px;background:var(--paper);box-shadow:0 16px 42px rgba(0,0,0,.17)}
+  .concierge-size-popover[hidden]{display:none}
+  .concierge-size-row{display:grid;grid-template-columns:1fr 34px 34px;gap:6px;align-items:center;padding:4px 0}
+  .concierge-size-row span{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+  .concierge-size-row button,.concierge-size-reset{border:1px solid var(--line);background:rgba(255,255,255,.52);color:var(--ink);border-radius:9px;min-height:32px;cursor:pointer}
+  .concierge-size-row button:hover,.concierge-size-reset:hover{background:#fff}
+  .concierge-size-reset{width:100%;margin-top:7px;font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+  .concierge-resize-grip{position:absolute;z-index:8;left:-1px;top:-1px;width:28px;height:28px;border:0;background:transparent;cursor:nwse-resize;touch-action:none}
+  .concierge-resize-grip::before,.concierge-resize-grip::after{content:"";position:absolute;left:7px;top:7px;border-left:2px solid rgba(78,45,49,.42);border-top:2px solid rgba(78,45,49,.42)}
+  .concierge-resize-grip::before{width:11px;height:11px}.concierge-resize-grip::after{width:6px;height:6px;left:12px;top:12px}
+  body.concierge-resizing{user-select:none;cursor:nwse-resize}
+}
+@media(max-width:640px){
+  .concierge-size-toggle,.concierge-size-popover,.concierge-resize-grip{display:none!important}
+}
+
+
+/* UX-PRIORITY — delayed floating controls, compact nonmodal mobile concierge */
+.concierge-launcher:not([hidden]){opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility .22s}
+body.rr-floating-controls-ready .concierge-launcher:not([hidden]){opacity:1;visibility:visible;pointer-events:auto}
+@media(max-width:640px){
+  body.concierge-open{overflow:visible!important;touch-action:auto}
+  body.concierge-open::before{content:none!important;display:none!important;backdrop-filter:none!important}
+  body.concierge-open .concierge-panel{
+    top:auto!important;
+    left:auto!important;
+    right:max(12px,env(safe-area-inset-right))!important;
+    bottom:calc(72px + env(safe-area-inset-bottom))!important;
+    width:min(310px,calc(100vw - 52px))!important;
+    max-width:calc(100vw - 52px)!important;
+    height:min(43svh,355px)!important;
+    max-height:calc(100dvh - 145px)!important;
+    min-width:0!important;
+    min-height:0!important;
+    overflow:hidden;
+    border-radius:18px;
+    box-shadow:0 16px 48px rgba(0,0,0,.22);
+  }
+  body.concierge-open .concierge-thread{min-height:0;overflow-y:auto;overscroll-behavior:contain}
+  body.concierge-open .concierge-chips,
+  body.concierge-open .concierge-form,
+  body.concierge-open .concierge-disclaimer{flex-shrink:0}
+}
+
+
+/* UX-MINIMIZE: desktop + mobile header control, compact phone chat */
+.concierge-minimize{appearance:none;flex:0 0 auto;display:grid;place-items:center;width:34px;height:34px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--ink);font:400 24px/1 var(--sans);cursor:pointer}
+.concierge-minimize:hover,.concierge-minimize:focus-visible{background:rgba(78,45,49,.09);outline-offset:2px}
+@media(max-width:640px){
+  .concierge-head-actions{display:flex;align-items:center;gap:2px}
+  .concierge-minimize{width:36px;height:36px;font-size:22px}
+  body.concierge-open .concierge-panel{width:min(280px,calc(100vw - 64px))!important;max-width:calc(100vw - 64px)!important;height:min(39svh,310px)!important;max-height:calc(100dvh - 155px)!important}
+  body.concierge-open .concierge-panel-head{flex-shrink:0}
+  body.concierge-open .concierge-panel-head>div:first-child{min-width:0}
+  body.concierge-open .concierge-panel-head strong{font-size:17px}
+  body.concierge-open .concierge-panel-head small{font-size:8px}
+  body.concierge-open .concierge-form input{min-width:0}
+}

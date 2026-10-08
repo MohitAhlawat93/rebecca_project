@@ -1,5 +1,7 @@
 import fs from 'node:fs';
 import { conciergePlan, parseBookingContext, draftEnquiry } from '../lib/concierge-planner.js';
+import { generateConciergeAnswer } from '../api/concierge.js';
+import { REBECCA_DATA } from '../data/rebecca-data.js';
 
 const fail=(message)=>{console.error(`[Concierge 2.0 validation] ${message}`);process.exitCode=1;};
 const assert=(condition,message)=>{if(!condition)fail(message);};
@@ -39,6 +41,15 @@ assert(!/available|confirmed booking|accepted/i.test(draft),'Draft must not clai
 const selectedAsia=conciergePlan('Can Rebecca come to Tokyo for 10 hours?',[],'/travel');
 assert(selectedAsia?.answer.includes('14 hours + travel'),'Selected-Asia planner did not use the confirmed 14-hour minimum');
 
+const petPeeves=await generateConciergeAnswer({message:'what are her pet peeves',history:[],page:'/about',language:'en',currentData:REBECCA_DATA});
+assert(petPeeves.answer.includes('Bad manners'),'Public interview matcher missed pet peeves');
+
+const favouriteCountries=await generateConciergeAnswer({message:'what are her favourite countries',history:[],page:'/about',language:'en',currentData:REBECCA_DATA});
+assert(favouriteCountries.answer.includes('Uzbekistan')&&favouriteCountries.answer.includes('Japan'),'Favourite countries were matched to the wrong profile answer');
+
+const generalDinner=await generateConciergeAnswer({message:'I am visiting Singapore, what is a classy first dinner idea?',history:[],page:'/',language:'en',currentData:REBECCA_DATA});
+assert(generalDinner.mode!=='grounded-planner','General Singapore/date advice must not be hijacked by the booking planner');
+
 const script=fs.readFileSync('script.js','utf8');
 const api=fs.readFileSync('api/concierge.js','utf8');
 const knowledge=fs.readFileSync('lib/rebecca-knowledge.js','utf8');
@@ -48,16 +59,32 @@ assert(script.includes('Rebecca’s Desk'),'Rebecca’s Desk name is missing');
 assert(script.includes('renderChatActions'),'Client does not render structured actions');
 assert(script.includes("matchMedia('(max-width: 640px)')"),'Mobile keyboard behavior is not guarded');
 assert(script.includes("button.dataset.afterhoursLauncher='true'"),'Persistent Rebecca Afterhours launcher is missing');
+assert(script.includes("CHAT_SIZE_KEY='rr-concierge-size-v2'"),'Resizable concierge state is missing');
+assert(script.includes('data-chat-size-toggle'),'Concierge resize menu is missing');
+assert(script.includes('data-chat-resize-grip'),'Concierge drag resize grip is missing');
 assert(script.includes('Rebecca Afterhours'),'Afterhours official-links panel is missing');
 assert(!script.includes('twitter.com/risquerebecca')&&!script.includes('throne.com/risquerebecca'),'Unverified social links must not be hard-coded');
 assert(api.includes('Attraction is subjective'),'Concierge lacks a helpful subjective-attraction response');
-assert(api.includes('temperature:0.45'),'Concierge model temperature was not updated for more natural answers');
+assert(api.includes("openai/gpt-oss-120b"),'Concierge is not using the stronger GPT-OSS 120B default');
+assert(api.includes("reasoning_effort:'medium'"),'Concierge reasoning effort is not enabled');
+assert(api.includes('FOCUSED PUBLIC CONTEXT'),'Concierge does not receive focused public context');
+assert(api.includes('const RATE_MAX=30'),'Concierge rate limit was not raised for real conversation');
+assert(api.includes('const bookingIntent='),'Booking planner is not gated by explicit booking intent');
+assert(api.includes('\\bid\\b|identity'),'Suggestion routing must use a whole-word ID match so “idea” does not trigger privacy');
+assert(api.includes('changing third-party facts'),'Concierge lacks safeguards for stale third-party facts');
+assert(api.includes("qnaPool=["),'Concierge public FAQ/interview fallback matcher is missing');
+assert(api.includes('favouriteCountriesMentioned'),'Concierge favourite-country fallback is missing');
+assert(api.includes('data.updates?.channelLabel'),'Concierge public-updates fallback is missing');
 assert(knowledge.includes("id:'profile-public-details'"),'Public profile details are missing from RAG knowledge');
 assert(knowledge.includes("like: ['likes','favourites'"),'Broad like/interests retrieval synonyms are missing');
+assert(knowledge.includes("id:'profile-faq'"),'Public FAQ knowledge chunk is missing');
+assert(knowledge.includes("id:'site-index'"),'Website coverage index is missing');
 
 const css=fs.readFileSync('styles.css','utf8');
 assert(css.includes('width:min(340px,calc(100vw - 40px))'),'Compact phone width rule is missing');
 assert(css.includes('height:min(58svh,480px)'),'Compact phone height rule is missing');
 assert(!css.includes('width:calc(100vw - 14px);height:calc(100svh - 14px)'),'Legacy near-full-screen mobile concierge rule remains');
+assert(css.includes("Rebecca's Desk — explicit desktop resizing"),'Desktop resize CSS is missing');
+assert(css.includes('cursor:nwse-resize'),'Visible drag-resize affordance is missing');
 
 if(!process.exitCode) console.log('Concierge 2.0 validation passed.');
