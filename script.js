@@ -1,4 +1,5 @@
 (async() => {
+  const rrUiStartup=performance.now();
   const header=document.querySelector('[data-header]');
   const onScroll=()=>header?.classList.toggle('is-scrolled',window.scrollY>24);
   onScroll(); window.addEventListener('scroll',onScroll,{passive:true});
@@ -234,14 +235,14 @@
     defaultIntro:'Ask me about Rebecca’s public rates, travel, etiquette or how to enquire.',
     pausedMessage:'Rebecca’s Desk is taking a short pause. Please use the Contact page for anything time-sensitive.'
   };
+  // Load owner configuration without blocking the two floating controls.
   let conciergePublic={...conciergePublicDefaults};
-  try{
-    const response=await fetch('/api/concierge-config',{headers:{Accept:'application/json'},cache:'no-store'});
-    const payload=await response.json();
-    if(response.ok&&payload?.config) conciergePublic={...conciergePublicDefaults,...payload.config};
-  }catch{
-    // Keep the bundled public-safe concierge presentation if owner controls are unavailable.
-  }
+  const conciergeConfigRequest=fetch('/api/concierge-config',{headers:{Accept:'application/json'},cache:'no-store'})
+    .then(async(response)=>{
+      if(!response.ok)return null;
+      const payload=await response.json();
+      return payload?.config||null;
+    }).catch(()=>null);
 
   const conciergePageConfig={
     '/about':{intro:'I can help you get a quick sense of Rebecca before you read the full page.',prompts:[['At a glance','Tell me about Rebecca in a few lines.'],['Interests','What does Rebecca enjoy talking about?'],['First meeting','What should I know before a first meeting?']]},
@@ -256,12 +257,18 @@
     '/contact':{intro:'I can help turn your details into a complete enquiry.',prompts:[['Draft enquiry','Help me draft a complete enquiry.'],['What to include','What should I include in my enquiry?'],['Screening','How does screening work?']]}
   };
   const conciergeConfig=conciergePageConfig[currentPath]||{intro:conciergePublic.defaultIntro,prompts:[['Singapore rates',"What are Rebecca's Singapore rates?"],['Screening','How does screening work?'],['Travel','Can Rebecca travel to me?']]};
-  const conciergeEnabled=conciergePublic.enabled!==false;
-  const conciergeIntro=conciergeEnabled?conciergeConfig.intro:conciergePublic.pausedMessage;
+  let conciergeEnabled=conciergePublic.enabled!==false;
+  let conciergeIntro=conciergeEnabled?conciergeConfig.intro:conciergePublic.pausedMessage;
   document.body.insertAdjacentHTML('beforeend',`
     <button class="concierge-launcher" type="button" data-open-concierge aria-label="Open ${escapeHtml(conciergePublic.displayName)}" aria-expanded="false" aria-controls="rebecca-concierge"><span class="spark" aria-hidden="true">✦</span><span>${escapeHtml(conciergePublic.displayName)}</span></button>
-    <aside class="concierge-panel" id="rebecca-concierge" data-concierge-panel hidden role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="rebecca-concierge-title">
-      <div class="concierge-panel-head"><div><strong id="rebecca-concierge-title">${escapeHtml(conciergePublic.displayName)}</strong><small>${escapeHtml(conciergePublic.subtitle)}</small></div><button class="concierge-close" type="button" data-close-concierge aria-label="Close concierge">×</button></div>
+    <aside class="concierge-panel" id="rebecca-concierge" data-concierge-panel hidden role="dialog" aria-modal="false" aria-hidden="true" aria-labelledby="rebecca-concierge-title">
+      <div class="concierge-panel-head"><div><strong id="rebecca-concierge-title">${escapeHtml(conciergePublic.displayName)}</strong><small>${escapeHtml(conciergePublic.subtitle)}</small></div><div class="concierge-head-actions"><button class="concierge-size-toggle" type="button" data-chat-size-toggle aria-expanded="false" aria-controls="rebecca-chat-size" aria-label="Resize Rebecca’s Desk">Size</button><button class="concierge-minimize" type="button" data-minimize-concierge aria-label="Minimize Rebecca’s Desk" title="Minimize chat">−</button><button class="concierge-close" type="button" data-close-concierge aria-label="Close concierge">×</button></div></div>
+      <div class="concierge-size-popover" id="rebecca-chat-size" data-chat-size-popover hidden>
+        <div class="concierge-size-row"><span>Width</span><button type="button" data-chat-width="-1" aria-label="Make chat narrower">−</button><button type="button" data-chat-width="1" aria-label="Make chat wider">+</button></div>
+        <div class="concierge-size-row"><span>Height</span><button type="button" data-chat-height="-1" aria-label="Make chat shorter">−</button><button type="button" data-chat-height="1" aria-label="Make chat taller">+</button></div>
+        <button type="button" class="concierge-size-reset" data-chat-size-reset>Reset size</button>
+      </div>
+      <button class="concierge-resize-grip" type="button" data-chat-resize-grip aria-label="Drag to resize chat" title="Drag to resize"></button>
       <div class="concierge-thread" data-concierge-thread aria-live="polite"><div class="chat-message assistant"><p>${escapeHtml(conciergePublic.welcome)}</p><p>${escapeHtml(conciergeIntro)}</p></div></div>
       <div class="concierge-chips" data-concierge-chips${conciergeEnabled?'':' hidden'}></div>
       <form class="concierge-form" data-concierge-form${conciergeEnabled?'':' hidden'}><input type="text" maxlength="600" autocomplete="off" placeholder="Ask something discreetly…" aria-label="Message concierge" required><button class="concierge-send" type="submit" aria-label="Send">↗</button></form>
@@ -270,10 +277,115 @@
 
   const panel=document.querySelector('[data-concierge-panel]'),thread=document.querySelector('[data-concierge-thread]'),form=document.querySelector('[data-concierge-form]'),input=form?.querySelector('input'),send=form?.querySelector('[type="submit"]'),chips=document.querySelector('[data-concierge-chips]');let conciergeReturnFocus=null;
   if(conciergeEnabled) conciergeConfig.prompts.forEach(([label,prompt])=>{const button=document.createElement('button');button.className='concierge-chip';button.type='button';button.textContent=label;button.setAttribute('data-chat-prompt',prompt);chips?.appendChild(button);});
-  const setConcierge=(open)=>{if(!panel)return;const launcher=document.querySelector('.concierge-launcher');if(open)conciergeReturnFocus=document.activeElement;panel.hidden=!open;panel.setAttribute('aria-hidden',String(!open));launcher?.toggleAttribute('hidden',open);launcher?.setAttribute('aria-expanded',String(open));document.body.classList.toggle('concierge-open',open);if(open&&!window.matchMedia('(max-width: 640px)').matches)setTimeout(()=>input?.focus(),60);else if(!open&&conciergeReturnFocus instanceof HTMLElement)conciergeReturnFocus.focus()};
+  const setConcierge=(open)=>{if(!panel)return;const launcher=document.querySelector('.concierge-launcher');if(open)conciergeReturnFocus=document.activeElement;panel.hidden=!open;panel.setAttribute('aria-hidden',String(!open));panel.setAttribute('aria-modal',String(open&&window.matchMedia('(min-width: 641px)').matches));launcher?.toggleAttribute('hidden',open);launcher?.setAttribute('aria-expanded',String(open));document.body.classList.toggle('concierge-open',open);if(open&&!window.matchMedia('(max-width: 640px)').matches)setTimeout(()=>input?.focus(),60);else if(!open&&conciergeReturnFocus instanceof HTMLElement)conciergeReturnFocus.focus()};
+  conciergeConfigRequest.then((config)=>{
+    if(!config)return;
+    conciergePublic={...conciergePublicDefaults,...config};
+    conciergeEnabled=conciergePublic.enabled!==false;
+    conciergeIntro=conciergeEnabled?(conciergePageConfig[currentPath]?.intro||conciergePublic.defaultIntro):conciergePublic.pausedMessage;
+    const launcher=document.querySelector('[data-open-concierge]');
+    const heading=document.querySelector('#rebecca-concierge-title');
+    const subtitle=document.querySelector('.concierge-panel-head small');
+    if(launcher){
+      const name=launcher.querySelector('span:last-child');
+      if(name)name.textContent=conciergePublic.displayName;
+      launcher.setAttribute('aria-label','Open '+conciergePublic.displayName);
+    }
+    if(heading)heading.textContent=conciergePublic.displayName;
+    if(subtitle)subtitle.textContent=conciergePublic.subtitle;
+    if(thread?.children.length===1){
+      const greeting=thread.querySelector('.chat-message.assistant');
+      if(greeting)greeting.innerHTML='<p>'+escapeHtml(conciergePublic.welcome)+'</p><p>'+escapeHtml(conciergeIntro)+'</p>';
+    }
+    if(form)form.hidden=!conciergeEnabled;
+    if(chips)chips.hidden=!conciergeEnabled;
+    const disclaimer=document.querySelector('.concierge-disclaimer');
+    if(disclaimer&&!conciergeEnabled)disclaimer.textContent='For anything time-sensitive, please use Rebecca’s official Contact page.';
+    if(!conciergeEnabled&&!panel.hidden)setConcierge(false);
+  });
   document.querySelectorAll('[data-open-concierge]').forEach(b=>b.addEventListener('click',()=>setConcierge(true)));
+  document.querySelector('[data-minimize-concierge]')?.addEventListener('click',()=>{setConcierge(false);document.querySelector('[data-open-concierge]')?.focus({preventScroll:true});});
   document.querySelector('[data-close-concierge]')?.addEventListener('click',()=>setConcierge(false));
-  panel?.addEventListener('keydown',(event)=>{if(event.key!=='Tab')return;const focusable=[...panel.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')];if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}});
+  panel?.addEventListener('keydown',(event)=>{if(event.key!=='Tab'||window.matchMedia('(max-width: 640px)').matches)return;const focusable=[...panel.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')];if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}});
+
+  const CHAT_SIZE_KEY='rr-concierge-size-v2';
+  const sizeToggle=document.querySelector('[data-chat-size-toggle]');
+  const sizePopover=document.querySelector('[data-chat-size-popover]');
+  const resizeGrip=document.querySelector('[data-chat-resize-grip]');
+  const desktopChat=()=>window.matchMedia('(min-width: 641px)').matches;
+  const chatBounds=()=>({minW:340,maxW:Math.max(340,Math.min(760,window.innerWidth-40)),minH:360,maxH:Math.max(360,window.innerHeight-40)});
+  const applyChatSize=(width,height,{persist=true}={})=>{
+    if(!panel||!desktopChat())return;
+    const bounds=chatBounds();
+    const w=Math.max(bounds.minW,Math.min(bounds.maxW,Number(width)||panel.getBoundingClientRect().width));
+    const h=Math.max(bounds.minH,Math.min(bounds.maxH,Number(height)||panel.getBoundingClientRect().height));
+    panel.style.width=Math.round(w)+'px';
+    panel.style.height=Math.round(h)+'px';
+    if(persist){try{localStorage.setItem(CHAT_SIZE_KEY,JSON.stringify({width:Math.round(w),height:Math.round(h)}))}catch{}}
+  };
+  const restoreChatSize=()=>{
+    if(!panel)return;
+    if(!desktopChat()){
+      panel.style.removeProperty('width');
+      panel.style.removeProperty('height');
+      sizePopover?.setAttribute('hidden','');
+      sizeToggle?.setAttribute('aria-expanded','false');
+      return;
+    }
+    try{
+      const saved=JSON.parse(localStorage.getItem(CHAT_SIZE_KEY)||'null');
+      if(saved?.width&&saved?.height)applyChatSize(saved.width,saved.height,{persist:false});
+    }catch{}
+  };
+  restoreChatSize();
+  sizeToggle?.addEventListener('click',(event)=>{
+    event.stopPropagation();
+    if(!desktopChat())return;
+    const open=sizePopover?.hasAttribute('hidden');
+    sizePopover?.toggleAttribute('hidden',!open);
+    sizeToggle.setAttribute('aria-expanded',String(Boolean(open)));
+  });
+  sizePopover?.addEventListener('click',(event)=>event.stopPropagation());
+  document.addEventListener('click',()=>{
+    sizePopover?.setAttribute('hidden','');
+    sizeToggle?.setAttribute('aria-expanded','false');
+  });
+  document.querySelectorAll('[data-chat-width]').forEach((button)=>button.addEventListener('click',()=>{
+    const rect=panel?.getBoundingClientRect();if(rect)applyChatSize(rect.width+Number(button.dataset.chatWidth||0)*80,rect.height);
+  }));
+  document.querySelectorAll('[data-chat-height]').forEach((button)=>button.addEventListener('click',()=>{
+    const rect=panel?.getBoundingClientRect();if(rect)applyChatSize(rect.width,rect.height+Number(button.dataset.chatHeight||0)*80);
+  }));
+  document.querySelector('[data-chat-size-reset]')?.addEventListener('click',()=>{
+    try{localStorage.removeItem(CHAT_SIZE_KEY)}catch{}
+    panel?.style.removeProperty('width');
+    panel?.style.removeProperty('height');
+  });
+  resizeGrip?.addEventListener('pointerdown',(event)=>{
+    if(!panel||!desktopChat()||event.button>0)return;
+    event.preventDefault();
+    const start=panel.getBoundingClientRect(),startX=event.clientX,startY=event.clientY;
+    resizeGrip.setPointerCapture?.(event.pointerId);
+    document.body.classList.add('concierge-resizing');
+    const move=(moveEvent)=>applyChatSize(start.width+(startX-moveEvent.clientX),start.height+(startY-moveEvent.clientY),{persist:false});
+    const end=()=>{
+      document.removeEventListener('pointermove',move);
+      document.removeEventListener('pointerup',end);
+      document.removeEventListener('pointercancel',end);
+      document.body.classList.remove('concierge-resizing');
+      const rect=panel.getBoundingClientRect();
+      applyChatSize(rect.width,rect.height);
+    };
+    document.addEventListener('pointermove',move);
+    document.addEventListener('pointerup',end,{once:true});
+    document.addEventListener('pointercancel',end,{once:true});
+  });
+  window.addEventListener('resize',()=>{
+    if(!panel)return;
+    if(!desktopChat()){restoreChatSize();return}
+    const rect=panel.getBoundingClientRect();
+    applyChatSize(rect.width,rect.height,{persist:false});
+  });
 
 
   // First-visit discovery: auto-open Rebecca's Desk once per session and keep Afterhours discoverable.
@@ -310,7 +422,7 @@
       .official-links-grid span{font-size:.76rem;font-weight:600}.official-links-grid small{margin-top:4px;color:var(--ink-soft);font-size:.66rem;overflow-wrap:anywhere}.official-links-grid b{position:absolute;right:13px;top:13px;font-weight:400}
       .official-links-note{margin:16px 2px 0;color:var(--ink-soft);font-size:.64rem;line-height:1.5}
       @media(max-width:640px){
-        .concierge-panel{right:10px;bottom:10px;width:calc(100vw - 20px);height:min(560px,calc(100svh - 84px));border-radius:22px 22px 8px 8px;overflow:hidden}
+        .concierge-panel{left:auto;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));width:min(280px,calc(100vw - 64px));height:min(39svh,310px);min-width:0;min-height:0;border-radius:18px;overflow:hidden}
         .afterhours-launcher{left:14px;bottom:14px;padding-right:11px}.afterhours-launcher small{display:none}.afterhours-launcher strong{font-size:.9rem}
         .official-links-backdrop{align-items:end;padding:0;background:rgba(22,20,18,.3)}
         .official-links-card{width:100%;max-height:82svh;border-radius:26px 26px 0 0;border-bottom:0;padding:28px 20px max(24px,env(safe-area-inset-bottom))}
@@ -380,26 +492,29 @@
   const startFirstVisitPrompts=()=>{
     if(firstVisitPromptsStarted)return;
     firstVisitPromptsStarted=true;
+    document.body.classList.add('rr-floating-controls-ready');
     ensureAfterhoursLauncher();
     const conciergeAlreadyShown=safeSessionGet(RR_CONCIERGE_AUTO_KEY)==='1';
     if(conciergeEnabled&&!conciergeAlreadyShown){
       window.setTimeout(()=>{
         if(document.hidden){
-          firstVisitPromptsStarted=false;
-          document.addEventListener('visibilitychange',()=>{if(!document.hidden)startFirstVisitPrompts()},{once:true});
+          document.addEventListener('visibilitychange',()=>{
+            if(!document.hidden&&panel?.hidden&&conciergeEnabled){
+              safeSessionSet(RR_CONCIERGE_AUTO_KEY,'1');
+              setConcierge(true);
+            }
+          },{once:true});
           return;
         }
+        if(!panel?.hidden||document.querySelector('[data-official-links-popup]'))return;
         safeSessionSet(RR_CONCIERGE_AUTO_KEY,'1');
         setConcierge(true);
-      },900);
+      },850);
     }
   };
   document.addEventListener('keydown',(event)=>{if(event.key==='Escape')closeOfficialLinksPopup();});
-  if(document.documentElement.dataset.rebeccaContentReady==='true')startFirstVisitPrompts();
-  else{
-    document.addEventListener('rebecca:content-ready',startFirstVisitPrompts,{once:true});
-    window.setTimeout(startFirstVisitPrompts,2200);
-  }
+  // Show both floating controls one second after initialization, independent of content loading.
+  window.setTimeout(startFirstVisitPrompts,Math.max(0,1000-(performance.now()-rrUiStartup)));
 
   const chatHistory=[];
   const formatChatText=(text='')=>{
