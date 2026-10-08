@@ -835,3 +835,19 @@ To run locally:
 GitHub Actions now requires the full `npm run validate`, both browser test projects, and `npm run vercel-build` to pass before merge. Failure traces and screenshots are stored only in the local/CI workspace unless explicitly shared; no real private content is used. The test server is restricted to `127.0.0.1` and a set of allowlisted admin files.
 
 **Not covered by simulated browser tests:** production owner credentials, actual Supabase connectivity/RLS policy, real email/integration provider connections, Vercel-authenticated owner login, physical device quirks, and real recovery against owner content. Those remain for RC-QA-06/07 and a supervised owner acceptance session; avoid entering production passwords into automated tests.
+
+## RC-QA-06 — Security, Recovery & Owner Handoff
+
+**Owner-friendly instructions:** [Rebecca Owner Handbook](docs/REBECCA_OWNER_HANDBOOK.md).  
+**Technical runbook and open risks:** [Security & Infrastructure Handoff](docs/RC-QA-06-SECURITY-HANDOFF.md).
+
+Security improvements:
+- Owner session signatures now bind to the private password hash as well as the private session secret. Rotating either invalidates previously issued cookies after the new deployment; existing owners must sign in again after the RC-QA-06 release.
+- Central owner API routing rejects explicit cross-origin browser writes and cross-site Fetch Metadata requests, with an isolated exception for Vercel Blob's signed upload callback. Owner session auth and SameSite=Strict remain required; missing Origin values are accepted for server compatibility.
+- Malformed cookies and oversized session tokens are handled without crashing API routes.
+- Backup imports reject unsupported formats, oversized content and incomplete Website/Photos/Concierge records on the server before writing.
+- Recovery creates a protective recovery point **before** changing any Draft. Independent stores are not an atomic transaction, and the owner receives a clear partial-restore error rather than a false success message.
+
+**Verification:** `npm run validate:rc-qa-06` runs isolated security and backup checks in CI; browser tests still run at desktop and phone widths. No real owner passwords, production content, domain DNS or database credentials are modified in this release.
+
+**Handoff is incomplete** until Rebecca's own Vercel/Supabase/Blob/provider accounts, MFA, distributed login-rate protection, physical-device signoff and supervised production recovery are verified. The runbook explicitly distinguishes software guards from production authorization and external penetration testing.

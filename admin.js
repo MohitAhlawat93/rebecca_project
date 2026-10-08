@@ -2221,7 +2221,7 @@ async function readBackupFile(file) {
     systemImportBundle = parsed;
     if (systemImportButton) systemImportButton.disabled = false;
     if (systemStatus) {
-      systemStatus.textContent = 'Backup validated locally. Ready to restore to Draft.';
+      systemStatus.textContent = 'Backup format recognized. Full validation and a protective recovery point are required on the server before restoring.';
       systemStatus.className = 'rc-export-status is-good';
     }
   } catch (error) {
