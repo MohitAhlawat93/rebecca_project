@@ -262,7 +262,7 @@
   document.body.insertAdjacentHTML('beforeend',`
     <button class="concierge-launcher" type="button" data-open-concierge aria-label="Open ${escapeHtml(conciergePublic.displayName)}" aria-expanded="false" aria-controls="rebecca-concierge"><span class="spark" aria-hidden="true">✦</span><span>${escapeHtml(conciergePublic.displayName)}</span></button>
     <aside class="concierge-panel" id="rebecca-concierge" data-concierge-panel hidden role="dialog" aria-modal="false" aria-hidden="true" aria-labelledby="rebecca-concierge-title">
-      <div class="concierge-panel-head"><div><strong id="rebecca-concierge-title">${escapeHtml(conciergePublic.displayName)}</strong><small>${escapeHtml(conciergePublic.subtitle)}</small></div><div class="concierge-head-actions"><button class="concierge-size-toggle" type="button" data-chat-size-toggle aria-expanded="false" aria-controls="rebecca-chat-size" aria-label="Resize Rebecca’s Desk">Size</button><button class="concierge-minimize" type="button" data-minimize-concierge aria-label="Minimize Rebecca’s Desk" title="Minimize chat">−</button><button class="concierge-close" type="button" data-close-concierge aria-label="Close concierge">×</button></div></div>
+      <div class="concierge-panel-head"><div><strong id="rebecca-concierge-title">${escapeHtml(conciergePublic.displayName)}</strong><small>${escapeHtml(conciergePublic.subtitle)}</small></div><div class="concierge-head-actions"><button class="concierge-size-toggle" type="button" data-chat-size-toggle aria-expanded="false" aria-controls="rebecca-chat-size" aria-label="Resize Rebecca’s Desk">Size</button><button class="concierge-minimize" type="button" data-minimize-concierge aria-label="Minimize Rebecca’s Desk" title="Minimize chat">−</button></div></div>
       <div class="concierge-size-popover" id="rebecca-chat-size" data-chat-size-popover hidden>
         <div class="concierge-size-row"><span>Width</span><button type="button" data-chat-width="-1" aria-label="Make chat narrower">−</button><button type="button" data-chat-width="1" aria-label="Make chat wider">+</button></div>
         <div class="concierge-size-row"><span>Height</span><button type="button" data-chat-height="-1" aria-label="Make chat shorter">−</button><button type="button" data-chat-height="1" aria-label="Make chat taller">+</button></div>
@@ -305,7 +305,6 @@
   });
   document.querySelectorAll('[data-open-concierge]').forEach(b=>b.addEventListener('click',()=>setConcierge(true)));
   document.querySelector('[data-minimize-concierge]')?.addEventListener('click',()=>{setConcierge(false);document.querySelector('[data-open-concierge]')?.focus({preventScroll:true});});
-  document.querySelector('[data-close-concierge]')?.addEventListener('click',()=>setConcierge(false));
   panel?.addEventListener('keydown',(event)=>{if(event.key!=='Tab'||window.matchMedia('(max-width: 640px)').matches)return;const focusable=[...panel.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')];if(!focusable.length)return;const first=focusable[0],last=focusable[focusable.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}});
 
   const CHAT_SIZE_KEY='rr-concierge-size-v2';
@@ -680,6 +679,7 @@
   async function askConcierge(message,displayMessage=message){
     const q=message.trim();if(!q)return;
     const visibleMessage=String(displayMessage||message).trim()||q;
+    if(chips)chips.hidden=true;
     addMessage('user',visibleMessage);
     let normalizedQuestion=q;
     if(preferredLanguage!=='en'&&displayMessage===message){
