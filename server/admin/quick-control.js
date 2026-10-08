@@ -2,6 +2,7 @@ import { getAdminSession } from '../../lib/admin-auth.js';
 import {
   adminStoreConfigured,
   readQuickControlState,
+  readVisualEditorState,
   writeQuickControlState
 } from '../../lib/admin-store.js';
 import { evaluateQuickControlSchedules } from '../../lib/schedule-engine.js';
@@ -28,11 +29,13 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     const current = await readQuickControlState();
+    const visual = await readVisualEditorState();
     const evaluated = evaluateQuickControlSchedules(current.state);
     return res.status(200).json({
       ok: true,
       configured: adminStoreConfigured(),
       ...current,
+      hasVisualDraftChanges: Boolean(visual.persistent && visual.hasDraftChanges),
       effectiveState: evaluated.state,
       schedule: evaluated.schedule
     });
@@ -40,9 +43,12 @@ export default async function handler(req, res) {
 
   if (req.method === 'PUT') {
     const body = readBody(req);
+    if (!Number.isSafeInteger(body.expectedVersion) || body.expectedVersion < 0) {
+      return res.status(400).json({ error: 'Missing content version. Refresh Rebecca Control before saving.' });
+    }
     try {
       await safeCaptureRecoverySnapshot('Before Quick Control Save & apply','Quick Control');
-      const saved = await writeQuickControlState(body.state, 'Rebecca');
+      const saved = await writeQuickControlState(body.state, 'Rebecca', body.expectedVersion);
       try {
         await recordSystemEvent({
           area:'Website',
@@ -64,9 +70,12 @@ export default async function handler(req, res) {
           error: 'Quick Control storage is not available right now. No public content was changed.'
         });
       }
+      if (error?.code === 'VISUAL_DRAFT_CONFLICT') {
+        return res.status(409).json({ error: error.message, code: error.code });
+      }
       if (error?.code === 'STORE_CONFLICT') {
         return res.status(409).json({
-          error: 'This content changed in another session. Reload Rebecca Control before saving again.'
+          error: error.message || 'This content changed in another session. Reload Rebecca Control before saving again.', code: error.code
         });
       }
       console.error('RC-04 save failed:', error);
