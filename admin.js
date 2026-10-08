@@ -1427,6 +1427,7 @@ async function publishConcierge() {
     conciergePublishButton.textContent = 'Publishing…';
   }
 
+  let publishedSuccessfully = false;
   try {
     const response = await fetch('/api/admin/concierge-control', {
       method: 'POST',
@@ -1446,14 +1447,18 @@ async function publishConcierge() {
     conciergeDirty = false;
     renderConcierge();
     await resolveNeedsFromPublishedAnswers(data.published?.trustedAnswers || []);
-    setText('[data-concierge-save-state]', 'Concierge published');
-    setText('[data-concierge-save-detail]', 'Visitors now use this version.');
+    publishedSuccessfully = true;
   } catch (error) {
     setText('[data-concierge-save-state]', 'Not published');
     setText('[data-concierge-save-detail]', error?.message || 'The live Concierge was not changed.');
   } finally {
     if (conciergePublishButton) conciergePublishButton.textContent = 'Publish Concierge';
     setConciergeDirty(conciergeDirty);
+    // Preserve a clear publish confirmation after the generic dirty-state renderer.
+    if (publishedSuccessfully) {
+      setText('[data-concierge-save-state]', 'Concierge published');
+      setText('[data-concierge-save-detail]', 'Visitors now use this version.');
+    }
   }
 }
 
