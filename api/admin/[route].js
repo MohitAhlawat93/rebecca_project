@@ -18,6 +18,7 @@ import searchImport from '../../server/admin/search-import.js';
 import searchIntelligence from '../../server/admin/search-intelligence.js';
 import searchOauthCallback from '../../server/admin/search-oauth-callback.js';
 import searchSync from '../../server/admin/search-sync.js';
+import { validateOwnerWriteOrigin } from '../../lib/admin-origin-guard.js';
 
 const ROUTES = {
   login,
@@ -51,6 +52,17 @@ export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'private, no-store, max-age=0');
     res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
     return res.status(404).json({ error: 'Unknown Rebecca Control route.' });
+  }
+
+  // Vercel Blob's verified upload-completion callback has its own validation
+  // and may not carry the owner's browser Origin header.
+  if (route !== 'media-upload') {
+    const origin = validateOwnerWriteOrigin(req);
+    if (!origin.allowed) {
+      res.setHeader('Cache-Control', 'private, no-store, max-age=0');
+      res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+      return res.status(403).json({ error: origin.reason });
+    }
   }
 
   return target(req, res);
