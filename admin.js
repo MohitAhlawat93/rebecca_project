@@ -2264,9 +2264,9 @@ async function loadSession() {
     if (response.ok && data.authenticated) {
       showApp(data);
       await loadQuickControl();
-      if (!requestedTab && data.control?.settings?.dashboardStartTab) {
-        activeTab = data.control.settings.dashboardStartTab;
-      }
+      // Take the original URL choice first: renderAll() may have initialized a
+      // fallback tab before settings finish loading.
+      activeTab = requestedTab || data.control?.settings?.dashboardStartTab || 'insights';
       // Existing ?tab=... links continue to work; area names are also accepted.
       if (Object.hasOwn(AREA_DETAILS, activeTab)) {
         const first = [...document.querySelectorAll('[data-subnav] [data-tab]')]
