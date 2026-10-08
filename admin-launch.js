@@ -13,6 +13,7 @@ function launchRender(data) {
   for(const item of data.checks || []) {
     const section=document.createElement('article');
     section.className='rc-launch-check';
+    section.setAttribute('data-launch-check','');
     const row=document.createElement('div');
     row.className='rc-launch-check-heading';
     const name=document.createElement('strong');
