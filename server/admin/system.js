@@ -72,6 +72,7 @@ export default async function handler(req,res){
     if(error?.code==='STORE_UNAVAILABLE')return res.status(503).json({error:'History & Recovery is temporarily unavailable.'});
     if(error?.code==='SNAPSHOT_NOT_FOUND')return res.status(404).json({error:error.message});
     if(error?.code==='BACKUP_INVALID')return res.status(400).json({error:error.message});
+    if(error?.code==='RESTORE_PARTIAL')return res.status(409).json({error:error.message,code:'RESTORE_PARTIAL'});
     if(error?.code==='STORE_CONFLICT')return res.status(409).json({error:'History changed while you were working. Reload and try again.'});
     console.error('RC-09 system API failed:',error);
     return res.status(500).json({error:'Could not complete that History & Recovery action safely.'});
