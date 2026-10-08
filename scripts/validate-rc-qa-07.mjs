@@ -54,6 +54,7 @@ const run=new Function('document','navigator','fetch',script+'\nreturn {render:l
 const app=run(document,{},()=>Promise.reject(new Error('Offline fixture')));
 app.render(complete);
 assert.equal(document.querySelector('[data-launch-checks]').children.length,6);
+assert.equal(document.querySelectorAll('[data-launch-check]').length,6,'Launch cards must expose the selector consumed by review notes');
 assert.equal(document.querySelector('[data-launch-decision]').textContent,'NOT SIGNED OFF');
 assert.equal(document.querySelector('[data-launch-pass]').textContent,'3');
 assert.equal(document.querySelector('[data-launch-open]').textContent,'3');
