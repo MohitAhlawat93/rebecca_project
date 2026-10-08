@@ -52,7 +52,7 @@ guide.show(true);
 assert.equal(panel.hidden, false, 'Help & guide can reopen at any time');
 
 const requiredTabs = [
-  'insights','availability','travel','live','schedule','rates','contact','profile',
+  'insights','publishing','availability','travel','live','schedule','rates','contact','profile',
   'media','concierge','concierge-test','needs-rebecca','assistant','search','settings','history','export'
 ];
 assert.deepEqual(Object.keys(guide.help).sort(), requiredTabs.sort());
@@ -94,4 +94,4 @@ assert.equal(values.get('rc-owner-help-collapsed-v1'),'0');
 guide.render('not-a-real-section');
 assert.equal(title.textContent, guide.help.insights.title);
 
-console.log('RC-QA-03 onboarding, all 17 guides, preview boundaries and Draft/Publish coaching passed.');
+console.log('RC-QA-03 onboarding, all 18 guides, preview boundaries and Draft/Publish coaching passed.');
