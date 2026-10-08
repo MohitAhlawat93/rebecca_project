@@ -124,6 +124,7 @@
         </div>
         <nav class="rc-tabs rc-subnav" aria-label="Controls in the selected area" data-subnav hidden>
           <button type="button" data-tab="insights" data-area="home">Overview</button>
+          <button type="button" data-tab="publishing" data-area="website">Publishing Center</button>
           <button type="button" data-tab="availability" data-area="website">Availability</button>
           <button type="button" data-tab="travel" data-area="website">Travel Plans</button>
           <button type="button" data-tab="live" data-area="website">Announcements &amp; Map</button>
@@ -157,12 +158,86 @@
           </div>
         </section>
 
+        <section class="rc-panel rc-publishing-panel" data-panel="publishing" hidden aria-labelledby="rc-publishing-heading">
+          <div class="rc-panel-intro rc-panel-intro-row">
+            <div>
+              <p class="rc-eyebrow">RC-QA-04 · Content &amp; Publishing</p>
+              <h3 id="rc-publishing-heading">Everything ready for review. Nothing goes live by accident.</h3>
+              <p>One view for website updates, private Website Drafts, photos and AI Concierge. Each area keeps its own safe Save, Preview and Publish process.</p>
+            </div>
+            <button type="button" class="rc-secondary" data-publishing-refresh>↻ Refresh status</button>
+          </div>
+
+          <div class="rc-publishing-summary" role="status" aria-live="polite">
+            <div><span>Saved drafts waiting</span><strong data-pub-draft-count>—</strong></div>
+            <div><span>Connected editors</span><strong data-pub-connected>—</strong><small>of 3 content stores</small></div>
+            <div><span>Last status check</span><strong data-pub-checked>—</strong><small>Owner-only view</small></div>
+          </div>
+          <p class="rc-publishing-feedback" data-publishing-feedback role="status" aria-live="polite">Choose Refresh status to check the latest saved content.</p>
+
+          <div class="rc-publishing-grid">
+            <article class="rc-publishing-card" data-publishing-card="websiteFacts">
+              <div class="rc-publishing-head"><span class="rc-card-kicker">Website · instant updates</span><span class="rc-publishing-pill" data-pub-status="websiteFacts">Checking…</span></div>
+              <h4>Public website details</h4>
+              <p>Availability, travel, rates, profile details and contact methods use <strong>Save &amp; apply</strong>. These changes are live immediately after a successful save.</p>
+              <small data-pub-detail="websiteFacts">Checking stored content…</small>
+              <div class="rc-publishing-actions">
+                <button type="button" class="rc-secondary" data-publishing-tab="availability">Edit details →</button>
+                <a class="rc-secondary" href="/" target="_blank" rel="noopener noreferrer">View live website ↗</a>
+              </div>
+            </article>
+            <article class="rc-publishing-card" data-publishing-card="websiteDraft">
+              <div class="rc-publishing-head"><span class="rc-card-kicker">Website · private draft</span><span class="rc-publishing-pill" data-pub-status="websiteDraft">Checking…</span></div>
+              <h4>Visual Website Draft</h4>
+              <p>Edit supported website fields on the page itself. <strong>Save to Draft</strong> is private; <strong>Publish</strong> is a separate action in Edit Website.</p>
+              <small data-pub-detail="websiteDraft">Checking saved draft…</small>
+              <div class="rc-publishing-actions">
+                <a class="rc-secondary" href="/?rc_edit=1">Review Website Draft ↗</a>
+                <button type="button" class="rc-secondary" data-publishing-tab="profile">Edit profile facts →</button>
+              </div>
+            </article>
+            <article class="rc-publishing-card" data-publishing-card="photos">
+              <div class="rc-publishing-head"><span class="rc-card-kicker">Photos · preview before publish</span><span class="rc-publishing-pill" data-pub-status="photos">Checking…</span></div>
+              <h4>Photos &amp; placements</h4>
+              <p>Upload, reorder, save a private photo Draft and preview it. Publish or schedule the approved version from Photos.</p>
+              <small data-pub-detail="photos">Checking photo draft and schedule…</small>
+              <div class="rc-publishing-actions">
+                <button type="button" class="rc-secondary" data-publishing-tab="media">Review Photos Draft →</button>
+              </div>
+            </article>
+            <article class="rc-publishing-card" data-publishing-card="concierge">
+              <div class="rc-publishing-head"><span class="rc-card-kicker">AI · test before publish</span><span class="rc-publishing-pill" data-pub-status="concierge">Checking…</span></div>
+              <h4>AI Concierge</h4>
+              <p>Update the greeting and Trusted Answers. Save Draft, test realistic questions, then publish the assistant separately.</p>
+              <small data-pub-detail="concierge">Checking saved Concierge Draft…</small>
+              <div class="rc-publishing-actions">
+                <button type="button" class="rc-secondary" data-publishing-tab="concierge">Edit AI Draft →</button>
+                <button type="button" class="rc-secondary" data-publishing-tab="concierge-test">Test AI →</button>
+              </div>
+            </article>
+          </div>
+
+          <section class="rc-publishing-workflow" aria-label="Safe publishing sequence">
+            <strong>Safe release sequence</strong>
+            <div class="rc-publishing-workflow-steps">
+              <span>1. Make changes</span><span>2. Save the Draft</span><span>3. Preview or test</span><span>4. Publish that area</span><span>5. Refresh status</span>
+            </div>
+            <p><strong>Website facts are different:</strong> Save &amp; apply makes them live immediately. If a separate Visual Website Draft is pending, finish or discard it before changing those same facts.</p>
+          </section>
+          <details class="rc-publishing-scope">
+            <summary>What can I edit without a developer?</summary>
+            <p>Availability, travel details, public notices, rates, profile facts, contact details, supported on-page visual fields, photographs, AI introductions and Trusted Answers can be updated using the existing controls.</p>
+            <p>Long-form homepage editorial paragraphs, Journal and Press articles, reviews, and SEO title/description templates are not yet a free-form CMS here. They require a separate reviewed content workflow; this page does not claim to edit or publish them.</p>
+          </details>
+        </section>
+
         <section class="rc-panel rc-insights-panel" data-panel="insights" hidden>
           <div class="rc-panel-intro rc-panel-intro-row">
             <div>
               <p class="rc-eyebrow">RC-10 · Owner Insights</p>
               <h3>What deserves your attention right now?</h3>
               <p>Operational intelligence from Rebecca Control. Search performance, Google/Bing visibility and AI-search signals now live in Search Intelligence.</p>
+              <button type="button" class="rc-secondary" data-publishing-tab="publishing">Open Publishing Center →</button>
             </div>
             <button type="button" class="rc-secondary" data-insights-refresh>Refresh</button>
           </div>
@@ -794,6 +869,7 @@
               <span><strong>Open Rebecca Control on</strong><small>Choose the first section shown after sign-in.</small></span>
               <select data-setting="dashboardStartTab">
                 <option value="insights">Home — Overview</option>
+                <option value="publishing">Website — Publishing Center</option>
                 <option value="availability">Website — Availability</option>
                 <option value="media">Photos — Publishing</option>
                 <option value="concierge">Concierge — AI Concierge</option>
