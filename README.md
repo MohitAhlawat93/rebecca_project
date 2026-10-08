@@ -800,3 +800,21 @@ Help is collapsible and remembers its state in the **owner's browser only** (loc
 Owner-facing errors are clearer for expired logins, unavailable storage and concurrent edits: unsaved Quick Control changes remain on screen, and the guidance warns against blindly refreshing before copying them. The documentation does not grant any new publishing permissions.
 
 This phase adds no database migrations, external analytics, new access rights or updates to public content. Run `npm run validate:rc-qa-03` for onboarding and feature guidance regression checks.
+
+## RC-QA-04 — Publishing Center (Content & Publishing Experience)
+
+Rebecca Control now has **Website → Publishing Center**. Home includes a shortcut, and the owner may select Publishing Center as the starting screen. This is a read-only coordination workspace, **not** a dangerous cross-store publish button.
+
+It consolidates four owner-visible flows:
+1. **Website facts** — availability, travel, notices, rates, contact and profile update publicly with the existing **Save & apply** Quick Control workflow. There is no separate draft for these direct changes.
+2. **Visual Website Draft** — private, versioned structured on-page editing through **Edit Website → Save to Draft → Publish**. Quick Control refuses to overwrite a pending Visual Draft.
+3. **Photos** — the existing separate private media Draft, preview and schedule/publish workflow. Upcoming or active scheduled snapshots are shown, and owner is directed to the Photos editor to manage a conflicting release.
+4. **AI Concierge** — a separate saved draft with private Test AI and a deliberate Publish Concierge action.
+
+The private `GET /api/admin/publishing-overview` endpoint reads the existing stores in parallel, returns **status only** (connectivity, saved-draft flags, versions, timestamps, schedule phase), and never returns draft payloads, messages, private visitor data or credentials. Failure of one source does not obscure the availability of the other sources. No write operations are introduced.
+
+The workspace provides **Refresh status** after changing one of the independent editors. It does not claim that unsaved edits in another open browser tab have been saved. Draft and live states must be verified in the respective editor before publishing.
+
+**Scope of editable text:** The existing Quick Control/Visual Editor covers structured public profile, availability, travel descriptions, notices, rates and contact text; the Concierge editor covers trusted answers and assistant presentation. This release does **not** create a free-form editorial CMS for whole homepage sections, Journal, Press, Reviews or SEO metadata. Those require a future editorial data model with authenticated draft/publish and a public rendering strategy.
+
+Compatibility: old tab routes remain supported; the existing Supabase schema and owner authentication are unchanged. Run `npm run validate:rc-qa-04` to check routing, protected API, draft aggregation, scheduled photo lifecycle and readonly UI behavior.

@@ -10,6 +10,13 @@ const RC_OWNER_HELP = {
     publishing: 'Read-only overview: no public changes.',
     caution: 'Search traffic and rankings live in Growth, not this overview.'
   },
+  publishing: {
+    title: 'Review everything before it goes live',
+    summary: 'Publishing Center shows saved draft and live status across your website, photos and AI concierge without publishing anything itself.',
+    steps: ['Refresh status to see which saved drafts are waiting.', 'Open the matching editor or preview, review the change, then publish only that area.', 'Return here and refresh again to verify the new saved status.'],
+    publishing: 'This screen is read-only. Website facts use Save & apply; Website, Photos and Concierge Drafts publish separately from their own editors.',
+    caution: 'Unsaved browser edits are not included. Scheduled photo releases can block manual publishing, and long-form page copy is not yet editable here.'
+  },
   availability: {
     title: 'Update your availability',
     summary: 'Tell visitors whether you are accepting enquiries, taking a break or travelling.',
