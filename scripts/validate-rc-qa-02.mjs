@@ -15,9 +15,9 @@ assert.equal(new Set(areas.map(x => x.dataset.controlArea)).size, 6);
 const tabs = [...document.querySelectorAll('[data-tab]')];
 const subTabs = [...document.querySelectorAll('[data-subnav] [data-tab]')];
 const panels = [...document.querySelectorAll('[data-panel]')];
-assert.equal(tabs.length, 18);
-assert.equal(subTabs.length, 17);
-assert.equal(new Set(tabs.map(x => x.dataset.tab)).size, 18);
+assert.equal(tabs.length, 19);
+assert.equal(subTabs.length, 18);
+assert.equal(new Set(tabs.map(x => x.dataset.tab)).size, 19);
 assert.deepEqual(tabs.map(x => x.dataset.tab).sort(), panels.map(x => x.dataset.panel).sort());
 assert.equal(document.querySelectorAll('[data-tab="assistant"]').length, 1, 'Ask Control is a launcher, not a duplicated nav tab');
 assert.equal(document.querySelectorAll('[data-assistant-back]').length, 1);
@@ -28,7 +28,7 @@ const expected = {
   photos: ['media'],
   concierge: ['concierge','concierge-test','needs-rebecca'],
   growth: ['search'],
-  settings: ['settings','history','export']
+  settings: ['launch','settings','history','export']
 };
 for (const [area, ids] of Object.entries(expected)) {
   assert.deepEqual(subTabs.filter(x => x.dataset.area === area).map(x => x.dataset.tab), ids);
