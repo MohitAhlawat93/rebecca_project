@@ -851,3 +851,15 @@ Security improvements:
 **Verification:** `npm run validate:rc-qa-06` runs isolated security and backup checks in CI; browser tests still run at desktop and phone widths. No real owner passwords, production content, domain DNS or database credentials are modified in this release.
 
 **Handoff is incomplete** until Rebecca's own Vercel/Supabase/Blob/provider accounts, MFA, distributed login-rate protection, physical-device signoff and supervised production recovery are verified. The runbook explicitly distinguishes software guards from production authorization and external penetration testing.
+
+## RC-QA-07 — Final Owner Acceptance & Launch Signoff
+
+**Current decision: NOT SIGNED OFF. Domain and indexing changes remain outside this phase.**
+
+Rebecca Control now includes **Settings → Launch Readiness** (deep link `/admin?tab=launch`). The owner-only `GET /api/admin/launch-readiness` route summarizes read-only Website/Photos/Concierge and recovery-store connections, recovery-point counts and AI key configuration presence. This is **not** a claim that real production editing, RLS policies, Groq quality, backup restoration or legal requirements have been verified. It returns no credentials, private content or stored customer data.
+
+The screen separates automated statuses from seven **ephemeral** owner review boxes and allows copying a plain-text review worksheet. Checkmarks are not saved or treated as consent; there are no publish, DNS, deployment, signoff or indexing actions. Refreshing the dashboard cannot approve a launch. Run `npm run validate:rc-qa-07` to test status summaries and safety boundaries; headless Chromium tests cover desktop and phone interaction.
+
+**Observed staging baseline:** homepage and admin both served HTTP 200; a sitemap exists; homepage noindex and `Disallow: /` remain deliberately in force; recent runtime records include historical Groq fallback 413/429 errors. No custom-domain launch was performed in this phase.
+
+**Signoff runbook:** [RC-QA-07 Launch Acceptance](docs/RC-QA-07-LAUNCH-ACCEPTANCE.md). Review with Rebecca, record a dated decision/evidence and only then begin a **separately authorized domain/indexing release**. The [Owner Handbook](docs/REBECCA_OWNER_HANDBOOK.md) and [Security Handoff](docs/RC-QA-06-SECURITY-HANDOFF.md) remain companion documents. Each future client/country needs its own independent evidence and permission.

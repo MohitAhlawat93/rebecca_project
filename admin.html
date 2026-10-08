@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/admin-search.css">
   <script src="/admin-guide.js" defer></script>
   <script src="/admin-publishing.js" defer></script>
+  <script src="/admin-launch.js" defer></script>
   <script src="/admin.js" defer></script>
   <script type="module" src="/admin-media-upload.js"></script>
   <script type="module" src="/admin-search.js"></script>
@@ -138,6 +139,7 @@
           <button type="button" data-tab="concierge-test" data-area="concierge">Test AI</button>
           <button type="button" data-tab="needs-rebecca" data-area="concierge">Questions for Rebecca</button>
           <button type="button" data-tab="search" data-area="growth">Search &amp; Growth</button>
+          <button type="button" data-tab="launch" data-area="settings">Launch Readiness</button>
           <button type="button" data-tab="settings" data-area="settings">Account &amp; Settings</button>
           <button type="button" data-tab="history" data-area="settings">Activity History</button>
           <button type="button" data-tab="export" data-area="settings">History &amp; Backups</button>
@@ -858,6 +860,47 @@
           <div class="rc-export-status" data-system-status></div>
         </section>
 
+        <section class="rc-panel rc-launch-panel" data-panel="launch" hidden aria-labelledby="rc-launch-heading">
+          <div class="rc-panel-intro rc-panel-intro-row">
+            <div>
+              <p class="rc-eyebrow">RC-QA-07 · Final launch gate</p>
+              <h3 id="rc-launch-heading">Launch readiness &amp; owner acceptance</h3>
+              <p>See what is verified, what is still pending and who needs to approve. This page cannot switch domains, publish Drafts, remove noindex or authorize a launch.</p>
+            </div>
+            <button type="button" class="rc-secondary" data-launch-refresh>↻ Check again</button>
+          </div>
+          <div class="rc-launch-summary" aria-live="polite">
+            <div><span>Launch decision</span><strong data-launch-decision>Not signed off</strong></div>
+            <div><span>Passed checks</span><strong data-launch-pass>—</strong></div>
+            <div><span>Blocked / still pending</span><strong data-launch-open>—</strong></div>
+          </div>
+          <p class="rc-launch-feedback" data-launch-feedback role="status" aria-live="polite">Status has not been checked.</p>
+          <div class="rc-launch-checks" data-launch-checks aria-label="Automated launch checks">
+            <p class="rc-empty">Sign in and check readiness to view the latest results.</p>
+          </div>
+
+          <section class="rc-launch-owner">
+            <div class="rc-media-section-title"><div><span class="rc-card-kicker">Requires a real person</span><strong>Rebecca’s acceptance walkthrough</strong></div></div>
+            <p>These boxes are a temporary on-screen checklist, not saved approval or proof. Complete with Rebecca on her real phone and laptop. Check the technical evidence and sign a handoff record separately.</p>
+            <div class="rc-launch-acceptance">
+              <label><input type="checkbox" data-launch-accept="account"><span>Rebecca signs in and signs out on her own device; recovery contact and access ownership confirmed.</span></label>
+              <label><input type="checkbox" data-launch-accept="content"><span>Rebecca approves public profile, dates, rates, photographs, policies, enquiries and the final copy.</span></label>
+              <label><input type="checkbox" data-launch-accept="publishing"><span>Rebecca tests Website Save &amp; apply, private Draft, previews, Photos and AI publishing under supervision.</span></label>
+              <label><input type="checkbox" data-launch-accept="recovery"><span>A protected backup is exported, and a safe restore to Draft is verified with owner approval.</span></label>
+              <label><input type="checkbox" data-launch-accept="security"><span>Real database permissions, MFA, infrastructure ownership, monitoring and rate limiting are verified.</span></label>
+              <label><input type="checkbox" data-launch-accept="concierge"><span>Live AI answers, provider limits, fallback, mobile usability and sensitive questions are tested.</span></label>
+              <label><input type="checkbox" data-launch-accept="search"><span>Final domain, canonical URLs, sitemap, robots, privacy/legal content and indexing plan are approved.</span></label>
+            </div>
+            <div class="rc-launch-owner-foot">
+              <span data-launch-owner-progress>0 of 7 owner checks reviewed · No approval is stored</span>
+              <button type="button" class="rc-secondary" data-launch-copy>Copy review notes</button>
+              <button type="button" class="rc-secondary" data-launch-reset>Clear checkmarks</button>
+            </div>
+            <p class="rc-launch-feedback" data-launch-copy-status role="status" aria-live="polite"></p>
+          </section>
+          <div class="rc-needs-privacy-note"><strong>Go-live protection</strong><span>Even when the checkboxes are complete, this release remains Not signed off until real owner acceptance is recorded, operational blockers are cleared and a separate domain/indexing change is explicitly authorized. Code deployment is not business launch approval.</span></div>
+        </section>
+
         <section class="rc-panel rc-settings-panel" data-panel="settings" hidden>
           <div class="rc-panel-intro">
             <p class="rc-eyebrow">RC-11 · Settings & Safety Controls</p>
@@ -871,6 +914,7 @@
               <select data-setting="dashboardStartTab">
                 <option value="insights">Home — Overview</option>
                 <option value="publishing">Website — Publishing Center</option>
+                <option value="launch">Settings — Launch Readiness</option>
                 <option value="availability">Website — Availability</option>
                 <option value="media">Photos — Publishing</option>
                 <option value="concierge">Concierge — AI Concierge</option>
