@@ -12,6 +12,7 @@ import assistantPropose from '../../server/admin/assistant-propose.js';
 import assistantApply from '../../server/admin/assistant-apply.js';
 import system from '../../server/admin/system.js';
 import insights from '../../server/admin/insights.js';
+import publishingOverview from '../../server/admin/publishing-overview.js';
 import searchConnect from '../../server/admin/search-connect.js';
 import searchImport from '../../server/admin/search-import.js';
 import searchIntelligence from '../../server/admin/search-intelligence.js';
@@ -33,6 +34,7 @@ const ROUTES = {
   'assistant-apply': assistantApply,
   system,
   insights,
+  'publishing-overview': publishingOverview,
   'search-connect': searchConnect,
   'search-import': searchImport,
   'search-intelligence': searchIntelligence,
