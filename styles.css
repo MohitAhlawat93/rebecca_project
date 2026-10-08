@@ -1049,3 +1049,77 @@ body.rr-floating-controls-ready .concierge-launcher:not([hidden]){opacity:1;visi
   body.concierge-open .concierge-panel-head small{font-size:8px}
   body.concierge-open .concierge-form input{min-width:0}
 }
+
+
+/* UX-MOBILE-CHAT-READABILITY — narrower, taller, conversation-first */
+@media(max-width:640px){
+  body.concierge-open .concierge-panel{
+    right:max(14px,env(safe-area-inset-right))!important;
+    bottom:calc(72px + env(safe-area-inset-bottom))!important;
+    width:clamp(244px,72vw,276px)!important;
+    max-width:calc(100vw - 56px)!important;
+    height:clamp(380px,54dvh,460px)!important;
+    max-height:calc(100dvh - 145px)!important;
+    border-radius:19px!important;
+  }
+  body.concierge-open .concierge-panel-head{
+    padding:10px 11px 9px!important;
+  }
+  body.concierge-open .concierge-panel-head strong{
+    font-size:17px!important;
+  }
+  body.concierge-open .concierge-panel-head small{
+    margin-top:2px;
+    font-size:8px!important;
+  }
+  body.concierge-open .concierge-head-actions{
+    gap:0!important;
+  }
+  body.concierge-open .concierge-minimize{
+    width:36px;
+    height:36px;
+    font-size:22px;
+  }
+  body.concierge-open .concierge-thread{
+    flex:1 1 auto;
+    min-height:0;
+    padding:12px 10px 9px!important;
+    gap:8px!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch;
+  }
+  body.concierge-open .chat-message{
+    max-width:94%!important;
+    padding:10px 11px!important;
+    font-size:13px!important;
+    line-height:1.5!important;
+  }
+  body.concierge-open .concierge-chips{
+    padding:2px 10px 7px!important;
+    gap:5px!important;
+  }
+  body.concierge-open .concierge-form{
+    padding:8px 9px!important;
+    gap:6px!important;
+  }
+  body.concierge-open .concierge-form input{
+    min-height:46px!important;
+    padding:10px 11px!important;
+  }
+  body.concierge-open .concierge-send{
+    min-width:42px!important;
+    min-height:46px!important;
+  }
+  body.concierge-open .concierge-disclaimer{
+    padding:0 10px 8px!important;
+    font-size:7.5px!important;
+    line-height:1.35!important;
+  }
+}
+@media(max-width:360px){
+  body.concierge-open .concierge-panel{
+    width:clamp(236px,74vw,260px)!important;
+    max-width:calc(100vw - 48px)!important;
+    height:clamp(360px,52dvh,430px)!important;
+  }
+}
