@@ -15,16 +15,16 @@ assert.equal(new Set(areas.map(x => x.dataset.controlArea)).size, 6);
 const tabs = [...document.querySelectorAll('[data-tab]')];
 const subTabs = [...document.querySelectorAll('[data-subnav] [data-tab]')];
 const panels = [...document.querySelectorAll('[data-panel]')];
-assert.equal(tabs.length, 17);
-assert.equal(subTabs.length, 16);
-assert.equal(new Set(tabs.map(x => x.dataset.tab)).size, 17);
+assert.equal(tabs.length, 18);
+assert.equal(subTabs.length, 17);
+assert.equal(new Set(tabs.map(x => x.dataset.tab)).size, 18);
 assert.deepEqual(tabs.map(x => x.dataset.tab).sort(), panels.map(x => x.dataset.panel).sort());
 assert.equal(document.querySelectorAll('[data-tab="assistant"]').length, 1, 'Ask Control is a launcher, not a duplicated nav tab');
 assert.equal(document.querySelectorAll('[data-assistant-back]').length, 1);
 
 const expected = {
   home: ['insights'],
-  website: ['availability','travel','live','schedule','rates','contact','profile'],
+  website: ['publishing','availability','travel','live','schedule','rates','contact','profile'],
   photos: ['media'],
   concierge: ['concierge','concierge-test','needs-rebecca'],
   growth: ['search'],
@@ -76,10 +76,10 @@ assert.deepEqual(visiblePanels(),['insights']);
 assert.equal(document.querySelector('[data-subnav]').hidden,true);
 
 ui.activateArea('website');
-assert.equal(ui.active(),'availability');
+assert.equal(ui.active(),'publishing');
 assert.equal(activeArea(),'website');
 assert.equal(document.querySelector('[data-subnav]').hidden,false);
-assert.deepEqual(selectedTabs(),['availability']);
+assert.deepEqual(selectedTabs(),['publishing']);
 
 ui.activateTab('rates');
 assert.deepEqual(visiblePanels(),['rates']);
@@ -118,4 +118,4 @@ assert.match(html, /option value="search">Search Intelligence/);
 assert.match(css, /grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
 assert.match(css, /max-width:480px/);
 
-console.log('RC-QA-02 six areas, all 17 features, old routes, switching, assistant return and responsive styles validated.');
+console.log('RC-QA-02 six areas, all 18 features, old routes, switching, assistant return and responsive styles validated.');
