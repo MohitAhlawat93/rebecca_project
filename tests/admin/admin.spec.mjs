@@ -62,7 +62,6 @@ test('six areas, old deep links, onboarding, Ask Control and responsive navigati
   }
   await page.locator('[data-control-area="website"]').click();
   await page.locator('[data-tab="rates"]').click();
-  await page.locator('[data-assistant-trigger]').count(); // Header launcher is the only AI action.
   await page.locator('[data-tab="assistant"]').click();
   await expect(page.locator('[data-panel="assistant"]')).toBeVisible();
   await page.locator('[data-assistant-back]').click();
@@ -139,10 +138,8 @@ test('Photos: edit, save Draft, confirmation-gated Publish',async({page})=>{
   await expect(page.locator('[data-media-draft-status]')).toHaveText('Saved draft');
   expect(api.count('PUT','/api/admin/media')).toBe(1);
   expect(api.count('POST','/api/admin/media')).toBe(0);
-  await page.locator('[data-media-publish]').click();
   page.once('dialog', d=>d.dismiss());
-  // The first dialog may appear immediately before the handler is registered in some browsers.
-  // Ensure no state change is sent until the explicit confirmation is accepted.
+  await page.locator('[data-media-publish]').click();
   await expect(page.locator('[data-media-publish]')).toBeEnabled();
   expect(api.count('POST','/api/admin/media')).toBe(0);
   page.once('dialog', d=>d.accept());
