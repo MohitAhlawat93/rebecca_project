@@ -384,7 +384,7 @@ Website + concierge update together
 
 **Discard** clears the private visual draft and restores the editor preview to current live content.
 
-A normal Quick Control **Save & apply** also clears any stored visual draft so the two editing surfaces cannot leave competing versions behind.
+Quick Control **Save & apply** is blocked while an unpublished Visual Editor Draft exists. The owner must first publish or discard that Draft. Normal Quick Control saves require the website version originally loaded by the browser; stale tabs receive a conflict instead of overwriting newer content. If there is no conflicting Visual Draft, Quick Control may clear an empty/equivalent draft.
 
 ### Privacy
 
