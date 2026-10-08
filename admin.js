@@ -293,6 +293,7 @@ function activateTab(name) {
   if ((name === 'history' || name === 'export' || name === 'settings') && !systemLoaded) loadSystem();
   if (name === 'insights' && !insightsLoaded) loadInsights();
   // Search Intelligence loads independently when admin-search.js observes its visible panel.
+  document.dispatchEvent(new CustomEvent('rc:admin-tab', { detail: { tab: name } }));
 }
 
 function renderAvailability() {
@@ -2274,6 +2275,7 @@ async function loadSession() {
         activeTab = first?.dataset.tab || 'insights';
       }
       activateTab(activeTab);
+      document.dispatchEvent(new Event('rc:admin-ready'));
       if (visualReturn) {
         const editLink = document.querySelector('[data-edit-website]');
         if (editLink) editLink.href = visualReturn;
@@ -2313,7 +2315,11 @@ loginForm?.addEventListener('submit', async (event) => {
 
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      loginMessage.textContent = data.error || 'Sign-in failed.';
+      loginMessage.textContent = response.status === 429
+        ? 'Too many sign-in attempts. Please wait before trying again.'
+        : response.status === 503
+          ? 'Private owner access is temporarily unavailable. Please contact your website administrator.'
+          : (data.error || 'Sign-in failed. Check your Owner ID and password.');
       return;
     }
 
@@ -2776,7 +2782,18 @@ saveButton?.addEventListener('click', async () => {
     });
 
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || 'Could not save these changes.');
+    if (!response.ok) {
+      const explanation = response.status === 409
+        ? 'Not saved. Your website was updated elsewhere, or a private Website Draft still needs review. Your edits remain on this screen. Copy anything important before refreshing, then review the latest state.'
+        : response.status === 401
+          ? 'Your session has expired. Sign in again. Copy your unsaved edits before reloading.'
+          : response.status === 503
+            ? 'Not saved. Content storage is temporarily unavailable. Keep your changes here and retry when storage is connected.'
+            : data.error || 'Could not save these changes. The live website has not been updated.';
+      const error = new Error(explanation);
+      error.status = response.status;
+      throw error;
+    }
 
     quickState = data.effectiveState || data.state;
     scheduleState = data.schedule || null;

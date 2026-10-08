@@ -784,3 +784,19 @@ Rebecca Control now has **Home, Website, Photos, Concierge, Growth and Settings*
 The consolidation changes layout, labeling and navigation only. There is no new database schema, change in public website content, or merging of independent Website, Media and Concierge drafts.
 
 Run `npm run validate:rc-qa-02` for navigation mappings and interaction regression checks.
+
+## RC-QA-03 — Guidance & Owner Onboarding
+
+Rebecca Control provides a **first-use, three-step introduction** after an authenticated session is established on a browser: updating website information, understanding Draft/Preview/Publish, and using Ask Control. The introduction is optional and may be dismissed. **Help & guide** in the owner header reopens it at any time.
+
+Each existing feature tab has contextual, plain-language help covering:
+- what the area changes;
+- two or three safe, realistic actions;
+- whether Save & apply changes the public site, or whether Save Draft / Test / Preview must be followed by Publish;
+- a practical caution and, where relevant, a link to the public page.
+
+Help is collapsible and remembers its state in the **owner's browser only** (localStorage keys `rc-owner-guide-seen-v1` and `rc-owner-help-collapsed-v1`). These flags contain no credentials, client messages, analytics or sensitive content. The introduction can be reopened independently of the flag. If localStorage is blocked, the interface works with a session-local fallback.
+
+Owner-facing errors are clearer for expired logins, unavailable storage and concurrent edits: unsaved Quick Control changes remain on screen, and the guidance warns against blindly refreshing before copying them. The documentation does not grant any new publishing permissions.
+
+This phase adds no database migrations, external analytics, new access rights or updates to public content. Run `npm run validate:rc-qa-03` for onboarding and feature guidance regression checks.
