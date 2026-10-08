@@ -2,6 +2,7 @@ import { buildDefaultQuickControlState } from '../../lib/admin-store.js';
 import { MEDIA_PLACEMENTS } from '../../lib/media-store.js';
 import { buildDefaultConciergeControl } from '../../lib/concierge-control-store.js';
 import { summarizePublishingStates } from '../../lib/publishing-overview.js';
+import { summarizeLaunchReadiness } from '../../lib/launch-readiness.js';
 
 const clone = v => structuredClone(v);
 const now = '2026-10-08T08:00:00.000Z';
@@ -141,6 +142,13 @@ export function createMockAdmin(options = {}) {
         concierge:{persistent:true,draft:aiDraft,published:aiLive,hasDraftChanges:aiDraftPending || JSON.stringify(aiDraft)!==JSON.stringify(aiLive),
           version:aiVersion,publishedVersion:aiLiveVersion,publishedAt:now,updatedAt:now}
       })});
+    }
+    if(path==='/api/admin/launch-readiness' && method==='GET') {
+      return json(route,{ok:true,...summarizeLaunchReadiness({
+        publishing:{overview:{connectedCount:3}},
+        system:{persistent:true,snapshots:[{id:'fixture-only'}]},
+        aiConfigured:true
+      },new Date(now))});
     }
     if(path==='/api/admin/insights' && method==='GET') {
       return json(route,{ok:true,privacy:'Mocked operational insights only.',health:{openNeeds:0,recurringNeeds:0,upcomingAutomaticChanges:0,recoveryPoints:1},
