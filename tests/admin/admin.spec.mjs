@@ -210,3 +210,30 @@ test('logout hides private workspace',async({page})=>{
   expect(api.authenticated).toBe(false);
   expect(api.count('POST','/api/admin/logout')).toBe(1);
 });
+
+test('launch readiness is read-only, remains unsigned and does not preserve local checkmarks',async({page})=>{
+  const {api,errors}=await fixture(page);
+  await open(page,'/admin?tab=launch');
+  await expect(page.locator('[data-panel="launch"]')).toBeVisible();
+  await expect(page.locator('[data-launch-decision]')).toHaveText('NOT SIGNED OFF');
+  await expect(page.locator('[data-launch-check]')).toHaveCount(6);
+  await expect(page.locator('[data-launch-pass]')).toHaveText('3');
+  await expect(page.locator('[data-launch-open]')).toHaveText('3');
+  await expect(page.locator('[data-launch-accept]')).toHaveCount(7);
+  expect(api.count('PUT','/api/admin/launch-readiness')).toBe(0);
+  expect(api.count('POST','/api/admin/launch-readiness')).toBe(0);
+  await page.locator('[data-launch-accept]').first().check();
+  await expect(page.locator('[data-launch-owner-progress]')).toContainText('1 of 7');
+  await expect(page.locator('[data-launch-decision]')).toHaveText('NOT SIGNED OFF');
+  await page.locator('[data-launch-refresh]').click();
+  await expect(page.locator('[data-launch-check]')).toHaveCount(6);
+  await page.locator('[data-launch-reset]').click();
+  await expect(page.locator('[data-launch-owner-progress]')).toContainText('0 of 7');
+  expect(await page.locator('[data-launch-accept]:checked').count()).toBe(0);
+  expect(api.count('POST','/api/admin/system')).toBe(0);
+  await page.reload();
+  await expect(page.locator('[data-panel="launch"]')).toBeVisible();
+  expect(await page.locator('[data-launch-accept]:checked').count()).toBe(0);
+  await expect(page.locator('[data-launch-decision]')).toHaveText('NOT SIGNED OFF');
+  expect(errors).toEqual([]);
+});
