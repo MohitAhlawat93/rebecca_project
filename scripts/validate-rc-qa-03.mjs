@@ -52,7 +52,7 @@ guide.show(true);
 assert.equal(panel.hidden, false, 'Help & guide can reopen at any time');
 
 const requiredTabs = [
-  'insights','publishing','availability','travel','live','schedule','rates','contact','profile',
+  'insights','launch','publishing','availability','travel','live','schedule','rates','contact','profile',
   'media','concierge','concierge-test','needs-rebecca','assistant','search','settings','history','export'
 ];
 assert.deepEqual(Object.keys(guide.help).sort(), requiredTabs.sort());
