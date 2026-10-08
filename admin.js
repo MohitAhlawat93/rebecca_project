@@ -7,6 +7,7 @@ const saveButton = document.querySelector('[data-save]');
 const saveState = document.querySelector('[data-save-state]');
 const saveDetail = document.querySelector('[data-save-detail]');
 const storeBanner = document.querySelector('[data-store-banner]');
+const visualDraftBanner = document.querySelector('[data-visual-draft-banner]');
 const quickSavebar = document.querySelector('[data-quick-savebar]');
 const mediaSaveButton = document.querySelector('[data-media-save-draft]');
 const mediaPublishButton = document.querySelector('[data-media-publish]');
@@ -50,6 +51,8 @@ let quickState = null;
 let scheduleState = null;
 let persistentStore = false;
 let dirty = false;
+let quickVersion = null;
+let visualDraftPending = false;
 let activeTab = requestedTab || 'availability';
 let mediaState = null;
 let mediaPublished = null;
@@ -193,11 +196,15 @@ function updateAvailabilityExpirySummary() {
 function setDirty(value = true) {
   dirty = value;
   if (!saveButton) return;
-  saveButton.disabled = !persistentStore || !dirty;
-  saveState.textContent = dirty ? 'Unsaved changes' : 'All changes saved';
-  saveDetail.textContent = persistentStore
-    ? (dirty ? 'Review, then use Save & apply.' : 'Website and concierge can use the current Quick Control state.')
-    : 'Storage must be connected before changes can be applied.';
+  saveButton.disabled = !persistentStore || !dirty || visualDraftPending || quickVersion === null;
+  saveState.textContent = visualDraftPending
+    ? 'Unpublished Website Draft needs review'
+    : (dirty ? 'Unsaved changes' : 'All changes saved');
+  saveDetail.textContent = visualDraftPending
+    ? 'Open Edit Website and publish or discard its draft before applying Quick Control edits.'
+    : (persistentStore
+      ? (dirty ? 'Review, then use Save & apply.' : 'Website and concierge can use the current Quick Control state.')
+      : 'Storage must be connected before changes can be applied.');
 }
 
 function showLogin(message = '') {
@@ -230,7 +237,7 @@ function activateTab(name) {
   if (name === 'needs-rebecca' && !needsLoaded) loadNeedsRebecca();
   if ((name === 'history' || name === 'export' || name === 'settings') && !systemLoaded) loadSystem();
   if (name === 'insights' && !insightsLoaded) loadInsights();
-  if (name === 'search' && !searchLoaded) loadSearchIntelligence();
+  // Search Intelligence is independently loaded by admin-search.js observing panel visibility.
 }
 
 function renderAvailability() {
@@ -1823,6 +1830,9 @@ async function loadQuickControl() {
     quickState = data.effectiveState || data.state;
     scheduleState = data.schedule || null;
     persistentStore = Boolean(data.persistent && data.configured);
+    quickVersion = Number.isInteger(data.version) ? data.version : null;
+    visualDraftPending = Boolean(data.hasVisualDraftChanges);
+    if (visualDraftBanner) visualDraftBanner.hidden = !visualDraftPending;
 
     setText('[data-store-mode]', persistentStore ? 'Connected' : 'Safe fallback');
     setText('[data-last-saved]', friendlyDate(data.updatedAt));
@@ -1832,6 +1842,7 @@ async function loadQuickControl() {
     setDirty(false);
   } catch (error) {
     persistentStore = false;
+    quickVersion = null;
     storeBanner.hidden = false;
     setText('[data-store-mode]', 'Unavailable');
     saveState.textContent = 'Editor unavailable';
@@ -2268,6 +2279,9 @@ logoutButton?.addEventListener('click', async () => {
   } finally {
     logoutButton.disabled = false;
     quickState = null;
+    quickVersion = null;
+    visualDraftPending = false;
+    if (visualDraftBanner) visualDraftBanner.hidden = true;
     scheduleState = null;
     mediaState = null;
     mediaSchedule = null;
@@ -2675,7 +2689,7 @@ conciergeTestForm?.addEventListener('submit', async (event) => {
 });
 
 saveButton?.addEventListener('click', async () => {
-  if (!persistentStore || !quickState || !dirty) return;
+  if (!persistentStore || !quickState || !dirty || visualDraftPending || quickVersion === null) return;
 
   saveButton.disabled = true;
   saveButton.textContent = 'Saving…';
@@ -2691,7 +2705,7 @@ saveButton?.addEventListener('click', async () => {
         'Content-Type': 'application/json',
         Accept: 'application/json'
       },
-      body: JSON.stringify({ state: nextState })
+      body: JSON.stringify({ state: nextState, expectedVersion: quickVersion })
     });
 
     const data = await response.json().catch(() => ({}));
@@ -2699,6 +2713,9 @@ saveButton?.addEventListener('click', async () => {
 
     quickState = data.effectiveState || data.state;
     scheduleState = data.schedule || null;
+    quickVersion = Number.isInteger(data.version) ? data.version : null;
+    visualDraftPending = false;
+    if (visualDraftBanner) visualDraftBanner.hidden = true;
     setText('[data-last-saved]', friendlyDate(data.updatedAt));
     renderAll();
     setDirty(false);
@@ -2708,7 +2725,7 @@ saveButton?.addEventListener('click', async () => {
     saveDetail.textContent = error?.message || 'Nothing was changed publicly.';
   } finally {
     saveButton.textContent = 'Save & apply';
-    saveButton.disabled = !persistentStore || !dirty;
+    saveButton.disabled = !persistentStore || !dirty || visualDraftPending || quickVersion === null;
   }
 });
 

@@ -36,6 +36,8 @@ assert.match(searchJs, /\/api\/admin\/search-import/);
 assert.match(admin, /No visitor identity/);
 assert.match(searchJs, /One-time technical setup/);
 assert.match(searchJs, /MutationObserver/);
+const adminController = fs.readFileSync(new URL('../admin.js', import.meta.url), 'utf8');
+assert.doesNotMatch(adminController, /\bsearchLoaded\b|\bloadSearchIntelligence\s*\(/, 'Search loading belongs to admin-search.js, not admin.js');
 assert.doesNotMatch(searchJs, /SEARCH_TOKEN_ENCRYPTION_KEY/);
 assert.doesNotMatch(searchJs, /SEARCH_STORE_SECRET/);
 assert.doesNotMatch(searchJs, /CRON_SECRET/);
