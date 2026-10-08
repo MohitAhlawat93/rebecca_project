@@ -46,6 +46,7 @@
         </div>
         <div class="rc-top-actions">
           <a href="/?rc_edit=1" class="rc-primary" data-edit-website>Edit Website ↗</a>
+          <button type="button" class="rc-secondary rc-assistant-trigger" data-tab="assistant" aria-label="Ask Control to prepare a change">✦ Ask Control</button>
           <a href="/" target="_blank" rel="noreferrer" class="rc-secondary">View website ↗</a>
           <button type="button" class="rc-text-button" data-logout>Log out</button>
         </div>
@@ -87,24 +88,35 @@
           <span class="rc-phase-pill" data-store-mode>Loading…</span>
         </div>
 
-        <nav class="rc-tabs" aria-label="Rebecca Control sections">
-          <button type="button" data-tab="insights">Insights</button>
-          <button type="button" data-tab="search">Search Intelligence</button>
-          <button type="button" data-tab="assistant">AI Assistant</button>
-          <button type="button" class="is-active" data-tab="availability">Availability</button>
-          <button type="button" data-tab="travel">Travel</button>
-          <button type="button" data-tab="live">Live info</button>
-          <button type="button" data-tab="schedule">Schedule</button>
-          <button type="button" data-tab="rates">Rates</button>
-          <button type="button" data-tab="contact">Contact</button>
-          <button type="button" data-tab="profile">Profile</button>
-          <button type="button" data-tab="concierge">AI Control</button>
-          <button type="button" data-tab="needs-rebecca">Needs Rebecca</button>
-          <button type="button" data-tab="concierge-test">Test Concierge</button>
-          <button type="button" data-tab="media">Media & Publish</button>
-          <button type="button" data-tab="history">History</button>
-          <button type="button" data-tab="export">Export & Recovery</button>
-          <button type="button" data-tab="settings">Settings</button>
+        <nav class="rc-primary-nav" aria-label="Rebecca Control main areas">
+          <button type="button" data-control-area="home" class="is-active" aria-current="page">Home</button>
+          <button type="button" data-control-area="website">Website</button>
+          <button type="button" data-control-area="photos">Photos</button>
+          <button type="button" data-control-area="concierge">Concierge</button>
+          <button type="button" data-control-area="growth">Growth</button>
+          <button type="button" data-control-area="settings">Settings</button>
+        </nav>
+        <div class="rc-nav-context" role="status" aria-live="polite">
+          <div><strong data-area-title>Home</strong><p data-area-description>Review what needs attention, then jump to the right control.</p></div>
+          <span class="rc-nav-context-hint">Your website, in one place.</span>
+        </div>
+        <nav class="rc-tabs rc-subnav" aria-label="Controls in the selected area" data-subnav hidden>
+          <button type="button" data-tab="insights" data-area="home">Overview</button>
+          <button type="button" data-tab="availability" data-area="website">Availability</button>
+          <button type="button" data-tab="travel" data-area="website">Travel Plans</button>
+          <button type="button" data-tab="live" data-area="website">Announcements &amp; Map</button>
+          <button type="button" data-tab="schedule" data-area="website">Automatic Changes</button>
+          <button type="button" data-tab="rates" data-area="website">Rates</button>
+          <button type="button" data-tab="contact" data-area="website">Contact Methods</button>
+          <button type="button" data-tab="profile" data-area="website">Profile</button>
+          <button type="button" data-tab="media" data-area="photos">Photos &amp; Publishing</button>
+          <button type="button" data-tab="concierge" data-area="concierge">AI Concierge</button>
+          <button type="button" data-tab="concierge-test" data-area="concierge">Test AI</button>
+          <button type="button" data-tab="needs-rebecca" data-area="concierge">Questions for Rebecca</button>
+          <button type="button" data-tab="search" data-area="growth">Search &amp; Growth</button>
+          <button type="button" data-tab="settings" data-area="settings">Account &amp; Settings</button>
+          <button type="button" data-tab="history" data-area="settings">Activity History</button>
+          <button type="button" data-tab="export" data-area="settings">History &amp; Backups</button>
         </nav>
 
         <section class="rc-panel rc-insights-panel" data-panel="insights" hidden>
@@ -298,7 +310,7 @@
               <h3>Describe the change. Review the proposal. You stay in control.</h3>
               <p>Rebecca Control can prepare structured changes for Website Draft or Concierge Draft. It cannot publish, deploy, delete content or silently apply anything.</p>
             </div>
-            <span class="rc-phase-pill">Draft-only</span>
+            <div class="rc-assistant-return"><span class="rc-phase-pill">Draft-only</span><button type="button" class="rc-secondary" data-assistant-back>← Return to previous section</button></div>
           </div>
 
           <section class="rc-assistant-compose">
@@ -743,12 +755,14 @@
             <label class="rc-settings-card">
               <span><strong>Open Rebecca Control on</strong><small>Choose the first section shown after sign-in.</small></span>
               <select data-setting="dashboardStartTab">
-                <option value="insights">Insights</option>
+                <option value="insights">Home — Overview</option>
+                <option value="availability">Website — Availability</option>
+                <option value="media">Photos — Publishing</option>
+                <option value="concierge">Concierge — AI Concierge</option>
                 <option value="search">Search Intelligence</option>
-                <option value="availability">Availability</option>
-                <option value="assistant">AI Assistant</option>
-                <option value="needs-rebecca">Needs Rebecca</option>
-                <option value="media">Media & Publish</option>
+                <option value="settings">Settings — Account &amp; Settings</option>
+                <option value="needs-rebecca">Concierge — Questions for Rebecca</option>
+                <option value="assistant">Ask Control</option>
               </select>
             </label>
 

@@ -53,7 +53,17 @@ let persistentStore = false;
 let dirty = false;
 let quickVersion = null;
 let visualDraftPending = false;
-let activeTab = requestedTab || 'availability';
+let activeTab = requestedTab || 'insights';
+let lastRegularTab = 'insights';
+const lastTabsByArea = Object.create(null);
+const AREA_DETAILS = {
+  home: { title: 'Home', description: 'See what needs attention, recommended actions and recent activity.' },
+  website: { title: 'Website', description: 'Manage availability, travel, notices, rates and your public information. Edit Website changes the visual page.' },
+  photos: { title: 'Photos', description: 'Upload, preview, schedule and publish photographs without touching code.' },
+  concierge: { title: 'Concierge', description: 'Manage AI answers, test your draft and handle questions that need your input.' },
+  growth: { title: 'Growth', description: 'Explore search visibility, connections and evidence-backed improvements.' },
+  settings: { title: 'Settings', description: 'Choose preferences, review activity and back up or recover your content.' }
+};
 let mediaState = null;
 let mediaPublished = null;
 let mediaPlacements = [];
@@ -219,13 +229,58 @@ function showApp(session) {
   setText('[data-control-status]', session?.control?.status || 'Quick Control');
 }
 
+function areaOfTab(name) {
+  return [...document.querySelectorAll('[data-subnav] [data-tab]')]
+    .find((button) => button.dataset.tab === name)?.dataset.area || 'home';
+}
+
+function activateArea(area) {
+  if (!Object.hasOwn(AREA_DETAILS, area)) return;
+  const first = [...document.querySelectorAll('[data-subnav] [data-tab]')]
+    .find((button) => button.dataset.area === area);
+  activateTab(lastTabsByArea[area] || first?.dataset.tab || 'insights');
+}
+
 function activateTab(name) {
+  const known = [...document.querySelectorAll('[data-tab]')]
+    .some((button) => button.dataset.tab === name);
+  if (!known) name = 'insights';
+  const assistant = name === 'assistant';
+  if (!assistant) {
+    lastRegularTab = name;
+    lastTabsByArea[areaOfTab(name)] = name;
+  }
+  const area = areaOfTab(assistant ? lastRegularTab : name);
+  const info = AREA_DETAILS[area] || AREA_DETAILS.home;
   activeTab = name;
+
+  document.querySelectorAll('[data-control-area]').forEach((button) => {
+    const selected = button.dataset.controlArea === area;
+    button.classList.toggle('is-active', selected);
+    if (selected) button.setAttribute('aria-current', 'page');
+    else button.removeAttribute('aria-current');
+  });
   document.querySelectorAll('[data-tab]').forEach((button) => {
     const selected = button.dataset.tab === name;
     button.classList.toggle('is-active', selected);
     button.setAttribute('aria-selected', selected ? 'true' : 'false');
   });
+
+  let visibleSubtabs = 0;
+  document.querySelectorAll('[data-subnav] [data-tab]').forEach((button) => {
+    const visible = !assistant && button.dataset.area === area;
+    button.hidden = !visible;
+    if (visible) visibleSubtabs += 1;
+  });
+  const subnav = document.querySelector('[data-subnav]');
+  if (subnav) subnav.hidden = assistant || visibleSubtabs <= 1;
+  setText('[data-area-title]', assistant ? 'Ask Control' : info.title);
+  setText('[data-area-description]', assistant
+    ? 'Describe a change, review the proposal and apply it only to a private Draft. Nothing publishes automatically.'
+    : info.description);
+  const returnButton = document.querySelector('[data-assistant-back]');
+  if (returnButton) returnButton.textContent = '← Return to ' + (AREA_DETAILS[areaOfTab(lastRegularTab)]?.title || 'Home');
+
   document.querySelectorAll('[data-panel]').forEach((panel) => {
     const selected = panel.dataset.panel === name;
     panel.hidden = !selected;
@@ -237,7 +292,7 @@ function activateTab(name) {
   if (name === 'needs-rebecca' && !needsLoaded) loadNeedsRebecca();
   if ((name === 'history' || name === 'export' || name === 'settings') && !systemLoaded) loadSystem();
   if (name === 'insights' && !insightsLoaded) loadInsights();
-  // Search Intelligence is independently loaded by admin-search.js observing panel visibility.
+  // Search Intelligence loads independently when admin-search.js observes its visible panel.
 }
 
 function renderAvailability() {
@@ -2209,13 +2264,16 @@ async function loadSession() {
     if (response.ok && data.authenticated) {
       showApp(data);
       await loadQuickControl();
-      if (!requestedTab && data.control?.settings?.dashboardStartTab) {
-        activeTab = data.control.settings.dashboardStartTab;
+      // Take the original URL choice first: renderAll() may have initialized a
+      // fallback tab before settings finish loading.
+      activeTab = requestedTab || data.control?.settings?.dashboardStartTab || 'insights';
+      // Existing ?tab=... links continue to work; area names are also accepted.
+      if (Object.hasOwn(AREA_DETAILS, activeTab)) {
+        const first = [...document.querySelectorAll('[data-subnav] [data-tab]')]
+          .find((button) => button.dataset.area === activeTab);
+        activeTab = first?.dataset.tab || 'insights';
       }
-      const validTab = document.querySelector('[data-tab="' + esc(activeTab) + '"]')
-        ? activeTab
-        : 'insights';
-      activateTab(validTab);
+      activateTab(activeTab);
       if (visualReturn) {
         const editLink = document.querySelector('[data-edit-website]');
         if (editLink) editLink.href = visualReturn;
@@ -2320,6 +2378,15 @@ logoutButton?.addEventListener('click', async () => {
 });
 
 document.addEventListener('click', (event) => {
+  const areaButton = event.target.closest('[data-control-area]');
+  if (areaButton) {
+    activateArea(areaButton.dataset.controlArea);
+    return;
+  }
+  if (event.target.closest('[data-assistant-back]')) {
+    activateTab(lastRegularTab);
+    return;
+  }
   const tab = event.target.closest('[data-tab]');
   if (tab) {
     activateTab(tab.dataset.tab);
